@@ -51,3 +51,7 @@ sources.list:
   - template: jinja
   - defaults:
       debian: {{ debian | yaml }}
+  cmd.run:
+  - name: apt-get update
+  - onchanges:
+    - file: sources.list
