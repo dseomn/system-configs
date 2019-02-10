@@ -13,17 +13,22 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - firewall
-  - mail
+root: {{ salt.pillar.get('mail:admin_email', 'david@mandelberg.org') }}
 
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
+# https://tools.ietf.org/html/rfc2142#section-4
+abuse: root
+noc: root
+security: root
 
-  'G@virtual:physical':
-  - smartd
+# https://tools.ietf.org/html/rfc2142#section-5
+postmaster: root
+hostmaster: root
+usenet: root
+news: root
+webmaster: root
+www: root
+uucp: root
+ftp: root
 
-  'G@role:desktop':
-  - lightdm
+# Commonly used by mail systems.
+mailer-daemon: root

@@ -1,0 +1,55 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# http://www.postfix.org/COMPATIBILITY_README.html
+compatibility_level = 2
+
+
+# Host identity.
+myhostname = {{ grains.fqdn }}
+mydomain = {{ grains.domain }}
+
+
+# Accept mail from localhost only.
+inet_interfaces = loopback-only
+mynetworks_style = host
+
+
+# Accept mail to localhost only.
+smtpd_relay_restrictions = reject_unauth_destination
+
+
+# Allow user+extension addresses.
+recipient_delimiter = +
+
+
+# Instead of delivering to a local mailbox by default, send local mail to root
+# if it doesn't match any alias.
+alias_maps = hash:/etc/aliases static:root
+alias_database = hash:/etc/aliases
+local_recipient_maps = proxy:unix:passwd.byname hash:/etc/aliases
+
+
+# Where to send all remote mail.
+relayhost = [mail.mandelberg.org]:submission
+smtp_tls_security_level = fingerprint
+# TODO: Use a more secure digest algorithm when postfix supports it.
+smtp_tls_fingerprint_digest = sha1
+smtp_tls_fingerprint_cert_match =
+  9F:E6:18:79:3B:ED:17:4D:CD:22:2A:6C:9A:09:9B:07:CF:F5:E3:02
+
+
+# Cache TLS session parameters.
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
