@@ -29,3 +29,8 @@ unattended-upgrades:
   file.managed:
   - name: /etc/apt/apt.conf.d/50unattended-upgrades-local
   - source: salt://debian/extras/unattended-upgrades-local.apt.conf
+
+# unattended-upgrades requires a package that provides mailx in order to send
+# email. mailutils provides mailx.
+mailutils:
+  pkg.installed: []
