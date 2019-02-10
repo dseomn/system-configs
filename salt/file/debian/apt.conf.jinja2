@@ -13,9 +13,4 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
-
-  'G@virtual:physical':
-  - smartd
+APT::Default-Release "{{ debian.distribution }}";

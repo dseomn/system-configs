@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
-
-  'G@virtual:physical':
-  - smartd
+{% if debian.track != 'unstable' %}
+Package: *
+Pin: release a=unstable
+Pin-Priority: 100
+{% endif %}

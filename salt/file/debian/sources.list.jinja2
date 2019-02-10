@@ -13,9 +13,20 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
+{% macro source(mirror, distribution, components) %}
+  deb {{ mirror }} {{ distribution }} {{ components }}
+  deb-src {{ mirror }} {{ distribution }} {{ components }}
+{% endmacro %}
 
-  'G@virtual:physical':
-  - smartd
+
+{{ source(debian.mirror['debian'], debian.distribution, debian.components) }}
+
+{% if debian.track != 'unstable' %}
+  {{ source(
+      debian.mirror['debian-security'], debian.distribution + '/updates',
+      debian.components) }}
+{% endif %}
+
+{% if debian.track == 'testing' %}
+  {{ source(debian.mirror['debian'], 'unstable', debian.components) }}
+{% endif %}
