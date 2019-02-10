@@ -13,10 +13,19 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
+apt-listbugs:
+  pkg.installed: []
 
-  'G@virtual:physical':
-  - smartd
+apt-listchanges:
+  debconf.set:
+  - data:
+      apt-listchanges/frontend:
+        type: select
+        value: mail
+  pkg.installed: []
+
+unattended-upgrades:
+  pkg.installed: []
+  file.managed:
+  - name: /etc/apt/apt.conf.d/50unattended-upgrades-local
+  - source: salt://debian/extras/unattended-upgrades-local.apt.conf
