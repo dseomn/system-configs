@@ -13,13 +13,5 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
-
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - lightdm
+[Seat:*]
+greeter-hide-users=false

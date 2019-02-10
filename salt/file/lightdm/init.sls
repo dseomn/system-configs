@@ -13,13 +13,25 @@
 # limitations under the License.
 
 
-base:
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
+{% set lightdm = salt.grains.filter_by({
+    'Debian': {
+        'pkg': 'lightdm',
+        'service': 'lightdm',
+        'config_dir': '/etc/lightdm',
+    },
+}) %}
 
-  'G@virtual:physical':
-  - smartd
 
-  'G@role:desktop':
-  - lightdm
+lightdm:
+  pkg.installed:
+  - name: {{ lightdm.pkg }}
+  # Enable the service, but don't start it, in case starting the display manager
+  # could interrupt the current session.
+  service.enabled:
+  - name: {{ lightdm.service }}
+
+lightdm.conf:
+  file.managed:
+  - name: {{ lightdm.config_dir }}/lightdm.conf
+  - source: salt://lightdm/lightdm.conf.jinja2
+  - template: jinja
