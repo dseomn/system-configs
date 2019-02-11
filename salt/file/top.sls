@@ -14,6 +14,9 @@
 
 
 base:
+  '*':
+  - firewall
+
   'G@os:Debian and G@debian:track:*':
   - debian
   - debian.extras

@@ -1,0 +1,49 @@
+#!{{ nftables.binary }} -f
+
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+flush ruleset
+
+table inet filter {
+	chain input {
+		type filter hook input priority 0
+		policy drop
+
+		ct state established,related accept
+
+		iif lo accept
+
+		meta l4proto icmp accept
+		meta l4proto ipv6-icmp accept
+
+		# https://en.wikipedia.org/wiki/DHCPv6
+		# TODO: Remove this once `ct state related` covers this.
+		ip6 saddr fe80::/10 ip6 daddr fe80::/10 \
+			udp sport dhcpv6-server udp dport dhcpv6-client accept
+	}
+
+	chain forward {
+		type filter hook forward priority 0
+		policy accept
+	}
+
+	chain output {
+		type filter hook output priority 0
+		policy accept
+	}
+}
+
+include "/etc/nftables.conf.d/*.conf"
