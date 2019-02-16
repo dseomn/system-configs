@@ -28,6 +28,12 @@
 {% do debian.setdefault('distribution', debian.track) %}
 
 
+# Make sure Apt supports HTTPS URLs before making any other changes. Otherwise,
+# apt can be left in a broken state once sources.list is updated to use a https
+# mirror.
+apt-transport-https:
+  pkg.installed: []
+
 apt.conf:
   file.managed:
   - name: /etc/apt/apt.conf
