@@ -13,6 +13,10 @@
 # limitations under the License.
 
 
+# Salt's debconf state doesn't work without this.
+debconf-utils:
+  pkg.installed: []
+
 apt-listbugs:
   pkg.installed: []
 
