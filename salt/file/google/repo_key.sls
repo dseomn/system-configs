@@ -13,18 +13,14 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - firewall
-  - mail
-
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
-
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - google.chrome
-  - lightdm
+{% if grains.os_family == 'Debian' %}
+# https://www.google.com/linuxrepositories/
+google:
+  file.managed:
+  - name: /etc/apt/trusted.gpg.d/google.asc
+  - source: salt://google/linux_signing_key.pub
+{% else %}
+error:
+  cmd.run:
+  - name: 'echo "Error: Unsupported platform." >&2; exit 1'
+{% endif %}

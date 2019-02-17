@@ -13,18 +13,21 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - firewall
-  - mail
+include:
+- google.repo_key
 
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
-
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - google.chrome
-  - lightdm
+{% if grains.os_family == 'Debian' and grains.osarch == 'amd64' %}
+chrome:
+  pkgrepo.managed:
+  - name: |
+      deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+  - file: /etc/apt/sources.list.d/google-chrome.list
+  - require:
+    - sls: google.repo_key
+  pkg.installed:
+  - name: google-chrome-stable
+{% else %}
+error:
+  cmd.run:
+  - name: 'echo "Error: Unsupported platform." >&2; exit 1'
+{% endif %}
