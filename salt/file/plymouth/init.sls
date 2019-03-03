@@ -16,7 +16,7 @@
 {% set plymouth = salt.grains.filter_by({
     'Debian': {
         'pkg': 'plymouth',
-        'theme_pkg': 'desktop-base',
+        'theme_pkgs': ['desktop-base', 'plymouth-label'],
         'theme': 'joy',
     },
 }) %}
@@ -28,7 +28,7 @@ plymouth:
 
 plymouth_theme:
   pkg.installed:
-  - name: {{ plymouth.theme_pkg }}
+  - pkgs: {{ plymouth.theme_pkgs | yaml }}
   cmd.run:
     # TODO: Run this only if the theme changed.
   - name: plymouth-set-default-theme --rebuild-initrd "{{ plymouth.theme }}"
