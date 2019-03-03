@@ -28,3 +28,4 @@ base:
   'G@role:desktop':
   - google.chrome
   - lightdm
+  - plymouth
