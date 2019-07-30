@@ -23,7 +23,7 @@
 
 {% if debian.track != 'unstable' %}
   {{ source(
-      debian.mirror['debian-security'], debian.distribution + '/updates',
+      debian.mirror['debian-security'], debian.distribution + '-security',
       debian.components) }}
 {% endif %}
 
