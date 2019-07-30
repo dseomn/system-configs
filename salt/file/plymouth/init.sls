@@ -17,7 +17,7 @@
     'Debian': {
         'pkg': 'plymouth',
         'theme_pkgs': ['desktop-base', 'plymouth-label'],
-        'theme': 'joy',
+        'theme': 'futureprototype',
     },
 }) %}
 
