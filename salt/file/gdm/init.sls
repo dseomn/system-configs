@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - firewall
-  - mail
+{% set gdm = salt.grains.filter_by({
+    'Debian': {
+        'pkg': 'gdm3',
+        'service': 'gdm',
+    },
+}) %}
 
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
 
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - gdm
-  - google.chrome
-  - plymouth
+gdm:
+  pkg.installed:
+  - name: {{ gdm.pkg }}
+  # Enable the service, but don't start it, in case starting the display manager
+  # could interrupt the current session.
+  service.enabled:
+  - name: {{ gdm.service }}
