@@ -16,7 +16,7 @@
 {% set smartd = salt['grains.filter_by']({
     'Debian': {
         'pkg': 'smartmontools',
-        'service': 'smartd',
+        'service': 'smartmontools',
     },
 }) %}
 
