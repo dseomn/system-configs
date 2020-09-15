@@ -29,3 +29,7 @@ base:
   - gdm
   - google.chrome
   - plymouth
+
+  'G@role:media-center':
+  - ssh.server
+  - dlna.renderer
