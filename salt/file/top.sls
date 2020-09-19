@@ -31,5 +31,5 @@ base:
   - plymouth
 
   'G@role:media-center':
-  - ssh.server
   - dlna.renderer
+  - ssh.server
