@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,24 +13,7 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - firewall
-  - mail
-
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
-
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - firewall.ssdp.client
-  - gdm
-  - google.chrome
-  - plymouth
-
-  'G@role:media-center':
-  - dlna.renderer
-  - ssh.server
+ssdp-client.conf:
+  file.managed:
+  - name: /etc/nftables.conf.d/ssdp-client.conf
+  - source: salt://firewall/ssdp/client/nftables.conf
