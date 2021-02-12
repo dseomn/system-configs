@@ -22,6 +22,9 @@
 }) %}
 
 
+include:
+- pki.public
+
 postfix:
   pkg.installed:
   - name: {{ postfix.pkg }}
@@ -46,3 +49,5 @@ postfix_main:
   - name: {{ postfix.config_directory }}/main.cf
   - source: salt://mail/postfix/main.cf.jinja2
   - template: jinja
+  - require:
+    - sls: pki.public

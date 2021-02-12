@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+{% from 'pki/public.jinja2' import public_pki %}
+
+
 # http://www.postfix.org/COMPATIBILITY_README.html
 compatibility_level = 2
 
@@ -44,11 +47,9 @@ local_recipient_maps = proxy:unix:passwd.byname hash:/etc/aliases
 
 # Where to send all remote mail.
 relayhost = [mail.mandelberg.org]:submission
-smtp_tls_security_level = fingerprint
-# TODO: Use a more secure digest algorithm when postfix supports it.
-smtp_tls_fingerprint_digest = sha1
-smtp_tls_fingerprint_cert_match =
-  9F:E6:18:79:3B:ED:17:4D:CD:22:2A:6C:9A:09:9B:07:CF:F5:E3:02
+smtp_tls_security_level = secure
+smtp_tls_secure_cert_match = nexthop
+smtp_tls_CAfile = {{ public_pki.ca_certificates_file }}
 
 
 # Cache TLS session parameters.
