@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+{% from 'debian/init.jinja2' import debian %}
+
+
 {% if debian.track != 'unstable' %}
 Package: *
 Pin: release a=unstable

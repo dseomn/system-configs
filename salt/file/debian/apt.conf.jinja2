@@ -13,4 +13,7 @@
 # limitations under the License.
 
 
+{% from 'debian/init.jinja2' import debian %}
+
+
 APT::Default-Release "{{ debian.distribution }}";

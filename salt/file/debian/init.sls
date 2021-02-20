@@ -13,44 +13,23 @@
 # limitations under the License.
 
 
-{% set debian = salt.pillar.get(
-    'debian',
-    {
-        'track': grains.debian.track,
-        'components': 'main contrib non-free',
-        'mirror': {
-            'debian': 'https://deb.debian.org/debian',
-            'debian-security': 'https://deb.debian.org/debian-security',
-        },
-    },
-    merge=True,
-) %}
-{% do debian.setdefault('distribution', debian.track) %}
-
-
 apt.conf:
   file.managed:
   - name: /etc/apt/apt.conf
   - source: salt://debian/apt.conf.jinja2
   - template: jinja
-  - defaults:
-      debian: {{ debian | yaml }}
 
 preferences:
   file.managed:
   - name: /etc/apt/preferences
   - source: salt://debian/preferences.jinja2
   - template: jinja
-  - defaults:
-      debian: {{ debian | yaml }}
 
 sources.list:
   file.managed:
   - name: /etc/apt/sources.list
   - source: salt://debian/sources.list.jinja2
   - template: jinja
-  - defaults:
-      debian: {{ debian | yaml }}
   cmd.run:
   - name: apt-get update
   - onchanges:
