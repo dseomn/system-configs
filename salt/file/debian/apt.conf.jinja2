@@ -16,4 +16,6 @@
 {% from 'debian/init.jinja2' import debian %}
 
 
-APT::Default-Release "{{ debian.distribution }}";
+{% if debian.track == 'testing' %}
+  APT::Default-Release "{{ debian.distribution }}";
+{% endif %}

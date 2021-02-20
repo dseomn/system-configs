@@ -28,6 +28,12 @@
   {{ source(
       debian.mirror['debian-security'], debian.distribution + '/updates',
       debian.components) }}
+  {{ source(
+      debian.mirror['debian'], debian.distribution + '-updates',
+      debian.components) }}
+  {{ source(
+      debian.mirror['debian'], debian.distribution + '-backports',
+      debian.components) }}
 {% elif debian.track == 'testing' %}
   {{ source(
       debian.mirror['debian-security'], debian.distribution + '-security',
