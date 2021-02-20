@@ -24,12 +24,13 @@
 
 {{ source(debian.mirror['debian'], debian.distribution, debian.components) }}
 
-{% if debian.track != 'unstable' %}
+{% if debian.track == 'stable' %}
+  {{ source(
+      debian.mirror['debian-security'], debian.distribution + '/updates',
+      debian.components) }}
+{% elif debian.track == 'testing' %}
   {{ source(
       debian.mirror['debian-security'], debian.distribution + '-security',
       debian.components) }}
-{% endif %}
-
-{% if debian.track == 'testing' %}
   {{ source(debian.mirror['debian'], 'unstable', debian.components) }}
 {% endif %}
