@@ -34,3 +34,6 @@ base:
   'G@role:media-center':
   - dlna.renderer
   - ssh.server
+
+  'G@role:router':
+  - ssh.server
