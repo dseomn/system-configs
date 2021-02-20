@@ -17,3 +17,4 @@ salt-call:
   config_dir: salt/config
   file_root: salt/file
   pillar_root: salt/pillar
+  state_output: changes
