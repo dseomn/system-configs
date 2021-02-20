@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-salt-call:
-  local: true
-  config_dir: salt/config
-  file_root: salt/file
-  pillar_root: salt/pillar
-  state_output: changes
 
-salt-ssh:
-  config_dir: salt/config
-  ssh_priv: agent-forwarding
-  state_output: changes
-  extra_filerefs:
-  - salt://debian/init.jinja2
-  - salt://pki/public.jinja2
+all: salt/config/master
+
+.SUFFIXES:
+
+.SUFFIXES: .in
+.in:
+	./preprocess '$<' '$@'
