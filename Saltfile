@@ -26,3 +26,4 @@ salt-ssh:
   extra_filerefs:
   - salt://debian/init.jinja2
   - salt://pki/public.jinja2
+  - salt://router/dns/init.jinja2
