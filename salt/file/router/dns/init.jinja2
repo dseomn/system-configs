@@ -17,6 +17,7 @@
 
 {% set dns = {
     'dnss_port': 25953,
+    'unbound_port': 14653,
 } %}
 {% do dns.update(salt.grains.filter_by({
     'Debian': {
@@ -26,5 +27,8 @@
         'dnss_service': 'dnss',
         'dnss_socket_unit': '/etc/systemd/system/dnss.socket',
         'dnss_service_unit': '/etc/systemd/system/dnss.service',
+        'unbound_pkg': 'unbound',
+        'unbound_conf_dir': '/etc/unbound/unbound.conf.d',
+        'unbound_service': 'unbound',
     },
 })) %}
