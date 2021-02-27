@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,29 +13,15 @@
 # limitations under the License.
 
 
-base:
-  '*':
-  - convenience
-  - firewall
-  - mail
+{% set convenience = salt.grains.filter_by({
+    'Debian': {
+        'pkgs': [
+            'tmux',
+        ],
+    },
+}) %}
 
-  'G@os:Debian and G@debian:track:*':
-  - debian
-  - debian.extras
 
-  'G@virtual:physical':
-  - smartd
-
-  'G@role:desktop':
-  - firewall.ssdp.client
-  - gdm
-  - google.chrome
-  - plymouth
-
-  'G@role:media-center':
-  - dlna.renderer
-  - ssh.server
-
-  'G@role:home-router':
-  - ddns
-  - ssh.server
+pkgs:
+  pkg.installed:
+  - pkgs: {{ convenience.pkgs | yaml }}
