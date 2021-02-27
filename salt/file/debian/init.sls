@@ -16,19 +16,19 @@
 apt.conf:
   file.managed:
   - name: /etc/apt/apt.conf
-  - source: salt://debian/apt.conf.jinja2
+  - source: salt://debian/apt.conf.jinja
   - template: jinja
 
 preferences:
   file.managed:
   - name: /etc/apt/preferences
-  - source: salt://debian/preferences.jinja2
+  - source: salt://debian/preferences.jinja
   - template: jinja
 
 sources.list:
   file.managed:
   - name: /etc/apt/sources.list
-  - source: salt://debian/sources.list.jinja2
+  - source: salt://debian/sources.list.jinja
   - template: jinja
   cmd.run:
   - name: apt-get update

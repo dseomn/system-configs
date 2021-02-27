@@ -35,7 +35,7 @@ sshd:
 sshd_config:
   file.managed:
   - name: {{ sshd.config_directory }}/sshd_config
-  - source: salt://ssh/server/sshd_config.jinja2
+  - source: salt://ssh/server/sshd_config.jinja
   - template: jinja
   - defaults:
       sshd: {{ sshd | yaml }}

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% from 'ddns/init.jinja2' import ddns %}
+{% from 'ddns/init.jinja' import ddns %}
 
 
 deps:
@@ -24,7 +24,7 @@ bin:
   file.managed:
   - name: {{ ddns.bin }}
   - mode: 0755
-  - source: salt://ddns/ddns.sh.jinja2
+  - source: salt://ddns/ddns.sh.jinja
   - template: jinja
 
 user:
@@ -51,5 +51,5 @@ user:
 cron:
   file.managed:
   - name: {{ ddns.cron_file }}
-  - source: salt://ddns/ddns.cron.jinja2
+  - source: salt://ddns/ddns.cron.jinja
   - template: jinja

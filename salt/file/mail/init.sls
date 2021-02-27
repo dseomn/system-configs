@@ -37,7 +37,7 @@ postfix:
 aliases:
   file.managed:
   - name: /etc/aliases
-  - source: salt://mail/aliases.jinja2
+  - source: salt://mail/aliases.jinja
   - template: jinja
   cmd.run:
   - name: newaliases
@@ -47,7 +47,7 @@ aliases:
 postfix_main:
   file.managed:
   - name: {{ postfix.config_directory }}/main.cf
-  - source: salt://mail/postfix/main.cf.jinja2
+  - source: salt://mail/postfix/main.cf.jinja
   - template: jinja
   - require:
     - sls: pki.public

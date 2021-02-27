@@ -33,5 +33,5 @@ lightdm:
 lightdm.conf:
   file.managed:
   - name: {{ lightdm.config_dir }}/lightdm.conf
-  - source: salt://lightdm/lightdm.conf.jinja2
+  - source: salt://lightdm/lightdm.conf.jinja
   - template: jinja

@@ -59,7 +59,7 @@ rygel.service:
 rygel.conf:
   file.managed:
   - name: {{ rygel.config_file }}
-  - source: salt://dlna/renderer/rygel.conf.jinja2
+  - source: salt://dlna/renderer/rygel.conf.jinja
   - template: jinja
   - defaults:
       rygel: {{ rygel | yaml }}
@@ -67,7 +67,7 @@ rygel.conf:
 rygel_port:
   file.managed:
   - name: /etc/nftables.conf.d/rygel.conf
-  - source: salt://dlna/renderer/nftables.conf.jinja2
+  - source: salt://dlna/renderer/nftables.conf.jinja
   - template: jinja
   - defaults:
       rygel: {{ rygel | yaml }}

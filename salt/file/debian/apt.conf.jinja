@@ -13,11 +13,9 @@
 # limitations under the License.
 
 
-{% from 'debian/init.jinja2' import debian %}
+{% from 'debian/init.jinja' import debian %}
 
 
-{% if debian.track != 'unstable' %}
-Package: *
-Pin: release a=unstable
-Pin-Priority: 100
+{% if debian.track == 'testing' %}
+  APT::Default-Release "{{ debian.distribution }}";
 {% endif %}
