@@ -28,6 +28,9 @@ apt-listchanges:
         value: mail
   pkg.installed: []
 
+debian-security-support:
+  pkg.installed: []
+
 unattended-upgrades:
   pkg.installed: []
   file.managed:
