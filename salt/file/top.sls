@@ -35,6 +35,6 @@ base:
   - dlna.renderer
   - ssh.server
 
-  'G@role:router':
+  'G@role:home-router':
   - ddns
   - ssh.server

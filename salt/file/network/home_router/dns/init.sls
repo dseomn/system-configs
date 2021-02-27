@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% from 'router/dns/map.jinja' import dns %}
+{% from 'network/home_router/dns/map.jinja' import dns %}
 
 
 util_pkgs:
@@ -29,14 +29,14 @@ dnss_pkg:
 dnss_socket_unit:
   file.managed:
   - name: {{ dns.dnss_socket_unit }}.d/50-local.conf
-  - source: salt://router/dns/dnss.local.socket.conf.jinja
+  - source: salt://network/home_router/dns/dnss.local.socket.conf.jinja
   - makedirs: true
   - template: jinja
 
 dnss_service_unit:
   file.managed:
   - name: {{ dns.dnss_service_unit }}.d/50-local.conf
-  - source: salt://router/dns/dnss.local.service.conf.jinja
+  - source: salt://network/home_router/dns/dnss.local.service.conf.jinja
   - makedirs: true
   - template: jinja
 
@@ -70,7 +70,7 @@ unbound_pkg:
 unbound_conf:
   file.managed:
   - name: {{ dns.unbound_conf_dir }}/local.conf
-  - source: salt://router/dns/unbound.local.conf.jinja
+  - source: salt://network/home_router/dns/unbound.local.conf.jinja
   - template: jinja
 
 unbound_service:
