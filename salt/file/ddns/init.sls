@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% from 'ddns/init.jinja' import ddns %}
+{% from 'ddns/map.jinja' import ddns %}
 
 
 deps:

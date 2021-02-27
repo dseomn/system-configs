@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% from 'ddns/init.jinja' import ddns %}
+{% from 'ddns/map.jinja' import ddns %}
 
 */10 * * * * {{ ddns.user }} {{ ddns.bin }} | logger -t ddns

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% from 'router/dns/init.jinja' import dns %}
+{% from 'router/dns/map.jinja' import dns %}
 
 
 util_pkgs:
