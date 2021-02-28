@@ -16,6 +16,9 @@ cachedir: ${XDG_CACHE_HOME}/salt/master
 file_roots:
   base:
   - ${REPO_ROOT}/salt/file
+pillar_roots:
+  base:
+  - ${REPO_ROOT}/salt/pillar
 ssh_log_file: ${HOME}/.local/log/salt/ssh
 ssh_minion_opts:
   backup_mode: minion
