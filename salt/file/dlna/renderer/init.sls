@@ -29,6 +29,8 @@
     },
 }) %}
 
+{% from 'network/firewall/map.jinja' import nftables %}
+
 
 rygel_pkgs:
   pkg.installed:
@@ -66,7 +68,7 @@ rygel.conf:
 
 rygel_port:
   file.managed:
-  - name: /etc/nftables.conf.d/rygel.conf
+  - name: {{ nftables.config_dir }}/rygel.conf
   - source: salt://dlna/renderer/nftables.conf.jinja
   - template: jinja
   - defaults:

@@ -13,7 +13,10 @@
 # limitations under the License.
 
 
+{% from 'network/firewall/map.jinja' import nftables %}
+
+
 ssdp-client.conf:
   file.managed:
-  - name: /etc/nftables.conf.d/ssdp-client.conf
+  - name: {{ nftables.config_dir }}/ssdp-client.conf
   - source: salt://network/firewall/ssdp/client/nftables.conf

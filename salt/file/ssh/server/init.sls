@@ -22,6 +22,8 @@
     },
 }) %}
 
+{% from 'network/firewall/map.jinja' import nftables %}
+
 
 sshd:
   pkg.installed:
@@ -42,5 +44,5 @@ sshd_config:
 
 sshd_port:
   file.managed:
-  - name: /etc/nftables.conf.d/ssh.conf
+  - name: {{ nftables.config_dir }}/ssh.conf
   - source: salt://ssh/server/nftables.conf

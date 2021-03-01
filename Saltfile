@@ -26,5 +26,6 @@ salt-ssh:
   extra_filerefs:
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
+  - salt://network/firewall/map.jinja
   - salt://network/home_router/dns/map.jinja
   - salt://pki/public.jinja

@@ -13,14 +13,7 @@
 # limitations under the License.
 
 
-{% set nftables = salt.grains.filter_by({
-    'Debian': {
-        'pkg': 'nftables',
-        'service': 'nftables',
-        'binary': '/usr/sbin/nft',
-        'config_file': '/etc/nftables.conf',
-    },
-}) %}
+{% from 'network/firewall/map.jinja' import nftables %}
 
 
 nftables:
@@ -35,9 +28,7 @@ nftables.conf:
   - mode: 0755
   - source: salt://network/firewall/nftables.conf.jinja
   - template: jinja
-  - defaults:
-      nftables: {{ nftables | yaml }}
 
 nftables.conf.d:
   file.directory:
-  - name: /etc/nftables.conf.d
+  - name: {{ nftables.config_dir }}
