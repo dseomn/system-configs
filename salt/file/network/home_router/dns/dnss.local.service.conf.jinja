@@ -22,6 +22,6 @@ ExecStart=\
   --enable_cache=false \
   --enable_dns_to_https \
   --fallback_domains=dns.google. \
-  --fallback_upstream=8.8.8.8:53 \
+  --fallback_upstream=[::1]:{{ dns.unbound_port }} \
   --force_mode=DoH \
   --https_upstream=https://dns.google/dns-query
