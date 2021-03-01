@@ -1,0 +1,58 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Configuration for an individual host on the network.
+
+# Salt minion ID.
+router-bos01.example.com:
+
+  # Required. Site name. See network/sites.yaml.
+  site: bos01
+
+  # Required. Network interfaces.
+  interfaces:
+
+    # Interface name
+    eth0:
+      # IP addresses.
+      ip:
+      -
+        # Receive addresses from DHCP and/or SLAAC.
+        auto:
+      # DNS configuration.
+      dns:
+      -
+        # Receive DNS servers from DHCP and/or Router Advertisements.
+        auto:
+
+    eth1:
+      # Makes this interface a child of a bridge, with untagged frames on the specified
+      # segment. See network/segments.yaml.
+      bridge_segment: lan
+
+    eth2:
+      # Makes this interface a child of a bridge, with tagged frames on the
+      # specified segments.
+      bridge_segments:
+      - lan
+
+    lan:
+      # Creates the name above as a virtual interface on the specified segment.
+      segment: lan
+      ip:
+      # Assigns IP addresses based on the segment above. See network/sites.yaml
+      # and network/segments.yaml for the subnet prefixes. For each subnet
+      # prefix, an address is assigned with the number here as the interface ID
+      # (IPv6) or host number (IPv4).
+      - interface_id: 1
