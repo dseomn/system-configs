@@ -33,7 +33,7 @@ nftables.conf:
   file.managed:
   - name: {{ nftables.config_file }}
   - mode: 0755
-  - source: salt://firewall/nftables.conf.jinja
+  - source: salt://network/firewall/nftables.conf.jinja
   - template: jinja
   - defaults:
       nftables: {{ nftables | yaml }}

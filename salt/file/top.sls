@@ -16,8 +16,8 @@
 base:
   '*':
   - convenience
-  - firewall
   - mail
+  - network.firewall
 
   'G@os:Debian and G@debian:track:*':
   - debian
@@ -27,9 +27,9 @@ base:
   - smartd
 
   'G@role:desktop':
-  - firewall.ssdp.client
   - gdm
   - google.chrome
+  - network.firewall.ssdp.client
   - plymouth
 
   'G@role:media-center':

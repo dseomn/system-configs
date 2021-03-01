@@ -16,4 +16,4 @@
 ssdp-client.conf:
   file.managed:
   - name: /etc/nftables.conf.d/ssdp-client.conf
-  - source: salt://firewall/ssdp/client/nftables.conf
+  - source: salt://network/firewall/ssdp/client/nftables.conf
