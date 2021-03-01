@@ -1,0 +1,65 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{% set interface_ids = [] %}
+
+{% set ns = namespace(auto_dns=false) %}
+{% for dns in interface.get('dns', ()) %}
+  {% if 'auto' in dns %}
+    {% set ns.auto_dns = true %}
+  {% endif %}
+{% endfor %}
+
+[Match]
+Name={{ interface_name }}
+
+[Network]
+{% for ip in interface.ip %}
+{% if 'auto' in ip %}
+DHCP=yes
+IPv6AcceptRA=yes
+{% elif 'interface_id' in ip %}
+{% do interface_ids.append(ip.interface_id) %}
+{% set segment = segments[interface.segment] %}
+Address=10.{{ site.id }}.{{ segment.id }}.{{ ip.interface_id }}/24
+Address={{
+  '{}:{:02x}{:02x}::{:x}/64'.format(
+        global.ula,
+        site.id,
+        segment.id,
+        ip.interface_id,
+    )
+}}
+{% endif %}
+{% endfor %}
+{% if interface_ids %}
+DHCPv6PrefixDelegation=yes
+{% endif %}
+
+{% if interface_ids %}
+[DHCPv6PrefixDelegation]
+SubnetId={{ '{:#x}'.format(segments[interface.segment].id) }}
+{% for interface_id in interface_ids %}
+Token={{ '::{:x}'.format(interface_id) }}
+{% endfor %}
+{% endif %}
+
+[DHCPv4]
+UseDNS={{ ns.auto_dns }}
+
+[DHCPv6]
+UseDNS={{ ns.auto_dns }}
+
+[IPv6AcceptRA]
+UseDNS={{ ns.auto_dns }}
