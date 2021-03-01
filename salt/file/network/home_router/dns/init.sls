@@ -21,6 +21,26 @@ util_pkgs:
   - pkgs: {{ dns.util_pkgs | yaml }}
 
 
+# Resolver for public names, where the authoritative servers care about the
+# resolver's IP address.
+unbound_pkg:
+  pkg.installed:
+  - name: {{ dns.unbound_pkg }}
+
+unbound_conf:
+  file.managed:
+  - name: {{ dns.unbound_conf_dir }}/local.conf
+  - source: salt://network/home_router/dns/unbound.local.conf.jinja
+  - template: jinja
+
+unbound_service:
+  service.running:
+  - name: {{ dns.unbound_service }}
+  - enable: true
+  - watch:
+    - file: unbound_conf
+
+
 # Main resolver for public names.
 dnss_pkg:
   pkg.installed:
@@ -39,6 +59,8 @@ dnss_service_unit:
   - source: salt://network/home_router/dns/dnss.local.service.conf.jinja
   - makedirs: true
   - template: jinja
+  - require:
+    - service: unbound_service
 
 dnss_unit_reload:
   cmd.run:
@@ -59,23 +81,3 @@ dnss_service:
   - enable: true
   - watch:
     - service: dnss_socket
-
-
-# Resolver for public names, where the authoritative servers care about the
-# resolver's IP address.
-unbound_pkg:
-  pkg.installed:
-  - name: {{ dns.unbound_pkg }}
-
-unbound_conf:
-  file.managed:
-  - name: {{ dns.unbound_conf_dir }}/local.conf
-  - source: salt://network/home_router/dns/unbound.local.conf.jinja
-  - template: jinja
-
-unbound_service:
-  service.running:
-  - name: {{ dns.unbound_service }}
-  - enable: true
-  - watch:
-    - file: unbound_conf
