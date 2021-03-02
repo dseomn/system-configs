@@ -29,8 +29,10 @@
 bind-dynamic
 
 no-resolv
-server=::1#{{ dns.dnss_port }}
-server=/{{ '/'.join(home_router.unbound_domains) }}/::1#{{ dns.unbound_port }}
+# TODO(https://github.com/albertito/dnss/issues/9): Start using dnss again.
+# server=::1#{{ dns.dnss_port }}
+# server=/{{ '/'.join(home_router.unbound_domains) }}/::1#{{ dns.unbound_port }}
+server=::1#{{ dns.unbound_port }}
 
 no-hosts
 
