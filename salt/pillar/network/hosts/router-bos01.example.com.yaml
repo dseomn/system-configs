@@ -12,58 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for an individual host on the network.
+# Configuration for an individual host on the network. The filename is the Salt
+# minion ID, with the .yaml extension appended.
 
-# Salt minion ID.
-router-bos01.example.com:
+# Required. Site name. See network/sites.yaml.
+site: bos01
 
-  # Required. Site name. See network/sites.yaml.
-  site: bos01
+# Required. Network interfaces.
+interfaces:
 
-  # Required. Network interfaces.
-  interfaces:
+  # Interface name
+  eth0:
+    # IP addresses.
+    ip:
+    -
+      # Receive addresses from DHCP and/or SLAAC.
+      auto:
+    # DNS configuration.
+    dns:
+    -
+      # Receive DNS servers from DHCP and/or Router Advertisements.
+      auto:
 
-    # Interface name
-    eth0:
-      # IP addresses.
-      ip:
-      -
-        # Receive addresses from DHCP and/or SLAAC.
-        auto:
-      # DNS configuration.
-      dns:
-      -
-        # Receive DNS servers from DHCP and/or Router Advertisements.
-        auto:
+  eth1:
+    # Makes this interface a child of a bridge, with untagged frames on the
+    # specified segment. See network/segments.yaml.
+    bridge_segment: lan
 
-    eth1:
-      # Makes this interface a child of a bridge, with untagged frames on the specified
-      # segment. See network/segments.yaml.
-      bridge_segment: lan
+  eth2:
+    # Makes this interface a child of a bridge, with tagged frames on the
+    # specified segments.
+    bridge_segments:
+    - lan
 
-    eth2:
-      # Makes this interface a child of a bridge, with tagged frames on the
-      # specified segments.
-      bridge_segments:
-      - lan
-
-    lan:
-      # Creates the name above as a virtual interface on the specified segment.
-      segment: lan
-      ip:
-      # Assigns IP addresses based on the segment above. See network/sites.yaml
-      # and network/segments.yaml for the subnet prefixes. For each subnet
-      # prefix, an address is assigned with the number here as the interface ID
-      # (IPv6) or host number (IPv4).
-      - interface_id: 1
-      # Enables home router things (DNS server, DHCP server, etc.) on this
-      # interface, and configures them.
-      home_router:
-        # Other hosts on this network segment.
-        hosts:
-          # Short host name, without domain name.
-          smtp:
-            # Required. MAC address.
-            mac: 00:00:5e:00:53:00
-            # Required. See interface_id parameter in the ip section above.
-            interface_id: 2
+  lan:
+    # Creates the name above as a virtual interface on the specified segment.
+    segment: lan
+    ip:
+    # Assigns IP addresses based on the segment above. See network/sites.yaml
+    # and network/segments.yaml for the subnet prefixes. For each subnet prefix,
+    # an address is assigned with the number here as the interface ID (IPv6) or
+    # host number (IPv4).
+    - interface_id: 1
+    # Enables home router things (DNS server, DHCP server, etc.) on this
+    # interface, and configures them.
+    home_router:
+      # Other hosts on this network segment.
+      hosts:
+        # Short host name, without domain name.
+        smtp:
+          # Required. MAC address.
+          mac: 00:00:5e:00:53:00
+          # Required. See interface_id parameter in the ip section above.
+          interface_id: 2
