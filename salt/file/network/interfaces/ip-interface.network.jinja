@@ -46,6 +46,11 @@ Address={{
 {% if interface_ids %}
 DHCPv6PrefixDelegation=yes
 {% endif %}
+{% for dns in interface.get('dns', ()) %}
+{% if 'static' in dns %}
+DNS={{ dns.static }}
+{% endif %}
+{% endfor %}
 
 {% if interface_ids %}
 [DHCPv6PrefixDelegation]

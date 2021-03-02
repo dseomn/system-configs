@@ -18,6 +18,12 @@
 # Required. Site name. See network/sites.yaml.
 site: bos01
 
+# Host-local DNS resolver configuration.
+dns:
+-
+  # Use a static DNS server.
+  static: 2001:db8::1
+
 # Required. Network interfaces.
 interfaces:
 
@@ -28,11 +34,14 @@ interfaces:
     -
       # Receive addresses from DHCP and/or SLAAC.
       auto:
-    # DNS configuration.
+    # Per-interface DNS resolver configuration.
     dns:
     -
       # Receive DNS servers from DHCP and/or Router Advertisements.
       auto:
+    -
+      # Use a static DNS server.
+      static: 192.0.2.1
 
   eth1:
     # Makes this interface a child of a bridge, with untagged frames on the

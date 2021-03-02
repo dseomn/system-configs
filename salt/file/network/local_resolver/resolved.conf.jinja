@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{% set dns_config = salt.pillar.get(
+    'network:hosts:{}:dns'.format(grains.id),
+    [],
+) %}
+
 [Resolve]
+{% for dns in dns_config %}
+{% if 'static' in dns %}
+DNS={{ dns.static }}
+{% endif %}
+{% endfor %}
 FallbackDNS=
 LLMNR=resolve
 MulticastDNS=resolve
