@@ -23,11 +23,11 @@ define HOME_ROUTER_INTERFACES = {
 
 table inet filter {
 	chain input {
-		iif $HOME_ROUTER_INTERFACES tcp dport domain accept
-		iif $HOME_ROUTER_INTERFACES udp dport domain accept
-		iif $HOME_ROUTER_INTERFACES meta nfproto ipv4 udp sport bootpc \
-			udp dport bootps accept
-		iif $HOME_ROUTER_INTERFACES meta nfproto ipv6 \
+		iifname $HOME_ROUTER_INTERFACES tcp dport domain accept
+		iifname $HOME_ROUTER_INTERFACES udp dport domain accept
+		iifname $HOME_ROUTER_INTERFACES meta nfproto ipv4 \
+			udp sport bootpc udp dport bootps accept
+		iifname $HOME_ROUTER_INTERFACES meta nfproto ipv6 \
 			udp sport dhcpv6-client udp dport dhcpv6-server accept
 	}
 }
