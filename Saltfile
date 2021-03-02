@@ -28,4 +28,5 @@ salt-ssh:
   - salt://debian/map.jinja
   - salt://network/firewall/map.jinja
   - salt://network/home_router/dns/map.jinja
+  - salt://network/home_router/map.jinja
   - salt://pki/public.jinja

@@ -12,11 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for the entire network, across all sites and segments.
+{% set host = pillar.network.hosts[grains.id] %}
 
-# Required. Domain name for the network.
-domain: example.com
+define HOME_ROUTER_INTERFACES = {
+{%- for interface_name, interface in host.interfaces.items()
+    if 'home_router' in interface %}
+	{{ interface_name }},
+{% endfor -%}
+}
 
-# Required. https://en.wikipedia.org/wiki/Unique_local_address. Replace the X's
-# with your own random Global ID.
-ula: fdXX:XXXX:XXXX
+table inet filter {
+	chain input {
+		iif $HOME_ROUTER_INTERFACES tcp dport domain accept
+		iif $HOME_ROUTER_INTERFACES udp dport domain accept
+		iif $HOME_ROUTER_INTERFACES meta nfproto ipv4 udp sport bootpc \
+			udp dport bootps accept
+		iif $HOME_ROUTER_INTERFACES meta nfproto ipv6 \
+			udp sport dhcpv6-client udp dport dhcpv6-server accept
+	}
+}

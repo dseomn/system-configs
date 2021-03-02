@@ -1,0 +1,64 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+{% from 'network/home_router/map.jinja' import home_router %}
+{% from 'network/home_router/dns/map.jinja' import dns %}
+
+{% set host = pillar.network.hosts[grains.id] %}
+{% set segments = pillar.network.segments %}
+{% set site = pillar.network.sites[host.site] %}
+{% set global = pillar.network.global %}
+
+{% set subdomain = '{}.{}'.format(host.site, global.domain) %}
+
+
+# Avoid conflicts with systemd-resolved which is also listening on port 53, but
+# not on the same interfaces and addresses.
+bind-dynamic
+
+no-resolv
+server=::1#{{ dns.dnss_port }}
+server=/{{ '/'.join(home_router.unbound_domains) }}/::1#{{ dns.unbound_port }}
+
+no-hosts
+
+domain={{ subdomain }}
+
+enable-ra
+
+{% for interface_name, interface in host.interfaces.items()
+    if 'home_router' in interface %}
+{% set segment = segments[interface.segment] %}
+{% set ipv4_prefix = '10.{}.{}'.format(site.id, segment.id) %}
+
+interface={{ interface_name }}
+
+interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
+interface-name={{ grains.host }},{{ interface_name }}
+
+dhcp-range={{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254
+dhcp-range=::100,::1ff,constructor:{{ interface_name }},slaac
+
+{% for other_host_name, other_host
+    in interface.home_router.get('hosts', {}).items() %}
+dhcp-host={{ '{},{}.{},[::{:x}],{}'.format(
+    other_host.mac,
+    ipv4_prefix,
+    other_host.interface_id,
+    other_host.interface_id,
+    other_host_name,
+) }}
+{% endfor %}
+{% endfor %}

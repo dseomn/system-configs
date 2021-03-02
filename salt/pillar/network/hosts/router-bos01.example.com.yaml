@@ -56,3 +56,14 @@ router-bos01.example.com:
       # prefix, an address is assigned with the number here as the interface ID
       # (IPv6) or host number (IPv4).
       - interface_id: 1
+      # Enables home router things (DNS server, DHCP server, etc.) on this
+      # interface, and configures them.
+      home_router:
+        # Other hosts on this network segment.
+        hosts:
+          # Short host name, without domain name.
+          smtp:
+            # Required. MAC address.
+            mac: 00:00:5e:00:53:00
+            # Required. See interface_id parameter in the ip section above.
+            interface_id: 2

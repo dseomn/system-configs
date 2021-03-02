@@ -38,6 +38,7 @@ base:
 
   'G@role:home-router':
   - ddns
+  - network.home_router
   - network.interfaces
   - network.local_resolver
   - ssh.server
