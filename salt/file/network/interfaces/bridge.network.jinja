@@ -21,3 +21,10 @@ Name=bridge
 VLAN={{ interface_name }}
 {% endif %}
 {% endfor %}
+
+[BridgeVLAN]
+{% for interface in host.interfaces.values() %}
+{% if 'segment' in interface %}
+VLAN={{ segments[interface.segment].id }}
+{% endif %}
+{% endfor %}
