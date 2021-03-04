@@ -19,6 +19,7 @@ ExecStart=
 ExecStart=\
   {{ dns.dnss_bin }} \
   --dns_listen_addr=systemd \
+  --monitoring_listen_addr=[::1]:{{ dns.dnss_monitoring_port }} \
   --enable_cache=false \
   --enable_dns_to_https \
   # TODO(https://github.com/albertito/dnss/issues/9): Remove `.` and `google.`
