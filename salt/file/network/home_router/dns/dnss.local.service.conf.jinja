@@ -21,7 +21,8 @@ ExecStart=\
   --dns_listen_addr=systemd \
   --enable_cache=false \
   --enable_dns_to_https \
-  --fallback_domains=dns.google. \
+  # TODO(https://github.com/albertito/dnss/issues/9): Remove `.` and `google.`
+  '--fallback_domains=. google. dns.google.' \
   --fallback_upstream=[::1]:{{ dns.unbound_port }} \
   --force_mode=DoH \
   --https_upstream=https://dns.google/dns-query
