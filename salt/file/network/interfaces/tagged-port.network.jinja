@@ -16,9 +16,6 @@
 Name={{ interface_name }}
 
 [Network]
-Bridge=bridge
-
-[BridgeVLAN]
-{% for bridge_segment in interface.bridge_segments %}
-VLAN={{ segments[bridge_segment].id }}
+{% for segment_name in bridge_segments %}
+VLAN={{ interface_name }}.{{ segment_name }}
 {% endfor %}

@@ -12,15 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% set segment = segments[interface.bridge_segment] %}
-
 [Match]
 Name={{ interface_name }}
 
 [Network]
-Bridge=bridge
-
-[BridgeVLAN]
-VLAN={{ segment.id }}
-EgressUntagged={{ segment.id }}
-PVID={{ segment.id }}
+Bridge={{ bridge_name }}

@@ -12,19 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[Match]
-Name=bridge
+[NetDev]
+Name={{ interface_name }}
+Kind=vlan
 
-[Network]
-{% for interface_name, interface in host.interfaces.items() %}
-{% if 'segment' in interface %}
-VLAN={{ interface_name }}
-{% endif %}
-{% endfor %}
-
-[BridgeVLAN]
-{% for interface in host.interfaces.values() %}
-{% if 'segment' in interface %}
-VLAN={{ segments[interface.segment].id }}
-{% endif %}
-{% endfor %}
+[VLAN]
+Id={{ vlan_id }}

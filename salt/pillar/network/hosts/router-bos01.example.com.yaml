@@ -49,7 +49,7 @@ interfaces:
     bridge_segment: lan
 
   eth2:
-    # Makes this interface a child of a bridge, with tagged frames on the
+    # Makes this interface a child of bridge(s), with tagged frames on the
     # specified segments.
     bridge_segments:
     - lan

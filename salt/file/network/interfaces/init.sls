@@ -25,13 +25,6 @@
 {% set site = pillar.network.sites[host.site] %}
 {% set global = pillar.network.global %}
 
-{% set template_defaults = {
-    'host': host,
-    'segments': segments,
-    'site': site,
-    'global': global,
-} %}
-
 
 # Disable other tools that might try to configure the network.
 {% if grains.os_family == 'Debian' %}
@@ -41,6 +34,7 @@
       # This system uses systemd-networkd to configure its interfaces.
 {% endif %}
 
+
 systemd_networkd:
   service.enabled:
   - name: {{ system.service }}
@@ -49,68 +43,94 @@ systemd_networkd:
   file.directory:
   - clean: true
 
-{{ system.config_directory }}/10-bridge.netdev:
-  file.managed:
-  - source: salt://network/interfaces/bridge.netdev
-  - require_in:
-    - file: {{ system.config_directory }}
 
-{{ system.config_directory }}/10-bridge.network:
+{% set bridge_name_by_segment = {} %}
+{% for interface_name, interface in host.interfaces.items() %}
+  {% if 'segment' in interface %}
+    {% do bridge_name_by_segment.update({interface.segment: interface_name}) %}
+  {% elif 'bridge_segment' in interface %}
+    {% do bridge_name_by_segment.setdefault(
+        interface.bridge_segment, interface.bridge_segment) %}
+  {% elif 'bridge_segments' in interface %}
+    {% for segment_name in interface.bridge_segments %}
+      {% do bridge_name_by_segment.setdefault(segment_name, segment_name) %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
+{% for bridge_name in bridge_name_by_segment.values() %}
+{{ system.config_directory }}/10-{{ bridge_name }}.netdev:
   file.managed:
-  - source: salt://network/interfaces/bridge.network.jinja
+  - source: salt://network/interfaces/bridge.netdev.jinja
   - template: jinja
-  - defaults: {{ template_defaults | json }}
+  - defaults:
+      bridge_name: {{ bridge_name }}
   - require_in:
     - file: {{ system.config_directory }}
+{% endfor %}
+
 
 {% for interface_name, interface in host.interfaces.items() %}
 
-{% set template_defaults = {
-    'interface_name': interface_name,
-    'interface': interface,
-    'host': host,
-    'segments': segments,
-    'site': site,
-    'global': global,
-} %}
-
-{% if 'segment' in interface %}
-  {% set netdev_source = 'salt://network/interfaces/segment-vif.netdev.jinja' %}
-{% else %}
-  {% set netdev_source = none %}
-{% endif %}
-
 {% if 'ip' in interface %}
-  {% set network_source =
-      'salt://network/interfaces/ip-interface.network.jinja' %}
-{% elif 'bridge_segment' in interface %}
-  {% set network_source =
-      'salt://network/interfaces/untagged-port.network.jinja' %}
-{% elif 'bridge_segments' in interface %}
-  {% set network_source =
-      'salt://network/interfaces/tagged-port.network.jinja' %}
-{% else %}
-  {% set network_source = none %}
-{% endif %}
 
-{% if not netdev_source is none %}
-{{ system.config_directory }}/20-{{ interface_name }}.netdev:
-  file.managed:
-  - source: {{ netdev_source }}
-  - template: jinja
-  - defaults: {{ template_defaults | json }}
-  - require_in:
-    - file: {{ system.config_directory }}
-{% endif %}
-
-{% if not network_source is none %}
 {{ system.config_directory }}/20-{{ interface_name }}.network:
   file.managed:
-  - source: {{ network_source }}
+  - source: salt://network/interfaces/ip-interface.network.jinja
   - template: jinja
-  - defaults: {{ template_defaults | json }}
+  - defaults:
+      interface_name: {{ interface_name }}
+      interface: {{ interface | json }}
+      segments: {{ segments | json }}
+      site: {{ site | json }}
+      global: {{ global | json }}
   - require_in:
     - file: {{ system.config_directory }}
+
+{% elif 'bridge_segment' in interface %}
+
+{{ system.config_directory }}/20-{{ interface_name }}.network:
+  file.managed:
+  - source: salt://network/interfaces/bridge-member.network.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}
+      bridge_name: {{ bridge_name_by_segment[interface.bridge_segment] }}
+  - require_in:
+    - file: {{ system.config_directory }}
+
+{% elif 'bridge_segments' in interface %}
+
+{{ system.config_directory }}/20-{{ interface_name }}.network:
+  file.managed:
+  - source: salt://network/interfaces/tagged-port.network.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}
+      bridge_segments: {{ interface.bridge_segments | json }}
+  - require_in:
+    - file: {{ system.config_directory }}
+{% for segment_name in interface.bridge_segments %}
+{{ system.config_directory }}/30-{{ interface_name }}.{{ segment_name }}.netdev:
+  file.managed:
+  - source: salt://network/interfaces/vlan.netdev.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}.{{ segment_name }}
+      vlan_id: {{ segments[segment_name].id }}
+  - require_in:
+    - file: {{ system.config_directory }}
+{{ system.config_directory }}/30-{{ interface_name }}.{{ segment_name }}.network:
+  file.managed:
+  - source: salt://network/interfaces/bridge-member.network.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}.{{ segment_name }}
+      bridge_name: {{ bridge_name_by_segment[segment_name] }}
+  - require_in:
+    - file: {{ system.config_directory }}
+{% endfor %}
+
 {% endif %}
 
 {% endfor %}
