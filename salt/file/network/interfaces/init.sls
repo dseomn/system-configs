@@ -17,6 +17,13 @@
     'Debian': {
         'service': 'systemd-networkd',
         'config_directory': '/etc/systemd/network',
+        'access_point_pkgs': [
+            'hostapd',
+            'iw',
+        ],
+        'hostapd_conf_template': '/etc/hostapd/{}.conf',
+        'hostapd_service_template': 'hostapd@{}.service',
+        'hostapd_ctrl_interface': '/var/run/hostapd',
     },
 }) %}
 
@@ -55,6 +62,10 @@ systemd_networkd:
     {% for segment_name in interface.bridge_segments %}
       {% do bridge_name_by_segment.setdefault(segment_name, segment_name) %}
     {% endfor %}
+  {% elif 'access_point' in interface %}
+    {% for segment_name in interface.access_point.segments %}
+      {% do bridge_name_by_segment.setdefault(segment_name, segment_name) %}
+    {% endfor %}
   {% endif %}
 {% endfor %}
 
@@ -69,6 +80,8 @@ systemd_networkd:
     - file: {{ system.config_directory }}
 {% endfor %}
 
+
+{% set access_point_interfaces = {} %}
 
 {% for interface_name, interface in host.interfaces.items() %}
 
@@ -131,6 +144,40 @@ systemd_networkd:
     - file: {{ system.config_directory }}
 {% endfor %}
 
+{% elif 'access_point' in interface %}
+
+{% do access_point_interfaces.update({interface_name: interface}) %}
+
 {% endif %}
+
+{% endfor %}
+
+
+{% if access_point_interfaces %}
+access_point_pkgs:
+  pkg.installed:
+  - pkgs: {{ system.access_point_pkgs | json }}
+{% endif %}
+
+{% for interface_name, interface in access_point_interfaces.items() %}
+
+{{ system.hostapd_conf_template.format(interface_name) }}:
+  file.managed:
+  - source: salt://network/interfaces/hostapd.conf.jinja
+  - mode: 0600
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}
+      interface: {{ interface | json }}
+      segments: {{ segments | json }}
+      site: {{ site | json }}
+      bridge_name_by_segment: {{ bridge_name_by_segment | json }}
+      ctrl_interface: {{ system.hostapd_ctrl_interface }}
+
+{{ system.hostapd_service_template.format(interface_name) }}:
+  service.running:
+  - enable: true
+  - watch:
+    - file: {{ system.hostapd_conf_template.format(interface_name) }}
 
 {% endfor %}

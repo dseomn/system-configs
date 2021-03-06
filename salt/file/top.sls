@@ -42,3 +42,8 @@ base:
   - network.interfaces
   - network.local_resolver
   - ssh.server
+
+  'G@role:access-point':
+  - network.interfaces
+  - network.local_resolver
+  - ssh.server
