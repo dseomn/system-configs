@@ -26,7 +26,7 @@ ieee80211d=1
 {{ setting }}
 {% endfor %}
 
-{% for setting in interface.access_point.get('hostapd', ()) %}
+{% for setting in interface.access_point.hostapd %}
 {{ setting }}
 {% endfor %}
 
@@ -35,7 +35,7 @@ ieee80211d=1
 bss={{ interface_name }}.{{ segment_name }}
 {% endif %}
 bridge={{ bridge_name_by_segment[segment_name] }}
-{% for setting in segments[segment_name].get('hostapd', ()) %}
+{% for setting in segments[segment_name].hostapd %}
 {{ setting }}
 {% endfor %}
 {% endfor %}
