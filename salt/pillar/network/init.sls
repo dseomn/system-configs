@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% import_yaml 'network/global.yaml' as global %}
-{% import_yaml 'network/sites.yaml' as sites %}
-{% import_yaml 'network/segments.yaml' as segments %}
-{% import_yaml 'network/hosts/{}.yaml'.format(grains.id) as host %}
+{% import_yaml 'network/global.yaml.jinja' as global %}
+{% import_yaml 'network/sites.yaml.jinja' as sites %}
+{% import_yaml 'network/segments.yaml.jinja' as segments %}
+{% import_yaml 'network/hosts/{}.yaml.jinja'.format(grains.id) as host %}
 
 network:
   global: {{ global | yaml }}

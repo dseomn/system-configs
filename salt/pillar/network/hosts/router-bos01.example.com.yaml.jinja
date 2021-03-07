@@ -13,9 +13,9 @@
 # limitations under the License.
 
 # Configuration for an individual host on the network. The filename is the Salt
-# minion ID, with the .yaml extension appended.
+# minion ID, with the .yaml.jinja extension appended.
 
-# Required. Site name. See network/sites.yaml.
+# Required. Site name. See network/sites.yaml.jinja.
 site: bos01
 
 # Host-local DNS resolver configuration.
@@ -45,7 +45,7 @@ interfaces:
 
   eth1:
     # Makes this interface a child of a bridge, with untagged frames on the
-    # specified segment. See network/segments.yaml.
+    # specified segment. See network/segments.yaml.jinja.
     bridge_segment: lan
 
   eth2:
@@ -58,7 +58,7 @@ interfaces:
     # Run an access point on this interface.
     access_point:
       # Required. Segments to serve on the access point. See
-      # network/segments.yaml.
+      # network/segments.yaml.jinja.
       segments:
       - lan
       # Required. hostapd.conf settings for this interface.
@@ -75,10 +75,10 @@ interfaces:
     # Creates the name above as a virtual interface on the specified segment.
     segment: lan
     ip:
-    # Assigns IP addresses based on the segment above. See network/sites.yaml
-    # and network/segments.yaml for the subnet prefixes. For each subnet prefix,
-    # an address is assigned with the number here as the interface ID (IPv6) or
-    # host number (IPv4).
+    # Assigns IP addresses based on the segment above. See
+    # network/sites.yaml.jinja and network/segments.yaml.jinja for the subnet
+    # prefixes. For each subnet prefix, an address is assigned with the number
+    # here as the interface ID (IPv6) or host number (IPv4).
     - interface_id: 1
     # Enables home router things (DNS server, DHCP server, etc.) on this
     # interface, and configures them.
