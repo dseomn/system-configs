@@ -21,6 +21,7 @@
     {},
 ) %}
 {% set forward = host_firewall.get('forward', ()) %}
+{% set masquerade_ipv4 = host_firewall.get('masquerade_ipv4', ()) %}
 
 
 flush ruleset
@@ -62,6 +63,17 @@ table inet filter {
 	chain output {
 		type filter hook output priority 0
 		policy accept
+	}
+}
+
+table ip nat {
+	chain postrouting {
+		type nat hook postrouting priority 0
+
+		{% if masquerade_ipv4 %}
+		oifname { {{ ', '.join(masquerade_ipv4) }} } \
+			masquerade persistent,fully-random
+		{% endif %}
 	}
 }
 

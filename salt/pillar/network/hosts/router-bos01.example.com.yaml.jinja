@@ -98,3 +98,7 @@ firewall:
   # Pairs of [input interface, output interface] that allow forwarding across.
   forward:
   - [lan, eth0]
+
+  # Interfaces to masquerade outbound IPv4 traffic.
+  masquerade_ipv4:
+  - eth0
