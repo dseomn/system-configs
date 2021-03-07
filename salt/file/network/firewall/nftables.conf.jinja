@@ -16,6 +16,13 @@
 # limitations under the License.
 
 
+{% set host_firewall = salt.pillar.get(
+    'network:hosts:{}:firewall'.format(grains.id),
+    {},
+) %}
+{% set forward = host_firewall.get('forward', ()) %}
+
+
 flush ruleset
 
 table inet filter {
@@ -41,6 +48,15 @@ table inet filter {
 		policy drop
 
 		ct state established,related accept
+
+		{% if forward %}
+		iifname . oifname {
+			{%- for iifname, oifname in forward -%}
+				{{ iifname }} . {{ oifname }}
+				{%- if not loop.last %}, {% endif -%}
+			{%- endfor -%}
+		} accept
+		{% endif %}
 	}
 
 	chain output {

@@ -91,3 +91,10 @@ interfaces:
           mac: 00:00:5e:00:53:00
           # Required. See interface_id parameter in the ip section above.
           interface_id: 2
+
+# Firewall configuration.
+firewall:
+
+  # Pairs of [input interface, output interface] that allow forwarding across.
+  forward:
+  - [lan, eth0]
