@@ -21,6 +21,15 @@ include:
 - network.home_router.dns
 
 
+net.ipv4.ip_forward:
+  sysctl.present:
+  - value: 1
+
+net.ipv6.conf.all.forwarding:
+  sysctl.present:
+  - value: 1
+
+
 dnsmasq_pkg:
   pkg.installed:
   - name: {{ home_router.dnsmasq_pkg }}
