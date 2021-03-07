@@ -26,3 +26,8 @@ bos01:
   # Because of how it's used in IP addresses, it must be between 0 and 255,
   # inclusive.
   id: 0
+
+  # hostapd.conf settings for access points at this site.
+  hostapd:
+  - ieee80211d=1
+  - country_code=US

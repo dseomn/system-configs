@@ -54,6 +54,23 @@ interfaces:
     bridge_segments:
     - lan
 
+  wlan0:
+    # Run an access point on this interface.
+    access_point:
+      # Required. Segments to serve on the access point. See
+      # network/segments.yaml.
+      segments:
+      - lan
+      # Required. hostapd.conf settings for this interface.
+      hostapd:
+      - hw_mode=g
+      - channel=acs_survey
+      - wmm_enabled=1
+      - ieee80211n=1
+      # Run `iw list` to set ht_capab.
+      - require_ht=1
+      - obss_interval=300
+
   lan:
     # Creates the name above as a virtual interface on the specified segment.
     segment: lan

@@ -20,8 +20,6 @@ logger_stdout=-1
 logger_stdout_level=2
 ctrl_interface={{ ctrl_interface }}
 
-ieee80211d=1
-
 {% for setting in site.get('hostapd', ()) %}
 {{ setting }}
 {% endfor %}
