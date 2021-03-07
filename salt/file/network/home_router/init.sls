@@ -41,14 +41,15 @@ dnsmasq_pkg:
   - require:
     - sls: network.home_router.dns
 
-{{ nftables.config_dir }}/dnsmasq.conf:
-  file.managed:
-  - source: salt://network/home_router/dnsmasq.nftables.conf.jinja
-  - template: jinja
-
 dnsmasq_service:
   service.running:
   - name: {{ home_router.dnsmasq_service }}
   - enable: true
   - watch:
     - file: {{ home_router.dnsmasq_conf }}
+
+
+{{ nftables.config_dir }}/home-router.conf:
+  file.managed:
+  - source: salt://network/home_router/nftables.conf.jinja
+  - template: jinja
