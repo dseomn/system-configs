@@ -16,10 +16,9 @@
 # limitations under the License.
 
 
-{% set host_firewall = salt.pillar.get(
-    'network:hosts:{}:firewall'.format(grains.id),
-    {},
-) %}
+{% set host = salt.pillar.get('network:hosts:{}'.format(grains.id), {}) %}
+{% set interfaces = host.get('interfaces', {}) %}
+{% set host_firewall = host.get('firewall', {}) %}
 {% set forward = host_firewall.get('forward', ()) %}
 {% set masquerade_ipv4 = host_firewall.get('masquerade_ipv4', ()) %}
 
@@ -27,6 +26,13 @@
 flush ruleset
 
 table inet filter {
+	{% if interfaces %}
+	flowtable flowtable_main {
+		hook ingress priority 0
+		devices = { {{ ', '.join(interfaces) }} }
+	}
+	{% endif %}
+
 	chain input {
 		type filter hook input priority 0
 		policy drop
@@ -47,6 +53,11 @@ table inet filter {
 	chain forward {
 		type filter hook forward priority 0
 		policy drop
+
+		{% if interfaces %}
+		ip protocol { tcp, udp } flow offload @flowtable_main
+		ip6 nexthdr { tcp, udp } flow offload @flowtable_main
+		{% endif %}
 
 		ct state established,related accept
 
