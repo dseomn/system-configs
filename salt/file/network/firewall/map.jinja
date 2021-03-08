@@ -24,3 +24,21 @@
         'config_dir': '/etc/nftables.conf.d',
     },
 }) %}
+
+
+{# Returns an nftables set (or map) given an iterable of entries. #}
+{% macro to_set(entries) -%}
+{
+{%- for entry in entries %}
+	{{ entry }},
+{%- endfor %}
+}
+{%- endmacro %}
+
+
+{# Returns an elements spec for a set/map from an iterable of entries. #}
+{% macro to_set_elements(entries) -%}
+{% if entries -%}
+elements = {{ to_set(entries) }}
+{%- endif %}
+{%- endmacro %}
