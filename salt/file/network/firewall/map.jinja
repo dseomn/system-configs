@@ -15,7 +15,13 @@
  #}
 
 
-{% set nftables = salt.grains.filter_by({
+{% set nftables = {
+    'mark': {
+        'dnat': 1,
+        'dnat_hairpin': 2,
+    },
+} %}
+{% do nftables.update(salt.grains.filter_by({
     'Debian': {
         'pkg': 'nftables',
         'service': 'nftables',
@@ -23,7 +29,7 @@
         'config_file': '/etc/nftables.conf',
         'config_dir': '/etc/nftables.conf.d',
     },
-}) %}
+})) %}
 
 
 {# Returns an nftables set (or map) given an iterable of entries. #}
