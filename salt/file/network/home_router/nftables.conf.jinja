@@ -12,23 +12,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% from 'network/firewall/map.jinja' import to_set_elements %}
+{% from 'network/firewall/map.jinja' import nftables, to_set, to_set_elements %}
 
 {% set host = pillar.network.hosts[grains.id] %}
+{% set segments = pillar.network.segments %}
+{% set site = pillar.network.sites[host.site] %}
 
 
 {% set home_router_interfaces = [] %}
+{% set dnat_services = [] %}
+{% set dnat_services_with_interface = [] %}
+{% set dnat_dest_by_service = [] %}
 {% for interface_name, interface in host.interfaces.items()
     if 'home_router' in interface %}
   {% do home_router_interfaces.append(interface_name) %}
+  {% for other_host in interface.home_router.get('hosts', {}).values() %}
+    {% set other_host_ipv4 = '10.{}.{}.{}'.format(
+	site.id,
+	segments[interface.segment].id,
+	other_host.interface_id,
+    ) %}
+    {% for service in other_host.get('services', ()) %}
+      {% for l4proto in ('tcp', 'udp') if l4proto in service %}
+	{% set port_str = '{}'.format(service[l4proto]) %}
+	{% set dnat_service = '{} . {}'.format(l4proto, port_str) %}
+	{% do dnat_services.append(dnat_service) %}
+	{% do dnat_services_with_interface.append('{} . {}'.format(
+	    dnat_service,
+	    interface_name,
+	)) %}
+	{% do dnat_dest_by_service.append('{} : {}'.format(
+	    dnat_service,
+	    other_host_ipv4,
+	)) %}
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
 {% endfor %}
 
+
+define DNAT_MARKS = {{ to_set((
+    nftables.mark.dnat,
+    nftables.mark.dnat_hairpin,
+)) }}
 
 table inet filter {
 	set home_router_interfaces {
 		type ifname
 		flags constant
 		{{ to_set_elements(home_router_interfaces) }}
+	}
+
+	set services_ipv4 {
+		type ifname . ipv4_addr . inet_proto . inet_service
+	}
+
+	set services_ipv6 {
+		type ifname . ipv6_addr . inet_proto . inet_service
 	}
 
 	chain input {
@@ -38,5 +78,53 @@ table inet filter {
 			udp sport bootpc udp dport bootps accept
 		iifname @home_router_interfaces meta nfproto ipv6 \
 			udp sport dhcpv6-client udp dport dhcpv6-server accept
+	}
+
+	chain forward {
+		oifname . ip daddr . meta l4proto . th dport @services_ipv4 \
+			accept
+		oifname . ip6 daddr . meta l4proto . th dport @services_ipv6 \
+			accept
+	}
+}
+
+table ip nat {
+	set masquerade_ipv4_addrs {
+		type ipv4_addr
+	}
+
+	set dnat_services {
+		type inet_proto . inet_service
+		flags constant
+		{{ to_set_elements(dnat_services) }}
+	}
+
+	set dnat_services_with_interface {
+		type inet_proto . inet_service . ifname
+		flags constant
+		{{ to_set_elements(dnat_services_with_interface) }}
+	}
+
+	map dnat_dest_by_service {
+		type inet_proto . inet_service : ipv4_addr
+		flags constant
+		{{ to_set_elements(dnat_dest_by_service) }}
+	}
+
+	chain prerouting {
+		ip daddr @masquerade_ipv4_addrs \
+			meta l4proto . th dport @dnat_services \
+			meta mark set {{ nftables.mark.dnat }}
+		mark {{ nftables.mark.dnat }} \
+			meta l4proto . th dport . iifname \
+			@dnat_services_with_interface \
+			meta mark set {{ nftables.mark.dnat_hairpin }}
+		mark $DNAT_MARKS \
+			dnat meta l4proto . th dport map @dnat_dest_by_service
+	}
+
+	chain postrouting {
+		mark {{ nftables.mark.dnat_hairpin }} \
+			masquerade persistent,fully-random
 	}
 }

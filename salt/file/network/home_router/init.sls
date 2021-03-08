@@ -53,3 +53,15 @@ dnsmasq_service:
   file.managed:
   - source: salt://network/home_router/nftables.conf.jinja
   - template: jinja
+
+{{ home_router.update_nftables_bin }}:
+  file.managed:
+  - mode: 0700
+  - source: salt://network/home_router/update-nftables.py
+  - template: jinja
+
+
+{{ home_router.cron_file }}:
+  file.managed:
+  - source: salt://network/home_router/cron.jinja
+  - template: jinja
