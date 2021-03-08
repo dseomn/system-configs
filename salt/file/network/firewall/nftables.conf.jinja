@@ -1,4 +1,4 @@
-{%- from 'network/firewall/map.jinja' import nftables -%}
+{%- from 'network/firewall/map.jinja' import nftables, to_set_elements -%}
 #!{{ nftables.binary }} -f
 
 # Copyright 2019 Google LLC
@@ -20,13 +20,22 @@
     'network:hosts:{}:firewall'.format(grains.id),
     {},
 ) %}
-{% set forward = host_firewall.get('forward', ()) %}
-{% set masquerade_ipv4 = host_firewall.get('masquerade_ipv4', ()) %}
+{% set forward_interface_pairs = [] %}
+{% for iifname, oifname in host_firewall.get('forward', ()) %}
+  {% do forward_interface_pairs.append('{} . {}'.format(iifname, oifname)) %}
+{% endfor %}
+{% set masquerade_ipv4_interfaces = host_firewall.get('masquerade_ipv4', ()) %}
 
 
 flush ruleset
 
 table inet filter {
+	set forward_interface_pairs {
+		type ifname . ifname
+		flags constant
+		{{ to_set_elements(forward_interface_pairs) }}
+	}
+
 	chain input {
 		type filter hook input priority 0
 		policy drop
@@ -50,14 +59,7 @@ table inet filter {
 
 		ct state established,related accept
 
-		{% if forward %}
-		iifname . oifname {
-			{%- for iifname, oifname in forward -%}
-				{{ iifname }} . {{ oifname }}
-				{%- if not loop.last %}, {% endif -%}
-			{%- endfor -%}
-		} accept
-		{% endif %}
+		iifname . oifname @forward_interface_pairs accept
 	}
 
 	chain output {
@@ -67,13 +69,17 @@ table inet filter {
 }
 
 table ip nat {
+	set masquerade_ipv4_interfaces {
+		type ifname
+		flags constant
+		{{ to_set_elements(masquerade_ipv4_interfaces) }}
+	}
+
 	chain postrouting {
 		type nat hook postrouting priority 0
 
-		{% if masquerade_ipv4 %}
-		oifname { {{ ', '.join(masquerade_ipv4) }} } \
+		oifname @masquerade_ipv4_interfaces \
 			masquerade persistent,fully-random
-		{% endif %}
 	}
 }
 

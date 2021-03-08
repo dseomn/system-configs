@@ -12,22 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{% from 'network/firewall/map.jinja' import to_set_elements %}
+
 {% set host = pillar.network.hosts[grains.id] %}
 
-define HOME_ROUTER_INTERFACES = {
-{%- for interface_name, interface in host.interfaces.items()
+
+{% set home_router_interfaces = [] %}
+{% for interface_name, interface in host.interfaces.items()
     if 'home_router' in interface %}
-	{{ interface_name }},
-{% endfor -%}
-}
+  {% do home_router_interfaces.append(interface_name) %}
+{% endfor %}
+
 
 table inet filter {
+	set home_router_interfaces {
+		type ifname
+		flags constant
+		{{ to_set_elements(home_router_interfaces) }}
+	}
+
 	chain input {
-		iifname $HOME_ROUTER_INTERFACES tcp dport domain accept
-		iifname $HOME_ROUTER_INTERFACES udp dport domain accept
-		iifname $HOME_ROUTER_INTERFACES meta nfproto ipv4 \
+		iifname @home_router_interfaces tcp dport domain accept
+		iifname @home_router_interfaces udp dport domain accept
+		iifname @home_router_interfaces meta nfproto ipv4 \
 			udp sport bootpc udp dport bootps accept
-		iifname $HOME_ROUTER_INTERFACES meta nfproto ipv6 \
+		iifname @home_router_interfaces meta nfproto ipv6 \
 			udp sport dhcpv6-client udp dport dhcpv6-server accept
 	}
 }
