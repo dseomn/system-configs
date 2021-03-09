@@ -24,31 +24,31 @@
 {% set dnat_services_with_interface = [] %}
 {% set dnat_dest_by_service = [] %}
 {% for interface_name, interface in host.interfaces.items()
-    if 'home_router' in interface %}
-  {% do home_router_interfaces.append(interface_name) %}
-  {% for other_host in interface.home_router.get('hosts', {}).values() %}
-    {% set other_host_ipv4 = '10.{}.{}.{}'.format(
+    if 'home_router' in interface -%}
+  {%- do home_router_interfaces.append(interface_name) -%}
+  {%- for other_host in interface.home_router.get('hosts', {}).values() -%}
+    {%- set other_host_ipv4 = '10.{}.{}.{}'.format(
 	site.id,
 	segments[interface.segment].id,
 	other_host.interface_id,
-    ) %}
-    {% for service in other_host.get('services', ()) %}
-      {% for l4proto in ('tcp', 'udp') if l4proto in service %}
-	{% set port_str = '{}'.format(service[l4proto]) %}
-	{% set dnat_service = '{} . {}'.format(l4proto, port_str) %}
-	{% do dnat_services.append(dnat_service) %}
-	{% do dnat_services_with_interface.append('{} . {}'.format(
+    ) -%}
+    {%- for service in other_host.get('services', ()) -%}
+      {%- for l4proto in ('tcp', 'udp') if l4proto in service -%}
+	{%- set port_str = '{}'.format(service[l4proto]) -%}
+	{%- set dnat_service = '{} . {}'.format(l4proto, port_str) -%}
+	{%- do dnat_services.append(dnat_service) -%}
+	{%- do dnat_services_with_interface.append('{} . {}'.format(
 	    dnat_service,
 	    interface_name,
-	)) %}
-	{% do dnat_dest_by_service.append('{} : {}'.format(
+	)) -%}
+	{%- do dnat_dest_by_service.append('{} : {}'.format(
 	    dnat_service,
 	    other_host_ipv4,
-	)) %}
-      {% endfor %}
-    {% endfor %}
-  {% endfor %}
-{% endfor %}
+	)) -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endfor %}
 
 
 define DNAT_MARKS = {{ to_set((
