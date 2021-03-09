@@ -16,7 +16,13 @@
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
+include:
+- network.firewall
+
+
 ssdp-client.conf:
   file.managed:
   - name: {{ nftables.config_dir }}/ssdp-client.conf
   - source: salt://network/firewall/ssdp/client/nftables.conf
+  - require_in:
+    - file: {{ nftables.config_dir }}

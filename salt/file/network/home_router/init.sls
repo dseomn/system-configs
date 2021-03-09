@@ -18,6 +18,7 @@
 
 
 include:
+- network.firewall
 - network.home_router.dns
 
 
@@ -53,6 +54,8 @@ dnsmasq_service:
   file.managed:
   - source: salt://network/home_router/nftables.conf.jinja
   - template: jinja
+  - require_in:
+    - file: {{ nftables.config_dir }}
 
 {{ home_router.update_nftables_bin }}:
   file.managed:

@@ -25,6 +25,10 @@
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
+include:
+- network.firewall
+
+
 sshd:
   pkg.installed:
   - name: {{ sshd.pkg }}
@@ -46,3 +50,5 @@ sshd_port:
   file.managed:
   - name: {{ nftables.config_dir }}/ssh.conf
   - source: salt://ssh/server/nftables.conf
+  - require_in:
+    - file: {{ nftables.config_dir }}

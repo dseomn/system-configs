@@ -32,6 +32,10 @@
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
+include:
+- network.firewall
+
+
 rygel_pkgs:
   pkg.installed:
   - pkgs: {{ rygel.pkgs | yaml }}
@@ -73,3 +77,5 @@ rygel_port:
   - template: jinja
   - defaults:
       rygel: {{ rygel | yaml }}
+  - require_in:
+    - file: {{ nftables.config_dir }}
