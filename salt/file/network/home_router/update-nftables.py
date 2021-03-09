@@ -106,7 +106,8 @@ def main():
                     ))
         if interface_name in _MASQUERADE_IPV4_INTERFACES:
             masquerade_ipv4_addrs.update(
-                addr['local'] for addr in ip_interface['addr_info']
+                str(ipaddress.ip_address(addr['local']))
+                for addr in ip_interface['addr_info']
                 if addr['family'] == 'inet'
             )
 
