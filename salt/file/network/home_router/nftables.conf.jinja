@@ -17,7 +17,14 @@
 {% set host = pillar.network.hosts[grains.id] %}
 {% set segments = pillar.network.segments %}
 {% set site = pillar.network.sites[host.site] %}
+{% set global = pillar.network.global %}
 
+
+{% set upstream_interfaces = [] %}
+{% for interface_name, interface in host.interfaces.items()
+    if interface.get('upstream', false) -%}
+  {%- do upstream_interfaces.append(interface_name) -%}
+{%- endfor %}
 
 {% set home_router_interfaces = [] %}
 {% set dnat_services = [] %}
@@ -57,6 +64,12 @@ define DNAT_MARKS = {{ to_set((
 )) }}
 
 table inet filter {
+	set upstream_interfaces {
+		type ifname
+		flags constant
+		{{ to_set_elements(upstream_interfaces) }}
+	}
+
 	set home_router_interfaces {
 		type ifname
 		flags constant
@@ -69,6 +82,13 @@ table inet filter {
 
 	set services_ipv6 {
 		type ifname . ipv6_addr . inet_proto . inet_service
+	}
+
+	chain prerouting {
+		fib saddr . iif oif missing drop
+		iifname @upstream_interfaces ip saddr 10.0.0.0/8 drop
+		iifname @upstream_interfaces ip6 saddr {{ global.ula }}::/48 \
+			drop
 	}
 
 	chain input {
@@ -85,6 +105,12 @@ table inet filter {
 			accept
 		oifname . ip6 daddr . meta l4proto . th dport @services_ipv6 \
 			accept
+	}
+
+	chain postrouting {
+		oifname @upstream_interfaces ip daddr 10.0.0.0/8 drop
+		oifname @upstream_interfaces ip6 daddr {{ global.ula }}::/48 \
+			drop
 	}
 }
 

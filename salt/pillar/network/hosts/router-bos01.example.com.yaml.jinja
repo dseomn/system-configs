@@ -29,6 +29,9 @@ interfaces:
 
   # Interface name
   eth0:
+    # The interface is facing upstream, so it shouldn't have any of our private
+    # or ULA addresses behind it.
+    upstream: true
     # IP addresses.
     ip:
     -
