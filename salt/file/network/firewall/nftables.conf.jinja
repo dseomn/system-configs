@@ -51,8 +51,8 @@ table inet filter {
 
 		iif lo accept
 
-		meta l4proto icmp accept
-		meta l4proto ipv6-icmp accept
+		ip protocol icmp accept
+		ip6 nexthdr ipv6-icmp accept
 
 		# https://en.wikipedia.org/wiki/DHCPv6
 		# TODO: Remove this once `ct state related` covers this.
