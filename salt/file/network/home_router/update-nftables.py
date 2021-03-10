@@ -84,7 +84,7 @@ def main():
     services_ipv4 = set()
     services_ipv6 = set()
     masquerade_ipv4_addrs = set()
-    for ip_interface in _ip('addr', 'show', 'up'):
+    for ip_interface in filter(None, _ip('addr', 'show', 'up')):
         interface_name = ip_interface['ifname']
         if interface_name in _HOME_ROUTER_INTERFACES:
             ipv4_networks = set(_global_networks(ip_interface, family='inet'))
