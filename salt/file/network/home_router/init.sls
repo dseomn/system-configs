@@ -31,9 +31,9 @@ net.ipv6.conf.all.forwarding:
   - value: 1
 
 
-dnsmasq_pkg:
+dnsmasq_pkgs:
   pkg.installed:
-  - name: {{ home_router.dnsmasq_pkg }}
+  - pkgs: {{ home_router.dnsmasq_pkgs | json }}
 
 {{ home_router.dnsmasq_conf }}:
   file.managed:

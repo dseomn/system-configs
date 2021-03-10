@@ -27,7 +27,7 @@
 } %}
 {% do home_router.update(salt.grains.filter_by({
     'Debian': {
-        'dnsmasq_pkg': 'dnsmasq',
+        'dnsmasq_pkgs': ['dnsmasq', 'dnsmasq-utils'],
         'dnsmasq_service': 'dnsmasq',
         'dnsmasq_conf': '/etc/dnsmasq.conf',
         'update_nftables_bin': '/usr/local/bin/home-router-update-nftabes',
