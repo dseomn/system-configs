@@ -43,3 +43,11 @@ lan:
   - sae_require_mfp=1
   - wpa_passphrase=...
   - sae_password=...
+
+  # hostapd.conf settings that point to files, where the contents of the files
+  # come from these pillar entries. Keys are setting names. For each key, a file
+  # will be created with the value as its contents, and the setting will point
+  # at that file.
+  hostapd_files:
+    wpa_psk_file: |
+      00:00:5e:00:53:00 some_passphrase

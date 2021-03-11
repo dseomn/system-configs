@@ -22,6 +22,7 @@
             'iw',
         ],
         'hostapd_conf_template': '/etc/hostapd/{}.conf',
+        'hostapd_file_settings_dir': '/etc/hostapd/file_settings',
         'hostapd_service_template': 'hostapd@{}.service',
         'hostapd_ctrl_interface': '/var/run/hostapd',
     },
@@ -157,9 +158,27 @@ systemd_networkd:
 access_point_pkgs:
   pkg.installed:
   - pkgs: {{ system.access_point_pkgs | json }}
+
+{{ system.hostapd_file_settings_dir }}:
+  file.directory:
+  - mode: 0700
+  - clean: true
 {% endif %}
 
+{% set hostapd_file_settings = {} %}
+
 {% for interface_name, interface in access_point_interfaces.items() %}
+
+{% set hostapd_file_settings_for_interface = {} %}
+{% for segment_name in interface.access_point.segments %}
+  {% for setting_name, setting_contents
+      in segments[segment_name].get('hostapd_files', {}).items() %}
+    {% do hostapd_file_settings_for_interface.update({
+        'segments/{}.{}'.format(segment_name, setting_name): setting_contents,
+    }) %}
+  {% endfor %}
+{% endfor %}
+{% do hostapd_file_settings.update(hostapd_file_settings_for_interface) %}
 
 {{ system.hostapd_conf_template.format(interface_name) }}:
   file.managed:
@@ -172,6 +191,7 @@ access_point_pkgs:
       segments: {{ segments | json }}
       site: {{ site | json }}
       bridge_name_by_segment: {{ bridge_name_by_segment | json }}
+      file_settings_dir: {{ system.hostapd_file_settings_dir }}
       ctrl_interface: {{ system.hostapd_ctrl_interface }}
 
 {{ system.hostapd_service_template.format(interface_name) }}:
@@ -179,5 +199,19 @@ access_point_pkgs:
   - enable: true
   - watch:
     - file: {{ system.hostapd_conf_template.format(interface_name) }}
+    {% for setting_file in hostapd_file_settings_for_interface %}
+    - file: {{ system.hostapd_file_settings_dir }}/{{ setting_file }}
+    {% endfor %}
 
+{% endfor %}
+
+{% for setting_file, contents in hostapd_file_settings.items() %}
+{{ system.hostapd_file_settings_dir }}/{{ setting_file }}:
+  file.managed:
+  - mode: 0600
+  - dir_mode: 0700
+  - makedirs: true
+  - contents: {{ contents | json }}
+  - require_in:
+    - file: {{ system.hostapd_file_settings_dir }}
 {% endfor %}

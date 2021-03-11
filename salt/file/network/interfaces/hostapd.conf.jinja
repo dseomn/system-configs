@@ -36,4 +36,7 @@ bridge={{ bridge_name_by_segment[segment_name] }}
 {% for setting in segments[segment_name].hostapd %}
 {{ setting }}
 {% endfor %}
+{% for setting_name in segments[segment_name].get('hostapd_files', {}) %}
+{{ setting_name }}={{ file_settings_dir }}/segments/{{ segment_name }}.{{ setting_name }}
+{% endfor %}
 {% endfor %}
