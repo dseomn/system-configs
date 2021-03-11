@@ -31,6 +31,18 @@ bind-dynamic
 no-resolv
 server=::1#{{ dns.dnss_port }}
 server=/{{ '/'.join(home_router.unbound_domains) }}/::1#{{ dns.unbound_port }}
+local=/{{ subdomain }}/
+local=/{{ site.id }}.10.in-addr.arpa/
+{% set site_ula_nibbles_reversed = [] -%}
+{%- for word in global.ula.split(':') -%}
+  {%- for nibble in '{:0>4}'.format(word) -%}
+    {%- do site_ula_nibbles_reversed.insert(0, nibble) -%}
+  {%- endfor -%}
+{%- endfor -%}
+{%- for nibble in '{:02x}'.format(site.id) -%}
+  {%- do site_ula_nibbles_reversed.insert(0, nibble) -%}
+{%- endfor %}
+local=/{{ '.'.join(site_ula_nibbles_reversed) }}.ip6.arpa/
 cache-size=0
 
 no-hosts
