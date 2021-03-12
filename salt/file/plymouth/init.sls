@@ -15,23 +15,18 @@
 
 {% set plymouth = salt.grains.filter_by({
     'Debian': {
-        'pkg': 'plymouth',
-        'theme_pkgs': ['desktop-base', 'plymouth-label'],
-        'theme': 'futureprototype',
+        'pkgs': [
+            'desktop-base',
+            'plymouth',
+            'plymouth-label',
+        ],
     },
 }) %}
 
 
 plymouth:
   pkg.installed:
-  - name: {{ plymouth.pkg }}
-
-plymouth_theme:
-  pkg.installed:
-  - pkgs: {{ plymouth.theme_pkgs | yaml }}
-  cmd.run:
-    # TODO: Run this only if the theme changed.
-  - name: plymouth-set-default-theme --rebuild-initrd "{{ plymouth.theme }}"
+  - pkgs: {{ plymouth.pkgs | json }}
 
 {% if grains.os_family == 'Debian' %}
 plymouth_grub:
