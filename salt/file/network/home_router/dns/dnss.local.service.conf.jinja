@@ -21,7 +21,7 @@ ExecStart=\
   --dns_listen_addr=systemd \
   --monitoring_listen_addr=[::1]:{{ dns.dnss_monitoring_port }} \
   --enable_dns_to_https \
-  # TODO(https://github.com/albertito/dnss/issues/9): Remove `.` and `google.`
+  # TODO(dnss >= 2021-03-05 at commit 5567591): Remove this flag.
   '--fallback_domains=. google. dns.google.' \
   --fallback_upstream=[::1]:{{ dns.unbound_port }} \
   --force_mode=DoH \
