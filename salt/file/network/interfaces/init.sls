@@ -17,6 +17,7 @@
     'Debian': {
         'service': 'systemd-networkd',
         'config_directory': '/etc/systemd/network',
+        'group': 'systemd-network',
         'access_point_pkgs': [
             'hostapd',
             'iw',
@@ -49,6 +50,14 @@ systemd_networkd:
 
 {{ system.config_directory }}:
   file.directory:
+  - user: root
+  - group: {{ system.group }}
+  - dir_mode: 0750
+  - file_mode: 0640
+  - recurse:
+    - user
+    - group
+    - mode
   - clean: true
 
 
