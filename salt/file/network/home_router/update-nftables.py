@@ -17,19 +17,23 @@
 {% from 'network/home_router/map.jinja' import home_router %}
 {% from 'network/firewall/map.jinja' import nftables %}
 
+{% set host = pillar.network.hosts[grains.id] %}
+
+{% set home_router_interfaces = {} %}
+{% for interface_name, interface in host.interfaces.items()
+    if 'home_router' in interface %}
+  {% do home_router_interfaces.update({
+      interface_name: {'home_router': interface['home_router']},
+  }) %}
+{% endfor %}
+
 import ipaddress
 import json
 import subprocess
 
-_HOST = json.loads('{{ pillar.network.hosts[grains.id] | json }}')
-
-_HOME_ROUTER_INTERFACES = {
-    interface_name: interface
-    for interface_name, interface in _HOST['interfaces'].items()
-    if 'home_router' in interface
-}
-_MASQUERADE_IPV4_INTERFACES = (
-    _HOST.get('firewall', {}).get('masquerade_ipv4', ()))
+_HOME_ROUTER_INTERFACES =  json.loads('{{ home_router_interfaces | json }}')
+_MASQUERADE_IPV4_INTERFACES = json.loads(
+    '{{ host.get('firewall', {}).get('masquerade_ipv4', ()) | json }}')
 
 
 def _ip(*args):
