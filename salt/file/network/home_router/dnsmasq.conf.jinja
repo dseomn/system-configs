@@ -75,3 +75,9 @@ dhcp-host={{ '{},{}.{},[::{:x}],{}'.format(
 ) }}
 {% endfor %}
 {% endfor %}
+
+{% for interface_name, interface in host.interfaces.items()
+    if 'wireguard' in interface %}
+interface={{ interface_name }}
+no-dhcp-interface={{ interface_name }}
+{% endfor %}

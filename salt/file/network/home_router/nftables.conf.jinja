@@ -26,6 +26,12 @@
   {%- do upstream_interfaces.append(interface_name) -%}
 {%- endfor %}
 
+{% set wireguard_interfaces = [] %}
+{% for interface_name, interface in host.interfaces.items()
+    if 'wireguard' in interface -%}
+  {%- do wireguard_interfaces.append(interface_name) -%}
+{%- endfor %}
+
 {% set home_router_interfaces = [] %}
 {% set dnat_services = [] %}
 {% set dnat_services_with_interface = [] %}
@@ -70,6 +76,12 @@ table inet filter {
 		{{ to_set_elements(upstream_interfaces) }}
 	}
 
+	set wireguard_interfaces {
+		type ifname
+		flags constant
+		{{ to_set_elements(wireguard_interfaces) }}
+	}
+
 	set home_router_interfaces {
 		type ifname
 		flags constant
@@ -94,6 +106,8 @@ table inet filter {
 	chain input {
 		iifname @home_router_interfaces tcp dport domain accept
 		iifname @home_router_interfaces udp dport domain accept
+		iifname @wireguard_interfaces tcp dport domain accept
+		iifname @wireguard_interfaces udp dport domain accept
 		iifname @home_router_interfaces meta nfproto ipv4 \
 			udp sport bootpc udp dport bootps accept
 		iifname @home_router_interfaces meta nfproto ipv6 \
