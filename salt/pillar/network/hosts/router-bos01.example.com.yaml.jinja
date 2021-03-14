@@ -102,12 +102,35 @@ interfaces:
           services:
           - tcp: smtp
 
+  wg.lan:
+    segment: wg.lan
+    ip:
+    - interface_id: 1
+    # Configures this interface as a WireGuard VPN.
+    wireguard:
+      # Required. Base64-encoded private key.
+      private_key: ...
+      # Required. UDP port to listen on for wireguard traffic.
+      listen_port: 12345
+      # Wireguard peers.
+      peers:
+      -
+        # Required. Base64-encoded public key.
+        public_key: ...
+        # Base64-encoded pre-shared key.
+        preshared_key: ...
+        # Required. See interface_id parameter in the ip section above.
+        interface_id: 2
+
 # Firewall configuration.
 firewall:
 
   # Pairs of [input interface, output interface] that allow forwarding across.
   forward:
   - [lan, eth0]
+  - [lan, wg.lan]
+  - [wg.lan, eth0]
+  - [wg.lan, lan]
 
   # Interfaces to masquerade outbound IPv4 traffic.
   masquerade_ipv4:

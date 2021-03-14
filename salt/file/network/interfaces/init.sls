@@ -26,13 +26,22 @@
         'hostapd_file_settings_dir': '/etc/hostapd/file_settings',
         'hostapd_service_template': 'hostapd@{}.service',
         'hostapd_ctrl_interface': '/var/run/hostapd',
+        'wireguard_pkgs': [
+            'wireguard',
+        ],
     },
 }) %}
+
+{% from 'network/firewall/map.jinja' import nftables %}
 
 {% set host = pillar.network.hosts[grains.id] %}
 {% set segments = pillar.network.segments %}
 {% set site = pillar.network.sites[host.site] %}
 {% set global = pillar.network.global %}
+
+
+include:
+- network.firewall
 
 
 # Disable other tools that might try to configure the network.
@@ -62,8 +71,11 @@ systemd_networkd:
 
 
 {% set bridge_name_by_segment = {} %}
+{% set wireguard_interfaces = {} %}
 {% for interface_name, interface in host.interfaces.items() %}
-  {% if 'segment' in interface %}
+  {% if 'wireguard' in interface %}
+    {% do wireguard_interfaces.update({interface_name: interface}) %}
+  {% elif 'segment' in interface %}
     {% do bridge_name_by_segment.update({interface.segment: interface_name}) %}
   {% elif 'bridge_segment' in interface %}
     {% do bridge_name_by_segment.setdefault(
@@ -224,3 +236,35 @@ access_point_pkgs:
   - require_in:
     - file: {{ system.hostapd_file_settings_dir }}
 {% endfor %}
+
+
+{% if wireguard_interfaces %}
+wireguard_pkgs:
+  pkg.installed:
+  - pkgs: {{ system.wireguard_pkgs | json }}
+{% endif %}
+
+{% for interface_name, interface in wireguard_interfaces.items() %}
+
+{{ system.config_directory }}/20-{{ interface_name }}.netdev:
+  file.managed:
+  - source: salt://network/interfaces/wireguard.netdev.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}
+      interface: {{ interface | json }}
+      segments: {{ segments | json }}
+      site: {{ site | json }}
+      global: {{ global | json }}
+  - require_in:
+    - file: {{ system.config_directory }}
+
+{% endfor %}
+
+
+{{ nftables.config_dir }}/interfaces.conf:
+  file.managed:
+  - source: salt://network/interfaces/nftables.conf.jinja
+  - template: jinja
+  - require_in:
+    - file: {{ nftables.config_dir }}
