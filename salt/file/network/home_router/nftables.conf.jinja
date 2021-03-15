@@ -151,7 +151,7 @@ table ip nat {
 		{{ to_set_elements(dnat_dest_by_service) }}
 	}
 
-	chain prerouting {
+	chain dstnat {
 		ip daddr @masquerade_ipv4_addrs \
 			fib daddr type local \
 			meta l4proto . th dport @dnat_services \

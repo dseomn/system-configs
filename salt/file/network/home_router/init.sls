@@ -20,7 +20,7 @@
 include:
 - network.firewall
 - network.firewall.filter_postrouting
-- network.firewall.nat_prerouting
+- network.firewall.nat_dstnat
 - network.home_router.dns
 
 
@@ -58,7 +58,7 @@ dnsmasq_service:
   - template: jinja
   - require:
     - sls: network.firewall.filter_postrouting
-    - sls: network.firewall.nat_prerouting
+    - sls: network.firewall.nat_dstnat
   - require_in:
     - file: {{ nftables.config_dir }}
 
