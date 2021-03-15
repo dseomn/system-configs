@@ -68,16 +68,6 @@ table inet filter {
 
 		iifname . oifname @forward_interface_pairs accept
 	}
-
-	chain output {
-		type filter hook output priority filter
-		policy accept
-	}
-
-	chain postrouting {
-		type filter hook postrouting priority filter
-		policy accept
-	}
 }
 
 table ip nat {
@@ -85,10 +75,6 @@ table ip nat {
 		type ifname
 		flags constant
 		{{ to_set_elements(masquerade_ipv4_interfaces) }}
-	}
-
-	chain prerouting {
-		type nat hook prerouting priority dstnat
 	}
 
 	chain postrouting {

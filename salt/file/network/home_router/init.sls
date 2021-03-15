@@ -19,6 +19,8 @@
 
 include:
 - network.firewall
+- network.firewall.filter_postrouting
+- network.firewall.nat_prerouting
 - network.home_router.dns
 
 
@@ -54,6 +56,9 @@ dnsmasq_service:
   file.managed:
   - source: salt://network/home_router/nftables.conf.jinja
   - template: jinja
+  - require:
+    - sls: network.firewall.filter_postrouting
+    - sls: network.firewall.nat_prerouting
   - require_in:
     - file: {{ nftables.config_dir }}
 

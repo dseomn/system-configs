@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@
 
 include:
 - network.firewall
-- network.firewall.filter_output
 
 
-ssdp-client.conf:
+{{ nftables.config_dir }}/10-filter-postrouting.conf:
   file.managed:
-  - name: {{ nftables.config_dir }}/50-ssdp-client.conf
-  - source: salt://network/firewall/ssdp/client/nftables.conf
-  - require:
-    - sls: network.firewall.filter_output
+  - source: salt://network/firewall/filter_postrouting.nftables.conf.jinja
+  - template: jinja
   - require_in:
     - file: {{ nftables.config_dir }}
