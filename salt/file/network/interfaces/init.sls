@@ -184,6 +184,14 @@ access_point_pkgs:
   file.directory:
   - mode: 0700
   - clean: true
+
+{% for subdir in ('segments',) %}
+{{ system.hostapd_file_settings_dir }}/{{ subdir }}:
+  file.directory:
+  - mode: 0700
+  - require_in:
+    - file: {{ system.hostapd_file_settings_dir }}
+{% endfor %}
 {% endif %}
 
 {% set hostapd_file_settings = {} %}
@@ -230,8 +238,6 @@ access_point_pkgs:
 {{ system.hostapd_file_settings_dir }}/{{ setting_file }}:
   file.managed:
   - mode: 0600
-  - dir_mode: 0700
-  - makedirs: true
   - contents: {{ contents | json }}
   - require_in:
     - file: {{ system.hostapd_file_settings_dir }}
