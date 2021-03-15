@@ -50,7 +50,7 @@ dnsmasq_service:
     - file: {{ home_router.dnsmasq_conf }}
 
 
-{{ nftables.config_dir }}/home-router.conf:
+{{ nftables.config_dir }}/50-home-router.conf:
   file.managed:
   - source: salt://network/home_router/nftables.conf.jinja
   - template: jinja

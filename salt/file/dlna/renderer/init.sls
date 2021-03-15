@@ -72,7 +72,7 @@ rygel.conf:
 
 rygel_port:
   file.managed:
-  - name: {{ nftables.config_dir }}/rygel.conf
+  - name: {{ nftables.config_dir }}/50-rygel.conf
   - source: salt://dlna/renderer/nftables.conf.jinja
   - template: jinja
   - defaults:

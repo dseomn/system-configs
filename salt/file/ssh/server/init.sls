@@ -48,7 +48,7 @@ sshd_config:
 
 sshd_port:
   file.managed:
-  - name: {{ nftables.config_dir }}/ssh.conf
+  - name: {{ nftables.config_dir }}/50-ssh.conf
   - source: salt://ssh/server/nftables.conf
   - require_in:
     - file: {{ nftables.config_dir }}

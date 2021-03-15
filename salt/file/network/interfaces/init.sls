@@ -268,7 +268,7 @@ wireguard_pkgs:
 {% endfor %}
 
 
-{{ nftables.config_dir }}/interfaces.conf:
+{{ nftables.config_dir }}/50-interfaces.conf:
   file.managed:
   - source: salt://network/interfaces/nftables.conf.jinja
   - template: jinja

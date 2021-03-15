@@ -22,7 +22,7 @@ include:
 
 ssdp-client.conf:
   file.managed:
-  - name: {{ nftables.config_dir }}/ssdp-client.conf
+  - name: {{ nftables.config_dir }}/50-ssdp-client.conf
   - source: salt://network/firewall/ssdp/client/nftables.conf
   - require_in:
     - file: {{ nftables.config_dir }}
