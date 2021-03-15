@@ -37,14 +37,14 @@ table inet filter {
 	}
 
 	chain prerouting {
-		type filter hook prerouting priority 0
+		type filter hook prerouting priority filter
 		policy accept
 
 		ct state invalid drop
 	}
 
 	chain input {
-		type filter hook input priority 0
+		type filter hook input priority filter
 		policy drop
 
 		ct state established,related accept
@@ -61,7 +61,7 @@ table inet filter {
 	}
 
 	chain forward {
-		type filter hook forward priority 0
+		type filter hook forward priority filter
 		policy drop
 
 		ct state established,related accept
@@ -70,12 +70,12 @@ table inet filter {
 	}
 
 	chain output {
-		type filter hook output priority 0
+		type filter hook output priority filter
 		policy accept
 	}
 
 	chain postrouting {
-		type filter hook postrouting priority 0
+		type filter hook postrouting priority filter
 		policy accept
 	}
 }
@@ -88,11 +88,11 @@ table ip nat {
 	}
 
 	chain prerouting {
-		type nat hook prerouting priority 0
+		type nat hook prerouting priority dstnat
 	}
 
 	chain postrouting {
-		type nat hook postrouting priority 0
+		type nat hook postrouting priority srcnat
 
 		oifname @masquerade_ipv4_interfaces \
 			masquerade persistent,fully-random
