@@ -58,7 +58,14 @@ dns_update() {
       2>&1
   )" || curl_ret=$?
   if [[ "$curl_ret" = 0 ]]; then
-    info -- "${record_file}: ${curl_output}"
+    case "$curl_output" in
+      'nochg '*|'good '*)
+        info -- "${record_file}: ${curl_output}"
+        ;;
+      *)
+        error -- "${record_file}: ${curl_output}"
+        ;;
+    esac
   else
     error -- "${record_file} (curl returned ${curl_ret}): ${curl_output}"
   fi
