@@ -14,4 +14,8 @@
 
 {% from 'ddns/map.jinja' import ddns %}
 
-*/10 * * * * {{ ddns.user }} {{ ddns.bin }} | logger -t ddns
+# Update DNS frequently, but only log errors noisily much less frequently. That
+# way if there's a failure there aren't a ton of failure emails, but errors also
+# don't fly under the radar long-term.
+*/10 * * * * {{ ddns.user }} LOGGER_ERROR_ARGS="" {{ ddns.bin }}
+5 */4 * * * {{ ddns.user }} LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}

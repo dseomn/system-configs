@@ -22,6 +22,21 @@ set -e
 shopt -s nullglob
 
 
+log() {
+  logger --tag ddns "$@"
+}
+
+
+info() {
+  log --priority user.info "$@"
+}
+
+
+error() {
+  log --priority user.err $LOGGER_ERROR_ARGS "$@"
+}
+
+
 dns_update() {
   local provider="$1"; shift
   local record_file="$1"; shift
@@ -43,9 +58,9 @@ dns_update() {
       2>&1
   )" || curl_ret=$?
   if [[ "$curl_ret" = 0 ]]; then
-    echo "success ${record_file}: ${curl_output}"
+    info -- "${record_file}: ${curl_output}"
   else
-    echo "error ${curl_ret} ${record_file}: ${curl_output}"
+    error -- "${record_file} (curl returned ${curl_ret}): ${curl_output}"
   fi
 }
 
