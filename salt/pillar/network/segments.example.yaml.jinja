@@ -31,26 +31,30 @@ lan:
   # addresses, the maximum value is 255.
   id: 2
 
-  # Required if there are any access points for this segment. hostapd.conf
-  # settings for access points serving this segment.
-  hostapd:
-  - ssid=My Amazing Lan
-  - auth_algs=1
-  - wpa=2
-  - wpa_key_mgmt=SAE WPA-PSK-SHA256 WPA-PSK
-  - rsn_pairwise=GCMP-256 CCMP-256 GCMP CCMP  # Check `iw list` for support.
-  - ieee80211w=1
-  - sae_require_mfp=1
-  - wpa_passphrase=...
-  - sae_password=...
+  # Required if there are any access points for this segment. Configuration for
+  # one or more service sets (BSSes/SSIDes/etc.) for the segment.
+  service_sets:
+    # Name of the service set, used in interface names.
+    0:
+      # Required. hostapd.conf settings for this service set.
+      hostapd:
+      - ssid=My Amazing Lan
+      - auth_algs=1
+      - wpa=2
+      - wpa_key_mgmt=SAE WPA-PSK-SHA256 WPA-PSK
+      - rsn_pairwise=GCMP-256 CCMP-256 GCMP CCMP  # Check `iw list` for support.
+      - ieee80211w=1
+      - sae_require_mfp=1
+      - wpa_passphrase=...
+      - sae_password=...
 
-  # hostapd.conf settings that point to files, where the contents of the files
-  # come from these pillar entries. Keys are setting names. For each key, a file
-  # will be created with the value as its contents, and the setting will point
-  # at that file.
-  hostapd_files:
-    wpa_psk_file: |
-      00:00:5e:00:53:00 some_passphrase
+      # hostapd.conf settings that point to files, where the contents of the
+      # files come from these pillar entries. Keys are setting names. For each
+      # key, a file will be created with the value as its contents, and the
+      # setting will point at that file.
+      hostapd_files:
+        wpa_psk_file: |
+          00:00:5e:00:53:00 some_passphrase
 
 wg.lan:
   id: 3

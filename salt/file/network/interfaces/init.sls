@@ -202,11 +202,18 @@ access_point_pkgs:
 
 {% set hostapd_file_settings_for_interface = {} %}
 {% for segment_name in interface.access_point.segments %}
-  {% for setting_name, setting_contents
-      in segments[segment_name].get('hostapd_files', {}).items() %}
-    {% do hostapd_file_settings_for_interface.update({
-        'segments/{}.{}'.format(segment_name, setting_name): setting_contents,
-    }) %}
+  {% for service_set_name, service_set
+      in segments[segment_name].service_sets.items() %}
+    {% for setting_name, setting_contents
+        in service_set.get('hostapd_files', {}).items() %}
+      {% do hostapd_file_settings_for_interface.update({
+          'segments/{}.{}.{}'.format(
+              segment_name,
+              service_set_name,
+              setting_name,
+          ): setting_contents,
+      }) %}
+    {% endfor %}
   {% endfor %}
 {% endfor %}
 {% do hostapd_file_settings.update(hostapd_file_settings_for_interface) %}
