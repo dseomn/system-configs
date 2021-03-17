@@ -60,6 +60,10 @@ interfaces:
   wlan0:
     # Run an access point on this interface.
     access_point:
+      # If present, the interface's MAC address is changed to this before
+      # hostapd starts. (See documentation in hostapd.conf about multiple
+      # BSSes.)
+      mac: 00:00:5e:00:53:00
       # Required. Segments to serve on the access point. See
       # network/segments.yaml.jinja.
       segments:

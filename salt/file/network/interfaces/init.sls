@@ -18,6 +18,7 @@
         'service': 'systemd-networkd',
         'config_directory': '/etc/systemd/network',
         'group': 'systemd-network',
+        'systemd_unit_dir': '/etc/systemd/system',
         'access_point_pkgs': [
             'hostapd',
             'iw',
@@ -198,6 +199,9 @@ access_point_pkgs:
 
 {% for interface_name, interface in access_point_interfaces.items() %}
 
+{% set hostapd_service =
+    system.hostapd_service_template.format(interface_name) %}
+
 {% set hostapd_file_settings_for_interface = {} %}
 {% for segment_name in interface.access_point.segments %}
   {% for setting_name, setting_contents
@@ -208,6 +212,15 @@ access_point_pkgs:
   {% endfor %}
 {% endfor %}
 {% do hostapd_file_settings.update(hostapd_file_settings_for_interface) %}
+
+{% if 'mac' in interface.access_point %}
+{{ system.systemd_unit_dir }}/{{ hostapd_service }}.d/50-mac.conf:
+  file.managed:
+  - makedirs: true
+  - contents: |
+      [Service]
+      ExecStartPre=ip link set dev {{ interface_name }} address {{ interface.access_point.mac }}
+{% endif %}
 
 {{ system.hostapd_conf_template.format(interface_name) }}:
   file.managed:
@@ -223,7 +236,7 @@ access_point_pkgs:
       file_settings_dir: {{ system.hostapd_file_settings_dir }}
       ctrl_interface: {{ system.hostapd_ctrl_interface }}
 
-{{ system.hostapd_service_template.format(interface_name) }}:
+{{ hostapd_service }}:
   service.running:
   - enable: true
   - watch:
