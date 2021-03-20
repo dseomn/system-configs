@@ -16,6 +16,7 @@
 {% set convenience = salt.grains.filter_by({
     'Debian': {
         'pkgs': [
+            'netcat-openbsd',
             'tmux',
         ],
     },
