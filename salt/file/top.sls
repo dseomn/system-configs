@@ -47,6 +47,8 @@ base:
   - ssh.server
 
   'G@role:kubernetes':
+  - network.interfaces
+  - network.local_resolver
   - ssh.server
 
   'G@role:media-center':
