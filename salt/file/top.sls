@@ -17,6 +17,8 @@ base:
   '*':
   - convenience
   - mail
+
+  'not G@role:kubernetes':
   - network.firewall.enable
 
   'G@os:Debian and G@debian:track:*':
@@ -42,6 +44,9 @@ base:
   - network.home_router
   - network.interfaces
   - network.local_resolver
+  - ssh.server
+
+  'G@role:kubernetes':
   - ssh.server
 
   'G@role:media-center':
