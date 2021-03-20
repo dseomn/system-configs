@@ -26,15 +26,16 @@ base:
   'G@virtual:physical':
   - smartd
 
+  'G@role:access-point':
+  - network.interfaces
+  - network.local_resolver
+  - ssh.server
+
   'G@role:desktop':
   - gdm
   - google.chrome
   - network.firewall.ssdp.client
   - plymouth
-
-  'G@role:media-center':
-  - dlna.renderer
-  - ssh.server
 
   'G@role:home-router':
   - ddns
@@ -43,7 +44,6 @@ base:
   - network.local_resolver
   - ssh.server
 
-  'G@role:access-point':
-  - network.interfaces
-  - network.local_resolver
+  'G@role:media-center':
+  - dlna.renderer
   - ssh.server
