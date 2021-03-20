@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
-nftables.conf:
-  file.managed:
-  - name: {{ nftables.config_file }}
-  - mode: 0755
-  - source: salt://network/firewall/nftables.conf.jinja
-  - template: jinja
+include:
+- network.firewall
 
-{{ nftables.config_dir }}:
-  file.directory:
-  - clean: true
+
+nftables:
+  pkg.installed:
+  - name: {{ nftables.pkg }}
+  service.enabled:
+  - name: {{ nftables.service }}
+  - require:
+    - sls: network.firewall

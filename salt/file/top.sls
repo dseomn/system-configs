@@ -17,7 +17,7 @@ base:
   '*':
   - convenience
   - mail
-  - network.firewall
+  - network.firewall.enable
 
   'G@os:Debian and G@debian:track:*':
   - debian
