@@ -16,8 +16,8 @@
 {% from 'debian/map.jinja' import debian %}
 
 
-{% if debian.track != 'unstable' %}
+{% for additional_distribution in debian.additional_distributions %}
 Package: *
-Pin: release a=unstable
+Pin: release a={{ additional_distribution }}
 Pin-Priority: 100
-{% endif %}
+{% endfor %}

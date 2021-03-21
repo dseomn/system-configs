@@ -38,5 +38,9 @@
   {{ source(
       debian.mirror['debian-security'], debian.distribution + '-security',
       debian.components) }}
-  {{ source(debian.mirror['debian'], 'unstable', debian.components) }}
 {% endif %}
+
+{% for additional_distribution in debian.additional_distributions %}
+  {{ source(
+      debian.mirror['debian'], additional_distribution, debian.components) }}
+{% endfor %}

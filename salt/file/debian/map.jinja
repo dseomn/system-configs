@@ -15,10 +15,19 @@
  #}
 
 
+{% set defaults = {
+    'pin_distribution': grains.debian.track == 'stable',
+    'additional_distributions': (
+        ['unstable'] if grains.debian.track == 'testing' else []),
+} %}
 {% set debian = {
     'track': grains.debian.track,
-    'distribution': (grains.oscodename if grains.debian.track == 'stable' else
-                     grains.debian.track),
+    'distribution': (
+        grains.oscodename
+        if grains.debian.get('pin_distribution', defaults.pin_distribution)
+        else grains.debian.track),
+    'additional_distributions': grains.debian.get(
+        'additional_distributions', defaults.additional_distributions),
     'components': 'main contrib non-free',
     'mirror': {
         'debian': 'https://deb.debian.org/debian',
