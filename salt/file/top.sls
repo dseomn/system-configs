@@ -47,6 +47,7 @@ base:
   - ssh.server
 
   'G@role:kubernetes':
+  - kubernetes
   - network.interfaces
   - network.local_resolver
   - ssh.server
