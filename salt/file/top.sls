@@ -48,6 +48,7 @@ base:
 
   'G@role:kubernetes':
   - kubernetes
+  - kubernetes.runtime
   - network.interfaces
   - network.local_resolver
   - ssh.server
