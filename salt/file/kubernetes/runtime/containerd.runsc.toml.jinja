@@ -13,4 +13,4 @@
 # limitations under the License.
 
 [runsc_config]
-  platform = "kvm"
+  platform = "{{ 'kvm' if grains.virtual == 'physical' else 'ptrace' }}"

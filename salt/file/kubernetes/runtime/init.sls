@@ -37,7 +37,8 @@ containerd:
 
 /etc/containerd/runsc.toml:
   file.managed:
-  - source: salt://kubernetes/runtime/containerd.runsc.toml
+  - source: salt://kubernetes/runtime/containerd.runsc.toml.jinja
+  - template: jinja
 
 /etc/containerd/local.toml:
   file.managed:
