@@ -57,5 +57,7 @@ containerd_unit_reload:
 containerd.service:
   service.running:
   - enable: true
-  - watch:
+  - watch_any:
+    - file: /etc/containerd/runsc.toml
+    - file: /etc/containerd/local.toml
     - cmd: containerd_unit_reload
