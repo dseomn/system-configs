@@ -41,7 +41,8 @@ containerd:
 
 /etc/containerd/local.toml:
   file.managed:
-  - source: salt://kubernetes/runtime/containerd.local.toml
+  - source: salt://kubernetes/runtime/containerd.local.toml.jinja
+  - template: jinja
 
 /etc/systemd/system/containerd.service.d/50-local.conf:
   file.managed:
