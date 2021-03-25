@@ -79,13 +79,15 @@ dhcp-host={{ '{},{},[::{:x}],{}'.format(
     other_host.interface_id,
     other_host_name,
 ) }}
+{% for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
 host-record={{ '{}.{},{},{},{}'.format(
-    other_host_name,
+    short_host_name,
     subdomain,
-    other_host_name,
+    short_host_name,
     other_host_ipv4,
     other_host_ipv6_ula,
 ) }}
+{% endfor %}
 {% endfor %}
 {% endfor %}
 

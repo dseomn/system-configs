@@ -98,6 +98,10 @@ interfaces:
           mac: 00:00:5e:00:53:00
           # Required. See interface_id parameter in the ip section above.
           interface_id: 2
+          # Additional short host names that should point at this host. The same
+          # name can be listed for multiple hosts.
+          aliases:
+          - mail
           # Publicly available services. For both IPv4 and IPv6, this allows
           # forwarding from any interface to the given service. For IPv4, this
           # additionally sets up port forwarding on any interfaces listed in
