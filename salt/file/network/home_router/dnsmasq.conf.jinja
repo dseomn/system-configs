@@ -66,12 +66,25 @@ dhcp-range=::100,::1ff,constructor:{{ interface_name }},slaac
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
-dhcp-host={{ '{},{}.{},[::{:x}],{}'.format(
-    other_host.mac,
-    ipv4_prefix,
+{% set other_host_ipv4 = '{}.{}'.format(ipv4_prefix, other_host.interface_id) %}
+{% set other_host_ipv6_ula = '{}:{:02x}{:02x}::{:x}'.format(
+    global.ula,
+    site.id,
+    segment.id,
     other_host.interface_id,
+) %}
+dhcp-host={{ '{},{},[::{:x}],{}'.format(
+    other_host.mac,
+    other_host_ipv4,
     other_host.interface_id,
     other_host_name,
+) }}
+host-record={{ '{}.{},{},{},{}'.format(
+    other_host_name,
+    subdomain,
+    other_host_name,
+    other_host_ipv4,
+    other_host_ipv6_ula,
 ) }}
 {% endfor %}
 {% endfor %}
