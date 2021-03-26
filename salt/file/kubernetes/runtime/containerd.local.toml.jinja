@@ -15,26 +15,28 @@
 # https://kubernetes.io/docs/setup/production-environment/container-runtimes/#cgroup-drivers
 # https://gvisor.dev/docs/user_guide/containerd/quick_start/#configure-containerd
 
-{{ salt.file.read('/etc/containerd/config.toml') }}
+version = 2
 
 disabled_plugins = [
   "io.containerd.internal.v1.restart",
 ]
 
-[plugins."io.containerd.runtime.v1.linux"]
-  shim_debug = true
+[plugins]
+  [plugins."io.containerd.runtime.v1.linux"]
+    shim_debug = true
 
-[plugins."io.containerd.grpc.v1.cri".containerd]
-  default_runtime_name = "runsc"
+  [plugins."io.containerd.grpc.v1.cri"]
+    [plugins."io.containerd.grpc.v1.cri".containerd]
+      default_runtime_name = "runsc"
 
-  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
-    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
-      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
-        SystemdCgroup = true
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+            SystemdCgroup = true
 
-    [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
-      runtime_type = "io.containerd.runsc.v1"
-      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc.options]
-        TypeUrl = "io.containerd.runsc.v1.options"
-        ConfigPath = "/etc/containerd/runsc.toml"
-        SystemdCgroup = true
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc]
+          runtime_type = "io.containerd.runsc.v1"
+          [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runsc.options]
+            TypeUrl = "io.containerd.runsc.v1.options"
+            ConfigPath = "/etc/containerd/runsc.toml"
+            SystemdCgroup = true
