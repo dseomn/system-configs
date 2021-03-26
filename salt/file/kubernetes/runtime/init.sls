@@ -63,3 +63,9 @@ containerd.service:
     - file: /etc/containerd/runsc.toml
     - file: /etc/containerd/local.toml
     - cmd: containerd_unit_reload
+
+
+/etc/crictl.yaml:
+  file.managed:
+  - source: salt://kubernetes/runtime/crictl.yaml.jinja
+  - template: jinja

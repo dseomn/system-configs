@@ -12,23 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-salt-call:
-  local: true
-  config_dir: salt/config
-  file_root: salt/file
-  pillar_root: salt/pillar
-  state_output: changes
+{% from 'kubernetes/runtime/map.jinja' import runtime %}
 
-salt-ssh:
-  config_dir: salt/config
-  ssh_priv: agent-forwarding
-  state_output: changes
-  extra_filerefs:
-  - salt://ddns/map.jinja
-  - salt://debian/map.jinja
-  - salt://kubernetes/map.jinja
-  - salt://kubernetes/runtime/map.jinja
-  - salt://network/firewall/map.jinja
-  - salt://network/home_router/dns/map.jinja
-  - salt://network/home_router/map.jinja
-  - salt://pki/public.jinja
+runtime-endpoint: unix://{{ runtime.cri_socket }}
+image-endpoint: unix://{{ runtime.cri_socket }}
