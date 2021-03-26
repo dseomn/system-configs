@@ -51,3 +51,9 @@ kubernetes_pkgs_hold:
   - name: apt-mark hold {{ ' '.join(kubernetes.pkgs) }}
   - onchanges:
     - pkg: kubernetes_pkgs
+
+
+/etc/kubernetes/kubeadm.yaml:
+  file.managed:
+  - source: salt://kubernetes/kubeadm.yaml.jinja
+  - template: jinja
