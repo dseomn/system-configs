@@ -31,6 +31,18 @@ error:
 runsc:
   pkg.installed: []
 
+# TODO(https://github.com/google/gvisor/issues/3481): Delete this.
+/etc/default/grub.d/systemd-cgroup-hybrid.cfg:
+  file.managed:
+  - contents: >
+      GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX}
+      systemd.unified_cgroup_hierarchy=0
+      systemd.legacy_systemd_cgroup_controller=0"
+update-grub:
+  cmd.run:
+  - onchanges:
+    - file: /etc/default/grub.d/systemd-cgroup-hybrid.cfg
+
 
 containerd:
   pkg.installed: []
