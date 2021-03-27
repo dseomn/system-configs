@@ -22,11 +22,16 @@ shopt -s nullglob
 temp_dir="$(mktemp -d)"
 patch_dir="$(dirname "$0")/patches"
 
-curl https://docs.projectcalico.org/manifests/calico.yaml \
-  -o "${temp_dir}/calico.yaml"
+curl \
+  --output-dir "$temp_dir" \
+  --remote-name-all \
+  https://docs.projectcalico.org/manifests/calico.yaml \
+  https://docs.projectcalico.org/manifests/calicoctl.yaml
 for patch in "$patch_dir"/*.patch; do
   patch --silent -d "$temp_dir" < "$patch"
 done
 cat "${temp_dir}/calico.yaml"
+printf '%s\n' ---
+cat "${temp_dir}/calicoctl.yaml"
 
 rm -rf "$temp_dir"
