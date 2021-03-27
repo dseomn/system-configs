@@ -16,17 +16,30 @@
 
 {% load_yaml as node_registration %}
 criSocket: {{ runtime.cri_socket }}
+taints: {{ pillar.kubernetes.get('taints') | json }}
 {% endload %}
 
+{% if pillar.kubernetes.control_plane %}
+{% load_yaml as local_api_endpoint %}
+advertiseAddress: {{ pillar.kubernetes.advertise_address }}
+{% endload %}
+{% endif %}
+
+{% if pillar.kubernetes.control_plane %}
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
 nodeRegistration: {{ node_registration | json }}
-
+localAPIEndpoint: {{ local_api_endpoint | json }}
 ---
+{% endif %}
 
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: JoinConfiguration
 nodeRegistration: {{ node_registration | json }}
+{% if pillar.kubernetes.control_plane %}
+controlPlane:
+  localAPIEndpoint: {{ local_api_endpoint | json }}
+{% endif %}
 
 ---
 
