@@ -14,6 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO(https://github.com/projectcalico/calico/issues/4492): Use WireGuard. See
+# also https://github.com/projectcalico/calico/issues/3760
+
 
 set -e
 shopt -s nullglob
