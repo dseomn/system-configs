@@ -1,0 +1,11 @@
+--- calico.yaml	2021-03-26 19:06:16.829483871 -0400
++++ calico.yaml.new	2021-03-26 19:08:26.922511478 -0400
+@@ -3648,7 +3648,7 @@
+               value: "autodetect"
+             # Enable IPIP
+             - name: CALICO_IPV4POOL_IPIP
+-              value: "Always"
++              value: "Never"
+             # Enable or Disable VXLAN on the default IP pool.
+             - name: CALICO_IPV4POOL_VXLAN
+               value: "Never"
