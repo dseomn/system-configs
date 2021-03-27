@@ -34,6 +34,13 @@ net.bridge.bridge-nf-call-iptables:
   sysctl.present:
   - value: 1
 
+net.ipv4.ip_forward:
+  sysctl.present:
+  - value: 1
+net.ipv6.conf.all.forwarding:
+  sysctl.present:
+  - value: 1
+
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
 /etc/apt/trusted.gpg.d/kubernetes.gpg:
