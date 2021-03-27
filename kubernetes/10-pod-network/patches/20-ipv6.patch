@@ -1,5 +1,5 @@
---- calico.yaml	2021-03-26 18:39:12.072105634 -0400
-+++ calico.yaml.new	2021-03-26 19:06:16.829483871 -0400
+--- calico.yaml	2021-03-27 00:55:11.799427048 -0400
++++ calico.yaml.new	2021-03-27 00:56:39.988051494 -0400
 @@ -32,7 +32,9 @@
            "nodename": "__KUBERNETES_NODE_NAME__",
            "mtu": __CNI_MTU__,
@@ -11,7 +11,7 @@
            },
            "policy": {
                "type": "k8s"
-@@ -3642,6 +3644,8 @@
+@@ -3642,12 +3644,16 @@
              # Auto-detect the BGP IP address.
              - name: IP
                value: "autodetect"
@@ -20,7 +20,15 @@
              # Enable IPIP
              - name: CALICO_IPV4POOL_IPIP
                value: "Always"
-@@ -3679,7 +3683,7 @@
+             # Enable or Disable VXLAN on the default IP pool.
+             - name: CALICO_IPV4POOL_VXLAN
+               value: "Never"
++            - name: CALICO_IPV6POOL_NAT_OUTGOING
++              value: "true"
+             # Set MTU for tunnel device used if ipip is enabled
+             - name: FELIX_IPINIPMTU
+               valueFrom:
+@@ -3679,7 +3685,7 @@
                value: "ACCEPT"
              # Disable IPv6 on Kubernetes.
              - name: FELIX_IPV6SUPPORT
