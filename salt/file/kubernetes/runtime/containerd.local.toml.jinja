@@ -27,7 +27,6 @@ disabled_plugins = [
 
   [plugins."io.containerd.grpc.v1.cri"]
     [plugins."io.containerd.grpc.v1.cri".containerd]
-      # TODO(dseomn): Get runsc working, then change it to the default here.
       default_runtime_name = "runc"
 
       [plugins."io.containerd.grpc.v1.cri".containerd.runtimes]
