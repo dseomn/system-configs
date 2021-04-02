@@ -53,11 +53,7 @@ net.ipv6.conf.all.forwarding:
 kubernetes_pkgs:
   pkg.installed:
   - pkgs: {{ kubernetes.pkgs | json }}
-kubernetes_pkgs_hold:
-  cmd.run:
-  - name: apt-mark hold {{ ' '.join(kubernetes.pkgs) }}
-  - onchanges:
-    - pkg: kubernetes_pkgs
+  - hold: true
 
 
 /etc/kubernetes/kubeadm.yaml:
