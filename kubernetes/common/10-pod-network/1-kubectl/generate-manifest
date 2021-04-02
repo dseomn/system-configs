@@ -28,8 +28,8 @@ patch_dir="$(dirname "$0")/patches"
 curl \
   --output-dir "$temp_dir" \
   --remote-name-all \
-  https://docs.projectcalico.org/manifests/calico.yaml \
-  https://docs.projectcalico.org/manifests/calicoctl.yaml
+  https://docs.projectcalico.org/archive/v3.18/manifests/calico.yaml \
+  https://docs.projectcalico.org/archive/v3.18/manifests/calicoctl.yaml
 for patch in "$patch_dir"/*.patch; do
   patch --silent -d "$temp_dir" < "$patch"
 done
