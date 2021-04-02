@@ -53,6 +53,7 @@ net.ipv6.conf.all.forwarding:
 kubernetes_pkgs:
   pkg.installed:
   - pkgs: {{ kubernetes.pkgs | json }}
+  - version: {{ pillar.kubernetes.version }}
   - hold: true
 
 
