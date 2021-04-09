@@ -17,9 +17,8 @@ kubernetes:
   # Required. Whether the node runs a control plane or not.
   control_plane: true
 
-  # Required if control_plane is true. advertiseAddress field in
-  # https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#APIEndpoint
-  advertise_address: fdXX:XXXX:XXXX:...
+  # Required. IP address to listen on.
+  node_address: fdXX:XXXX:XXXX:...
 
   # taints field in
   # https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#NodeRegistrationOptions

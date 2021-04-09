@@ -17,11 +17,13 @@
 {% load_yaml as node_registration %}
 criSocket: {{ runtime.cri_socket }}
 taints: {{ pillar.kubernetes.get('taints') | json }}
+kubeletExtraArgs:
+  node-ip: {{ pillar.kubernetes.node_address }}
 {% endload %}
 
 {% if pillar.kubernetes.control_plane %}
 {% load_yaml as local_api_endpoint %}
-advertiseAddress: {{ pillar.kubernetes.advertise_address }}
+advertiseAddress: {{ pillar.kubernetes.node_address }}
 {% endload %}
 {% endif %}
 
