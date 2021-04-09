@@ -14,7 +14,7 @@
 
 kubernetes:
   # Required. Version of kubernetes packages.
-  version: 1.20.5-00
+  version: 1.21.0-00
 
   # Required. serviceSubnet field in
   # https://pkg.go.dev/k8s.io/kubernetes@v1.20.5/cmd/kubeadm/app/apis/kubeadm/v1beta2#Networking

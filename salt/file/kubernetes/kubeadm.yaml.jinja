@@ -50,8 +50,6 @@ networking:
   podSubnet: {{ pillar.kubernetes.pod_subnet }}
   dnsDomain: {{ pillar.kubernetes.dns_domain }}
 controlPlaneEndpoint: {{ pillar.kubernetes.control_plane_endpoint }}
-featureGates:
-  IPv6DualStack: true
 clusterName: {{ pillar.kubernetes.cluster_name }}
 
 ---
