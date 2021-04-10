@@ -47,9 +47,9 @@ update-grub:
 containerd:
   pkg.installed: []
 
-/etc/containerd/runsc.toml:
+/etc/containerd/runsc.local.toml:
   file.managed:
-  - source: salt://kubernetes/runtime/containerd.runsc.toml.jinja
+  - source: salt://kubernetes/runtime/containerd.runsc.local.toml.jinja
   - template: jinja
 
 /etc/containerd/local.toml:
@@ -72,7 +72,7 @@ containerd.service:
   service.running:
   - enable: true
   - watch_any:
-    - file: /etc/containerd/runsc.toml
+    - file: /etc/containerd/runsc.local.toml
     - file: /etc/containerd/local.toml
     - cmd: containerd_unit_reload
 
