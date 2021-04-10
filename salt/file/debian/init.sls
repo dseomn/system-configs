@@ -13,12 +13,6 @@
 # limitations under the License.
 
 
-apt.conf:
-  file.managed:
-  - name: /etc/apt/apt.conf
-  - source: salt://debian/apt.conf.jinja
-  - template: jinja
-
 preferences:
   file.managed:
   - name: /etc/apt/preferences
