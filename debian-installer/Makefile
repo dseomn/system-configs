@@ -18,14 +18,11 @@ all: install.iso unmount
 install-dependencies:
 	sudo apt install isolinux xorriso
 
-.PHONY: base-mounted
-base-mounted: base.iso
+base: base.iso
 	mkdir -p base
-	[ -d base/.disk ] || sudo mount -o loop,ro base.iso base
+	sudo mount -o loop,ro base.iso base
 
-.PHONY: overlay-mounted
-overlay-mounted: base-mounted
-	sudo rm -rf overlay
+overlay: base
 	mkdir -p overlay/upper overlay/work overlay/merged
 	sudo mount -t overlay overlay overlay/merged -o \
 		lowerdir=cdrom:base,upperdir=overlay/upper,workdir=overlay/work
@@ -38,7 +35,7 @@ inst-data.img:
 	sudo umount inst-data.mnt
 	mv -f "$@.new" "$@"
 
-install.iso: overlay-mounted inst-data.img
+install.iso: overlay inst-data.img
 	sudo chown -R $$USER: overlay/merged/boot/grub overlay/merged/isolinux
 	chmod -R u+w overlay/merged/boot/grub overlay/merged/isolinux
 	cd overlay/merged && ../../patch-bootloader
