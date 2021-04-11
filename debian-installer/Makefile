@@ -68,5 +68,5 @@ install.iso: overlay-mounted inst-data.img
 
 .PHONY: unmount
 unmount: install.iso
-	sudo umount -q overlay/merged
-	sudo umount -q base
+	sudo umount -q overlay/merged || true
+	sudo umount -q base || true
