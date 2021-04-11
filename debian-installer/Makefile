@@ -27,8 +27,7 @@ base-mounted: base.iso
 overlay-mounted: base-mounted
 	sudo rm -rf overlay
 	mkdir -p overlay/upper overlay/work overlay/merged
-	[ -d overlay/merged/.disk ] || \
-		sudo mount -t overlay overlay overlay/merged -o \
+	sudo mount -t overlay overlay overlay/merged -o \
 		lowerdir=cdrom:base,upperdir=overlay/upper,workdir=overlay/work
 
 inst-data.img:
