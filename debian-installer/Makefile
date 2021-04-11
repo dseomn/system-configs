@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-all: install.iso unmount
+all: install.iso
 
 .PHONY: install-dependencies
 install-dependencies:
@@ -64,6 +64,6 @@ install.iso: overlay inst-data.img
 		overlay/merged
 
 .PHONY: unmount
-unmount: install.iso
+unmount:
 	sudo umount -q overlay/merged || true
 	sudo umount -q base || true
