@@ -18,6 +18,20 @@ all: install.iso
 install-dependencies:
 	sudo apt install isolinux xorriso
 
+.PHONY: unmount
+unmount:
+	sudo umount -q base overlay/merged inst-data.mnt || true
+
+.PHONY: clean
+clean: unmount
+	sudo rm -rf \
+		base \
+		inst-data.img \
+		inst-data.img.new \
+		inst-data.mnt \
+		install.iso \
+		overlay
+
 base: base.iso
 	mkdir -p base
 	sudo mount -o loop,ro base.iso base
@@ -62,8 +76,3 @@ install.iso: overlay inst-data.img
 		-isohybrid-apm-hfsplus \
 		-append_partition 3 FAT16 inst-data.img \
 		overlay/merged
-
-.PHONY: unmount
-unmount:
-	sudo umount -q overlay/merged || true
-	sudo umount -q base || true
