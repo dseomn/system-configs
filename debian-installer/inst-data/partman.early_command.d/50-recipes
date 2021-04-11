@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+. /lib/partman/lib/recipes.sh || exit 1
+
+
+recipe_dir="$(get_recipedir)" || exit 1
+
+atomic_recipe="$(echo "$recipe_dir"/??atomic)" || exit 1
+[ -f "$atomic_recipe" ] || exit 1
+
+
+# Required partitions, not including /.
+starter_body="$(
+  sed \
+    -e '/:$/ d' \
+    -e 's/\$defaultignore{ }//' \
+    -e '/linux-swap/,/\.$/ d' \
+    -e '/\$default_filesystem/,/\.$/ d' \
+    < "$atomic_recipe"
+)" || exit 1
+
+
+# Starter, empty system partition, empty partition for ceph.
+{
+cat > "${recipe_dir}/10kubernetes_starter" <<EOF
+kubernetes_starter :
+
+${starter_body}
+
+32000 64000 64000 free
+  .
+
+64000 128000 -1 free
+  .
+EOF
+} || exit 1
+
+
+# Secondary device for storing dm-crypt keys.
+{
+cat > "${recipe_dir}/90keys" <<EOF
+keys :
+
+1 1 -1 \$default_filesystem
+  \$primary{ }
+  method{ format }
+  format{ }
+  use_filesystem{ }
+  \$default_filesystem{ }
+  label{ $(hostname)-keys }
+  .
+
+EOF
+} || exit 1

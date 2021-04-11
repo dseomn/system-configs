@@ -1,0 +1,73 @@
+#!/bin/sh
+
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+if [ "$#" != 1 ]; then
+  echo "Usage: $0 /dev/<system_partition>"
+  exit 1
+fi
+system_partition="$1"
+
+anna-install \
+  crypto-dm-modules \
+  crypto-modules \
+  cryptsetup-udeb \
+  || exit 1
+depmod || exit 1
+modprobe dm_crypt || exit 1
+
+hostname="$(hostname)" || exit 1
+
+key_disk="/dev/disk/by-label/${hostname}-keys"
+
+mkdir -p /srv/keys || exit 1
+mount "$key_disk" /srv/keys || exit 1
+
+if [ -z "$skip_wipe" ]; then
+  wipe_permille=0
+  echo "$(date '+%F %T'): Wiping ${system_partition}..."
+  blockdev-wipe -f /dev/urandom "$system_partition" | while read x; do
+    let ++wipe_permille
+    printf '\r%s: %d.%d%%' \
+      "$(date '+%F %T')" \
+      $((wipe_permille / 10)) \
+      $((wipe_permille % 10))
+  done || exit 1
+  echo
+fi
+
+system_key="${hostname}.system.key"
+dd if=/dev/urandom of="/srv/keys/${system_key}" bs=1K count=1 || exit 1
+chown root: "/srv/keys/${system_key}" || exit 1
+chmod 400 "/srv/keys/${system_key}" || exit 1
+
+cryptsetup \
+  --use-random \
+  luksFormat "$system_partition" "/srv/keys/${system_key}" || exit 1
+cryptsetup \
+  --key-file "/srv/keys/${system_key}" \
+  luksOpen "$system_partition" system_crypt || exit 1
+
+umount /srv/keys || exit 1
+
+system_uuid="$(cryptsetup luksUUID "$system_partition")" || exit 1
+
+echo "system_crypt UUID=${system_uuid} ${key_disk}:/${system_key} luks,keyscript=passdev" \
+  >> /srv/crypttab || exit 1
+
+pvcreate /dev/mapper/system_crypt || exit 1
+vgcreate "${hostname}-system" /dev/mapper/system_crypt || exit 1
+lvcreate -l 100%FREE -n root "${hostname}-system" || exit 1
