@@ -18,3 +18,8 @@
 [ -e /srv/crypttab ] || exit 0
 
 cat < /srv/crypttab >> /target/etc/crypttab || exit 1
+
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=618862): Delete this
+# workaround. See also https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=983708.
+ln -s /dev/null \
+  /target/etc/systemd/system/systemd-cryptsetup@system_crypt.service || exit 1
