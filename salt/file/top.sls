@@ -26,6 +26,7 @@ base:
   - debian.extras
 
   'G@virtual:physical':
+  - convenience.physical
   - smartd
 
   'G@role:access-point':
