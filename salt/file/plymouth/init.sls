@@ -33,7 +33,7 @@ plymouth_grub:
   file.managed:
   - name: /etc/default/grub.d/plymouth.cfg
   - contents: |
-      GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+      GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} splash"
   cmd.run:
   - name: update-grub
   - onchanges:
