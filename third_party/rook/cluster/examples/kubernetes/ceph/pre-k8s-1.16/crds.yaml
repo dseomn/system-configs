@@ -9,13 +9,6 @@
 #
 # Most of the sections are prefixed with a 'OLM' keyword which is used to build our CSV for an OLM (Operator Life Cycle manager)
 ###################################################################################################################
-
-# Namespace where the operator and other rook resources are created
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: rook-ceph
-# The CRD declarations
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -86,6 +79,10 @@ spec:
                 volumeClaimTemplate: {}
             mgr:
               properties:
+                count:
+                  type: integer
+                  minimum: 0
+                  maximum: 2
                 modules:
                   items:
                     properties:
@@ -161,17 +158,6 @@ spec:
                   type: string
                 config: {}
                 storageClassDeviceSets: {}
-            driveGroups:
-              type: array
-              items:
-                properties:
-                  name:
-                    type: string
-                  spec: {}
-                  placement: {}
-                required:
-                - name
-                - spec
             monitoring:
               properties:
                 enabled:
@@ -770,5 +756,21 @@ spec:
       - obc
       - obcs
   scope: Namespaced
+  subresources:
+    status: {}
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: cephfilesystemmirrors.ceph.rook.io
+spec:
+  group: ceph.rook.io
+  names:
+    kind: CephFilesystemMirror
+    listKind: CephFilesystemMirrorList
+    plural: cephfilesystemmirrors
+    singular: cephfilesystemmirror
+  scope: Namespaced
+  version: v1
   subresources:
     status: {}

@@ -47,23 +47,29 @@ spec:
     # type of the gateway (s3)
     type: s3
     # A reference to the secret in the rook namespace where the ssl certificate is stored
-    sslCertificateRef:
+    # sslCertificateRef:
     # The port that RGW pods will listen on (http)
     port: 8080
     # The port that RGW pods will listen on (https). An ssl certificate is required.
     # securePort: 443
     # The number of pods in the rgw deployment
     instances: 1
-    # The affinity rules to apply to the rgw deployment or daemonset.
+    # The affinity rules to apply to the rgw deployment
     placement:
-    #  nodeAffinity:
-    #    requiredDuringSchedulingIgnoredDuringExecution:
-    #      nodeSelectorTerms:
-    #      - matchExpressions:
-    #        - key: role
-    #          operator: In
-    #          values:
-    #          - rgw-node
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - rook-ceph-rgw
+              # topologyKey: */zone can be used to spread RGW across different AZ
+              # Use <topologyKey: failure-domain.beta.kubernetes.io/zone> in k8s cluster if your cluster is v1.16 or lower
+              # Use <topologyKey: topology.kubernetes.io/zone>  in k8s cluster is v1.17 or upper
+              topologyKey: kubernetes.io/hostname
     #  topologySpreadConstraints:
     #  tolerations:
     #  - key: rgw-node
@@ -85,8 +91,13 @@ spec:
     #    cpu: "500m"
     #    memory: "1024Mi"
     # priorityClassName: my-priority-class
-   #zone:
-    #name: zone-a
+    #zone:
+    #  name: zone-a
+    #  # Configuration for the Kubernetes Service created for the RGW cluster
+    #service:
+    #  # A key-value list of annotations to apply to the RGW service
+    #  annotations:
+    #    service.beta.openshift.io/serving-cert-secret-name: <name of TLS secret automatic generation>
   # service endpoint healthcheck
   healthCheck:
     bucket:
@@ -95,7 +106,31 @@ spec:
     # Configure the pod liveness probe for the rgw daemon
     livenessProbe:
       disabled: false
-
+  # security oriented settings
+  # security:
+  # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
+  #   kms:
+  #     # name of the config map containing all the kms connection details
+  #     connectionDetails:
+  #        KMS_PROVIDER: "vault"
+  #        VAULT_ADDR: VAULT_ADDR_CHANGE_ME # e,g: http://vault.my-domain.com:8200
+  #        VAULT_BACKEND_PATH: "rook"
+  #        VAULT_SECRET_ENGINE: "kv"
+  #        VAULT_BACKEND: v2
+  #     # name of the secret containing the kms authentication token
+  #     tokenSecretName: rook-vault-token
+# # UNCOMMENT THIS TO ENABLE A KMS CONNECTION
+# # Also, do not forget to replace both:
+# #  * ROOK_TOKEN_CHANGE_ME: with a base64 encoded value of the token to use
+# #  * VAULT_ADDR_CHANGE_ME: with the Vault address
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: rook-vault-token
+#   namespace: rook-ceph # namespace:cluster
+# data:
+#   token: ROOK_TOKEN_CHANGE_ME
 ---
 apiVersion: route.openshift.io/v1
 kind: Route

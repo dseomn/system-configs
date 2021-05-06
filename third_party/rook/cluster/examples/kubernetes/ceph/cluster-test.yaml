@@ -26,9 +26,12 @@ metadata:
 spec:
   dataDirHostPath: /var/lib/rook
   cephVersion:
-    image: ceph/ceph:v15
+    image: ceph/ceph:v16
     allowUnsupported: true
   mon:
+    count: 1
+    allowMultiplePerNode: true
+  mgr:
     count: 1
     allowMultiplePerNode: true
   dashboard:
@@ -44,3 +47,5 @@ spec:
       mon:
         interval: 45s
         timeout: 600s
+  disruptionManagement:
+    managePodBudgets: true
