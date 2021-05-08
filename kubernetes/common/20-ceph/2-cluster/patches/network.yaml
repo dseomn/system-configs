@@ -19,4 +19,4 @@ metadata:
   name: rook-ceph
 spec:
   network:
-    ipFamily: IPv6
+    dualStack: true
