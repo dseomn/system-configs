@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-BASE_URL = https://docs.projectcalico.org/archive/v3.18/manifests
+BASE_URL = https://docs.projectcalico.org/archive/v3.19/manifests
 BASE_MANIFESTS = calico.yaml calicoctl.yaml
 MANIFESTS = $(BASE_MANIFESTS) calico.patched.yaml
 
