@@ -19,7 +19,7 @@ core.workflow(
     authoring = authoring.overwrite("David Mandelberg <david@mandelberg.org>"),
     origin = git.github_origin(
         url = "https://github.com/rook/rook",
-        ref = "v1.5.9",
+        ref = "v1.6.2",
     ),
     origin_files = glob(
         include = [
