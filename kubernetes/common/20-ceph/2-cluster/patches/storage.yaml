@@ -19,5 +19,7 @@ metadata:
   name: rook-ceph
 spec:
   storage:
+    useAllNodes: false
     useAllDevices: false
-    devicePathFilter: "^/dev/mapper/[^/]*[^/-]-ceph$"
+    # TODO(https://github.com/rook/rook/discussions/7602): Use devicePathFilter
+    # to use all encrypted LVs designated for Ceph.
