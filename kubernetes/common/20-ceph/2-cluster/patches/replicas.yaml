@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-- resources/cluster.yaml
-patches:
-- patches/dashboard.yaml
-- patches/network.yaml
-- patches/replicas.yaml
-- patches/storage.yaml
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  namespace: rook-ceph
+  name: rook-ceph
+spec:
+  mgr:
+    count: 2
