@@ -12,16 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: ConfigMap
 metadata:
   namespace: rook-ceph
-  name: rook-ceph-operator
-spec:
-  template:
-    spec:
-      containers:
-      - name: rook-ceph-operator
-        env:
-        - name: ROOK_ENABLE_DISCOVERY_DAEMON
-          value: "true"
+  name: rook-ceph-operator-config
+data:
+  ROOK_ENABLE_DISCOVERY_DAEMON: "true"
