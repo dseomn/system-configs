@@ -27,6 +27,7 @@ base:
 
   'G@virtual:physical':
   - convenience.physical
+  - power
   - smartd
 
   'G@role:access-point':
