@@ -28,6 +28,9 @@ apt-listchanges:
         value: mail
   pkg.installed: []
 
+aptitude:
+  pkg.installed: []
+
 debian-security-support:
   pkg.installed: []
 
