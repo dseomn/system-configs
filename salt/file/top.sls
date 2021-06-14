@@ -38,9 +38,11 @@ base:
   'G@role:desktop':
   - gdm
   - google.chrome
-  - gvisor
   - network.firewall.ssdp.client
   - plymouth
+
+  'G@role:dev':
+  - gvisor
 
   'G@role:home-router':
   - ddns

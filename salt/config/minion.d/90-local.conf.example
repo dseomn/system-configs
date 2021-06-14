@@ -15,5 +15,6 @@
 grains:
   role:
     desktop:
+    dev:
   debian:
     track: testing
