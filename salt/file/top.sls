@@ -41,6 +41,10 @@ base:
   - network.firewall.ssdp.client
   - plymouth
 
+  'G@role:desktop:basic':
+  - desktop.basic
+  - ssh.server
+
   'G@role:dev':
   - gvisor
 
