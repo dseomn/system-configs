@@ -12,25 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-salt-call:
-  local: true
-  config_dir: salt/config
-  file_root: salt/file
-  pillar_root: salt/pillar
-  state_output: changes
 
-salt-ssh:
-  config_dir: salt/config
-  ssh_priv: agent-forwarding
-  state_output: changes
-  extra_filerefs:
-  - salt://ddns/map.jinja
-  - salt://debian/map.jinja
-  - salt://disk_usage/map.jinja
-  - salt://gvisor/map.jinja
-  - salt://kubernetes/map.jinja
-  - salt://kubernetes/runtime/map.jinja
-  - salt://network/firewall/map.jinja
-  - salt://network/home_router/dns/map.jinja
-  - salt://network/home_router/map.jinja
-  - salt://pki/public.jinja
+{% from 'disk_usage/map.jinja' import disk_usage %}
+
+
+{{ disk_usage.bin }}:
+  file.managed:
+  - mode: 0755
+  - source: salt://disk_usage/disk_usage_at_least.py
+
+{{ disk_usage.cron_file }}:
+  file.managed:
+  - contents: |
+      0 0 * * 0 {{ disk_usage.user }} {{ disk_usage.bin }} 80
+      0 0 * * * {{ disk_usage.user }} {{ disk_usage.bin }} 90

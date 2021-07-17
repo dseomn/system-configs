@@ -16,6 +16,7 @@
 base:
   '*':
   - convenience
+  - disk_usage
   - mail
 
   'not G@role:kubernetes':
