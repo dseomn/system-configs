@@ -39,13 +39,35 @@ user:
   - shell: {{ ddns.user_shell }}
   - system: true
 
-{% for subdir in [''] + ddns.providers %}
-{% set directory = ddns.conf_dir + ('/' if subdir else '') + subdir %}
-{{ directory }}:
+{{ ddns.conf_dir }}:
   file.directory:
   - user: root
   - group: {{ ddns.user_group }}
-  - mode: 0750
+  - dir_mode: 0750
+  - file_mode: 0640
+  - recurse:
+    - user
+    - group
+    - mode
+  - clean: true
+
+{% for provider, provider_records in pillar.ddns.items() %}
+
+{{ ddns.conf_dir }}/{{ provider }}:
+  file.directory:
+  - clean: true
+  - require_in:
+    - file: {{ ddns.conf_dir }}
+
+{% for record, record_data in provider_records.items() %}
+
+{{ ddns.conf_dir }}/{{ provider }}/{{ record }}:
+  file.managed:
+  - contents: {{ record_data | json }}
+  - require_in:
+    - file: {{ ddns.conf_dir }}/{{ provider }}
+
+{% endfor %}
 {% endfor %}
 
 cron:

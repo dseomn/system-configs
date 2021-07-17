@@ -15,12 +15,7 @@
  #}
 
 
-{% set ddns = {
-    'providers': [
-        'dyn.dns.he.net',
-    ],
-} %}
-{% do ddns.update(salt.grains.filter_by({
+{% set ddns = salt.grains.filter_by({
     'Debian': {
         'deps': ['curl'],
         'bin': '/usr/local/bin/ddns',
@@ -31,4 +26,4 @@
         'user_home': '/nonexistent',
         'user_shell': '/usr/sbin/nologin',
     },
-})) %}
+}) %}
