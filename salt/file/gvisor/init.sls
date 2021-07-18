@@ -24,7 +24,7 @@ error:
 /etc/apt/trusted.gpg.d/gvisor.asc:
   file.managed:
   - source: https://gvisor.dev/archive.key
-  - source_hash: 35b63b9bece0375efcc6c43254a69fdcd32b4648771f17cd3fad08382774b086a274b484ae51409d4c43fbba467d261b391c30c8ddf186e695f022e19d9fe277
+  - source_hash: 14f9edb6a623b335f29d26a11e7a458652c252bce0e1f15fcc8bdf02f97283c2e2eb2de89e65cfc6088d90cf5d7410bd9dde9a2821b0beb014e7500356a0c4fc
 "deb https://storage.googleapis.com/gvisor/releases release main":
   pkgrepo.managed:
   - file: /etc/apt/sources.list.d/gvisor.list
