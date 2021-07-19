@@ -44,3 +44,8 @@ unattended-upgrades:
 # email. mailutils provides mailx.
 mailutils:
   pkg.installed: []
+
+/etc/cron.daily/apt-update-and-upgrade:
+  file.managed:
+  - mode: 0755
+  - source: salt://debian/extras/apt-update-and-upgrade.sh
