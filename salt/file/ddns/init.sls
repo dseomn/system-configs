@@ -70,8 +70,19 @@ user:
 {% endfor %}
 {% endfor %}
 
-cron:
-  file.managed:
-  - name: {{ ddns.cron_file }}
-  - source: salt://ddns/ddns.cron.jinja
-  - template: jinja
+# Update DNS frequently, but only log errors noisily much less frequently. That
+# way if there's a failure there aren't a ton of failure emails, but errors also
+# don't fly under the radar long-term.
+#
+# TODO(https://github.com/saltstack/salt/issues/60567): Randomize these.
+LOGGER_ERROR_ARGS="" {{ ddns.bin }}:
+  cron.present:
+  - identifier: 75b6f087-2f4b-4028-a11b-cf5cf06f7e93
+  - user: {{ ddns.user }}
+  - minute: "*/10"
+LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
+  cron.present:
+  - identifier: 4dd2d722-295b-4276-a886-e46f541903d6
+  - user: {{ ddns.user }}
+  - minute: 5
+  - hour: "*/4"

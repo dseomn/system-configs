@@ -45,7 +45,14 @@ unattended-upgrades:
 mailutils:
   pkg.installed: []
 
-/etc/cron.daily/apt-update-and-upgrade:
-  file.managed:
-  - mode: 0755
-  - source: salt://debian/extras/apt-update-and-upgrade.sh
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=778878): Add the below
+# (and maybe more) apt config directives, and get rid of this cron entry. See
+# also https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=833662.
+#
+# APT::Periodic::Update-Package-Lists "1";
+# APT::Periodic::Unattended-Upgrade "1";
+apt-get -qq update && unattended-upgrade:
+  cron.present:
+  - identifier: 03d139b7-b29a-4bde-8e7d-2cf4dc58b52f
+  - minute: random
+  - hour: random

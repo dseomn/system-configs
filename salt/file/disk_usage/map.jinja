@@ -18,7 +18,5 @@
 {% set disk_usage = salt.grains.filter_by({
     'Debian': {
         'bin': '/usr/local/bin/disk_usage_at_least',
-        'cron_file': '/etc/cron.d/disk_usage',
-        'user': 'nobody',
     },
 }) %}
