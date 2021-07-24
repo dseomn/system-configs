@@ -28,6 +28,7 @@ base:
 
   'G@virtual:physical':
   - convenience.physical
+  - firmware
   - power
   - smartd
 
