@@ -28,6 +28,7 @@ apt-listchanges:
   - contents: |
       [apt]
       frontend=mail
+      headers=true
 
 aptitude:
   pkg.installed: []
