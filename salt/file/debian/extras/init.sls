@@ -21,12 +21,13 @@ apt-listbugs:
   pkg.installed: []
 
 apt-listchanges:
-  debconf.set:
-  - data:
-      apt-listchanges/frontend:
-        type: select
-        value: mail
   pkg.installed: []
+
+/etc/apt/listchanges.conf.d/local.conf:
+  file.managed:
+  - contents: |
+      [apt]
+      frontend=mail
 
 aptitude:
   pkg.installed: []
