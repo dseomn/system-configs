@@ -45,7 +45,7 @@ inst-data.img:
 	/sbin/mkfs.fat -C -n INST-DATA "$@.new" $$((32 * 1024))
 	mkdir -p inst-data.mnt
 	sudo mount -o loop "$@.new" inst-data.mnt
-	sudo cp -r inst-data/* inst-data.mnt
+	sudo cp -Lr inst-data/* inst-data.mnt
 	sudo umount inst-data.mnt
 	mv -f "$@.new" "$@"
 
