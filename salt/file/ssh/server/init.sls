@@ -29,6 +29,11 @@ include:
 - network.firewall
 
 
+ssh-server-config-changed:
+  test.configurable_test_state:
+  - warnings: "Test ssh with: ssh -S none {{ grains.id }}"
+
+
 sshd:
   pkg.installed:
   - name: {{ sshd.pkg }}
@@ -41,6 +46,8 @@ sshd:
 sshd_config:
   file.managed:
   - name: {{ sshd.config_directory }}/sshd_config
+  - onchanges_in:
+    - ssh-server-config-changed
   - source: salt://ssh/server/sshd_config.jinja
   - template: jinja
   - defaults:
@@ -49,6 +56,8 @@ sshd_config:
 sshd_port:
   file.managed:
   - name: {{ nftables.config_dir }}/50-ssh.conf
+  - onchanges_in:
+    - ssh-server-config-changed
   - source: salt://ssh/server/nftables.conf
   - require_in:
     - file: {{ nftables.config_dir }}
