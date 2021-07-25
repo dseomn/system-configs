@@ -13,3 +13,5 @@
 # limitations under the License.
 
 backup_mode: minion
+use_superseded:
+- module.run
