@@ -61,3 +61,17 @@ sshd_port:
   - source: salt://ssh/server/nftables.conf
   - require_in:
     - file: {{ nftables.config_dir }}
+
+
+/root/.ssh:
+  file.directory:
+  - mode: 0700
+  - onchanges_in:
+    - ssh-server-config-changed
+
+/root/.ssh/authorized_keys:
+  file.managed:
+  - mode: 0600
+  - onchanges_in:
+    - ssh-server-config-changed
+  - source: salt://ssh/server/authorized_keys
