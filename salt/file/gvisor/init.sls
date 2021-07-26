@@ -13,11 +13,17 @@
 # limitations under the License.
 
 
+{% from 'grub/map.jinja' import grub %}
+
 {% if grains.os_family != 'Debian' %}
 error:
   cmd.run:
   - name: 'echo "Error: Unsupported platform." >&2; exit 1'
 {% endif %}
+
+
+include:
+- grub
 
 
 # https://gvisor.dev/docs/user_guide/install/#install-from-an-apt-repository
@@ -32,13 +38,11 @@ runsc:
   pkg.installed: []
 
 # TODO(https://github.com/google/gvisor/issues/3481): Delete this.
-/etc/default/grub.d/systemd-cgroup-hybrid.cfg:
+{{ grub.default_grub_d }}/systemd-cgroup-hybrid.cfg:
   file.managed:
+  - onchanges_in:
+    - update-grub
   - contents: >
       GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX}
       systemd.unified_cgroup_hierarchy=0
       systemd.legacy_systemd_cgroup_controller=0"
-update-grub:
-  cmd.run:
-  - onchanges:
-    - file: /etc/default/grub.d/systemd-cgroup-hybrid.cfg

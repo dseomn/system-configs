@@ -27,6 +27,7 @@ salt-ssh:
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
+  - salt://grub/map.jinja
   - salt://gvisor/map.jinja
   - salt://kubernetes/map.jinja
   - salt://kubernetes/runtime/map.jinja

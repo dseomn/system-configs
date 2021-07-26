@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,30 +13,6 @@
 # limitations under the License.
 
 
-{% from 'grub/map.jinja' import grub %}
-
-{% set plymouth = salt.grains.filter_by({
-    'Debian': {
-        'pkgs': [
-            'desktop-base',
-            'plymouth',
-            'plymouth-label',
-        ],
-    },
-}) %}
-
-
-include:
-- grub
-
-
-plymouth:
-  pkg.installed:
-  - pkgs: {{ plymouth.pkgs | json }}
-
-{{ grub.default_grub_d }}/plymouth.cfg:
-  file.managed:
-  - onchanges_in:
-    - update-grub
-  - contents: |
-      GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} splash"
+# This is meant to be referenced by other states with onchanges_in.
+update-grub:
+  cmd.run: []
