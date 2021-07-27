@@ -16,8 +16,16 @@
 {% set convenience = salt.grains.filter_by({
     'Debian': {
         'pkgs': [
+            'bash-completion',
+            'bind9-dnsutils',
+            'bind9-host',
+            'file',
+            'man-db',
+            'manpages',
             'netcat-openbsd',
             'tmux',
+            'traceroute',
+            'wget',
         ],
     },
 }) %}
