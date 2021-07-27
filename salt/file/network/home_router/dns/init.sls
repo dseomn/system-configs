@@ -16,11 +16,6 @@
 {% from 'network/home_router/dns/map.jinja' import dns %}
 
 
-util_pkgs:
-  pkg.installed:
-  - pkgs: {{ dns.util_pkgs | yaml }}
-
-
 # Resolver for public names, where the authoritative servers care about the
 # resolver's IP address.
 unbound_pkg:

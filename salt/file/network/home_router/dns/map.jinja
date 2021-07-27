@@ -22,7 +22,6 @@
 } %}
 {% do dns.update(salt.grains.filter_by({
     'Debian': {
-        'util_pkgs': ['dnsutils'],
         'unbound_pkg': 'unbound',
         'unbound_conf_dir': '/etc/unbound/unbound.conf.d',
         'unbound_service': 'unbound',
