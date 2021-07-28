@@ -36,6 +36,7 @@ base:
   - network.interfaces
   - network.local_resolver
   - ssh.server
+  - standard
 
   'G@role:desktop':
   - gdm
@@ -56,6 +57,7 @@ base:
   - network.interfaces
   - network.local_resolver
   - ssh.server
+  - standard
 
   'G@role:kubernetes':
   - kubernetes
@@ -63,6 +65,7 @@ base:
   - network.interfaces
   - network.local_resolver
   - ssh.server
+  - standard
 
   'G@role:media-center':
   - dlna.renderer
