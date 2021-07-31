@@ -1,0 +1,82 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% from 'ddns/map.jinja' import ddns %}
+
+
+{% set acme = {
+    'email': 'david@mandelberg.org',
+} %}
+{% do acme.update(salt.grains.filter_by({
+    'Debian': {
+        'pkgs': ['certbot'],
+        'certbot_config_dir': '/etc/letsencrypt',
+        'certbot_bin': 'certbot',
+    },
+})) %}
+
+
+{#
+ # Outputs states for a certificate from an ACME server.
+ #
+ # TODO(dseomn): Make this update the renewal config if it changes.
+ #}
+{% macro acme_cert(name, group='root', dns_provider='dyn.dns.he.net') %}
+acme_cert_{{ name }}:
+  cmd.run:
+  - name: >
+      {{ acme.certbot_bin }}
+      certonly
+      --non-interactive
+      --agree-tos
+      --email '{{ acme.email }}'
+      --domain '{{ name }}'
+      --preferred-challenges dns
+      --manual
+      --manual-auth-hook
+      '{{ ddns.bin_txt }}
+      {{ dns_provider }}
+      "_acme-challenge.${CERTBOT_DOMAIN}"
+      "${CERTBOT_VALIDATION}"'
+  - require:
+    - acme_pkgs
+  - creates:
+    - {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf
+    - {{ acme.certbot_config_dir }}/live/{{ name }}/privkey.pem
+    - {{ acme.certbot_config_dir }}/live/{{ name }}/fullchain.pem
+
+{{ acme.certbot_config_dir }}/renewal/{{ name }}.conf:
+  file.exists:
+  - require_in:
+    - {{ acme.certbot_config_dir }}/renewal
+  - require:
+    - acme_cert_{{ name }}
+
+{{ acme.certbot_config_dir }}/live/{{ name }}/privkey.pem:
+  file.managed:
+  - create: false
+  - replace: false
+  - group: {{ group }}
+  - mode: 0640
+  - require:
+    - acme_cert_{{ name }}
+
+{{ acme.certbot_config_dir }}/live/{{ name }}/fullchain.pem:
+  file.exists:
+  - require:
+    - acme_cert_{{ name }}
+{% endmacro %}

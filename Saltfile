@@ -24,6 +24,7 @@ salt-ssh:
   ssh_priv: agent-forwarding
   state_output: changes
   extra_filerefs:
+  - salt://acme/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
