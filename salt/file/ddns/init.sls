@@ -16,18 +16,17 @@
 {% from 'ddns/map.jinja' import ddns %}
 
 
-deps:
+ddns_deps:
   pkg.installed:
   - pkgs: {{ ddns.deps | yaml }}
 
-bin:
+{{ ddns.bin }}:
   file.managed:
-  - name: {{ ddns.bin }}
   - mode: 0755
   - source: salt://ddns/ddns.sh.jinja
   - template: jinja
 
-user:
+ddns_user:
   group.present:
   - name: {{ ddns.user_group }}
   - system: true
