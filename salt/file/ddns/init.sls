@@ -16,6 +16,9 @@
 {% from 'ddns/map.jinja' import ddns %}
 
 
+{% set _ddns = namespace(enable_cron=False) %}
+
+
 ddns_deps:
   pkg.installed:
   - pkgs: {{ ddns.deps | yaml }}
@@ -66,6 +69,10 @@ ddns_user:
 
 {% for record, record_data in provider_records.items() %}
 
+{% if record.endswith(('.A', '.AAAA')) %}
+  {% set _ddns.enable_cron = True %}
+{% endif %}
+
 {{ ddns.conf_dir }}/{{ provider }}/{{ record }}:
   file.managed:
   - contents: {{ record_data | json }}
@@ -85,9 +92,11 @@ LOGGER_ERROR_ARGS="" {{ ddns.bin }}:
   - identifier: 75b6f087-2f4b-4028-a11b-cf5cf06f7e93
   - user: {{ ddns.user }}
   - minute: "*/10"
+  - commented: {{ (not _ddns.enable_cron) | json }}
 LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
   cron.present:
   - identifier: 4dd2d722-295b-4276-a886-e46f541903d6
   - user: {{ ddns.user }}
   - minute: 5
   - hour: "*/4"
+  - commented: {{ (not _ddns.enable_cron) | json }}
