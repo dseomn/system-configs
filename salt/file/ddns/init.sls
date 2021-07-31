@@ -26,6 +26,12 @@ ddns_deps:
   - source: salt://ddns/ddns.sh.jinja
   - template: jinja
 
+{{ ddns.bin_txt }}:
+  file.managed:
+  - mode: 0755
+  - source: salt://ddns/ddns-txt.sh.jinja
+  - template: jinja
+
 ddns_user:
   group.present:
   - name: {{ ddns.user_group }}
