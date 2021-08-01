@@ -51,7 +51,7 @@ sshd_config:
   - source: salt://ssh/server/sshd_config.jinja
   - template: jinja
   - defaults:
-      sshd: {{ sshd | yaml }}
+      sshd: {{ sshd | json }}
 
 sshd_port:
   file.managed:

@@ -21,7 +21,7 @@
 
 ddns_deps:
   pkg.installed:
-  - pkgs: {{ ddns.deps | yaml }}
+  - pkgs: {{ ddns.deps | json }}
 
 {{ ddns.bin }}:
   file.managed:
