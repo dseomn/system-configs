@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-root: {{ salt.pillar.get('mail:admin_email', 'david@mandelberg.org') }}
+root: david@mandelberg.org
 
 # https://tools.ietf.org/html/rfc2142#section-4
 abuse: root

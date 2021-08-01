@@ -37,8 +37,7 @@ postfix:
 aliases:
   file.managed:
   - name: /etc/aliases
-  - source: salt://mail/aliases.jinja
-  - template: jinja
+  - source: salt://mail/aliases
   cmd.run:
   - name: newaliases
   - onchanges:
