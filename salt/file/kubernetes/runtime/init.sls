@@ -50,9 +50,13 @@ containerd_unit_reload:
   - onchanges_any:
     - file: /etc/systemd/system/containerd.service.d/50-local.conf
 
-containerd.service:
+containerd_enabled:
+  service.enabled:
+  - name: containerd
+
+containerd_running:
   service.running:
-  - enable: true
+  - name: containerd
   - watch_any:
     - file: /etc/containerd/runsc.local.toml
     - file: /etc/containerd/local.toml

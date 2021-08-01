@@ -52,13 +52,17 @@ rygel_user:
   - shell: {{ rygel.user_shell }}
   - system: True
 
-rygel.service:
+{{ rygel.systemd_directory }}/{{ rygel.service }}.service:
   file.symlink:
-  - name: {{ rygel.systemd_directory }}/{{ rygel.service }}.service
   - target: {{ rygel.service_file }}
+
+rygel_enabled:
+  service.enabled:
+  - name: {{ rygel.service }}
+
+rygel_running:
   service.running:
   - name: {{ rygel.service }}
-  - enable: True
   - watch:
     - file: rygel.conf
 

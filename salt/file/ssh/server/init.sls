@@ -34,12 +34,17 @@ ssh-server-config-changed:
   - warnings: "Test ssh with: ssh -S none {{ grains.id }}"
 
 
-sshd:
+sshd_pkg:
   pkg.installed:
   - name: {{ sshd.pkg }}
+
+sshd_enabled:
+  service.enabled:
+  - name: {{ sshd.service }}
+
+sshd_running:
   service.running:
   - name: {{ sshd.service }}
-  - enable: True
   - watch:
     - file: sshd_config
 

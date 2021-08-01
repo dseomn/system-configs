@@ -28,10 +28,13 @@ unbound_conf:
   - source: salt://network/home_router/dns/unbound.local.conf.jinja
   - template: jinja
 
-unbound_service:
+unbound_enabled:
+  service.enabled:
+  - name: {{ dns.unbound_service }}
+
+unbound_running:
   service.running:
   - name: {{ dns.unbound_service }}
-  - enable: true
   - watch:
     - file: unbound_conf
 
@@ -55,7 +58,7 @@ dnss_service_unit:
   - makedirs: true
   - template: jinja
   - require:
-    - service: unbound_service
+    - unbound_running
 
 dnss_unit_reload:
   cmd.run:
@@ -70,9 +73,12 @@ dnss_socket:
   - watch:
     - cmd: dnss_unit_reload
 
-dnss_service:
+dnss_enabled:
+  service.enabled:
+  - name: {{ dns.dnss_service }}.service
+
+dnss_running:
   service.running:
   - name: {{ dns.dnss_service }}.service
-  - enable: true
   - watch:
     - service: dnss_socket

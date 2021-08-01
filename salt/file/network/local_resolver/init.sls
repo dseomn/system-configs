@@ -33,10 +33,13 @@
   - target: {{ system.resolv_conf_target }}
   - backupname: {{ system.resolv_conf }}.bak
 
-systemd_resolved:
+systemd_resolved_enabled:
+  service.enabled:
+  - name: {{ system.service }}
+
+systemd_resolved_running:
   service.running:
   - name: {{ system.service }}
-  - enable: true
   - watch:
     - file: {{ system.config_file }}
     - file: {{ system.resolv_conf }}

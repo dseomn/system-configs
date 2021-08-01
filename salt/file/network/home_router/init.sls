@@ -44,10 +44,13 @@ dnsmasq_pkgs:
   - require:
     - sls: network.home_router.dns
 
-dnsmasq_service:
+dnsmasq_enabled:
+  service.enabled:
+  - name: {{ home_router.dnsmasq_service }}
+
+dnsmasq_running:
   service.running:
   - name: {{ home_router.dnsmasq_service }}
-  - enable: true
   - watch:
     - file: {{ home_router.dnsmasq_conf }}
 

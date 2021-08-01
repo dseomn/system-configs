@@ -241,9 +241,13 @@ access_point_pkgs:
       file_settings_dir: {{ system.hostapd_file_settings_dir }}
       ctrl_interface: {{ system.hostapd_ctrl_interface }}
 
-{{ hostapd_service }}:
+{{ hostapd_service }}_enabled:
+  service.enabled:
+  - name: {{ hostapd_service }}
+
+{{ hostapd_service }}_running:
   service.running:
-  - enable: true
+  - name: {{ hostapd_service }}
   - watch:
     - file: {{ system.hostapd_conf_template.format(interface_name) }}
     {% for setting_file in hostapd_file_settings_for_interface %}
