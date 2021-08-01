@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,33 @@
 # limitations under the License.
 
 
-/etc/aliases:
-  file.managed:
-  - source: salt://mail/aliases
+{% from 'mail/map.jinja' import mail %}
+
+
+include:
+- mail
+
+
+postfix_pkg:
+  pkg.installed:
+  - name: {{ mail.postfix.pkg }}
+
+postfix_enabled:
+  service.enabled:
+  - name: {{ mail.postfix.service }}
+  - require:
+    - postfix_pkg
+
+postfix_running:
+  service.running:
+  - name: {{ mail.postfix.service }}
+  - require:
+    - postfix_pkg
+
+
+newaliases:
+  cmd.run:
+  - require:
+    - postfix_pkg
+  - onchanges:
+    - /etc/aliases

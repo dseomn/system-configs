@@ -1,4 +1,4 @@
-# Copyright 2019 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,19 @@
 # limitations under the License.
 
 
-/etc/aliases:
+{% from 'mail/map.jinja' import mail %}
+
+
+include:
+- mail.postfix
+- pki.public
+
+
+{{ mail.postfix.config_directory }}/main.cf:
   file.managed:
-  - source: salt://mail/aliases
+  - source: salt://mail/local_relay/postfix_main.cf.jinja
+  - template: jinja
+  - require:
+    - sls: pki.public
+  - watch_in:
+    - postfix_running

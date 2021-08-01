@@ -17,7 +17,7 @@ base:
   '*':
   - convenience
   - disk_usage
-  - mail
+  - mail.local_relay
 
   'not G@role:kubernetes':
   - network.firewall.enable
