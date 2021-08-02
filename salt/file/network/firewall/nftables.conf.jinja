@@ -55,7 +55,6 @@ table inet filter {
 		ip6 nexthdr ipv6-icmp accept
 
 		# https://en.wikipedia.org/wiki/DHCPv6
-		# TODO: Remove this once `ct state related` covers this.
 		ip6 saddr fe80::/10 ip6 daddr fe80::/10 \
 			udp sport dhcpv6-server udp dport dhcpv6-client accept
 	}
