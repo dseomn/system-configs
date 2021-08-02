@@ -18,6 +18,7 @@ base:
   - convenience
   - disk_usage
   - mail.local_relay
+  - uptime
 
   'not G@role:kubernetes':
   - network.firewall.enable
