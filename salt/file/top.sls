@@ -18,6 +18,7 @@ base:
   - convenience
   - disk_usage
   - mail.local_relay
+  - trim
   - uptime
 
   'not G@role:kubernetes':
