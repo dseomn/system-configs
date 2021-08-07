@@ -15,7 +15,45 @@
 # limitations under the License.
 
 import argparse
+import shutil
 import subprocess
+import sys
+
+
+def _lvm_usage(*, min_percent):
+    if not shutil.which('lvs'):
+        return ''
+    lvs = subprocess.run(
+        (
+            'lvs',
+            '-S',
+            ('lv_layout=pool,'
+             f'(data_percent>={min_percent}||metadata_percent>={min_percent})'),
+        ),
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+    return lvs.stdout
+
+
+def _filesystem_usage(*, min_percent):
+    df = subprocess.run(
+        ('df', '-h'),
+        stdout=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+    df_lines = df.stdout.splitlines()
+    df_header = df_lines[0]
+    df_lines_to_print = [
+        line for line in df_lines[1:]
+        if float(line.split()[4].rstrip('%')) >= min_percent
+    ]
+    if df_lines_to_print:
+        return ''.join(line + '\n' for line in (df_header, *df_lines_to_print))
+    else:
+        return ''
 
 
 def main():
@@ -28,25 +66,11 @@ def main():
     )
     args = arg_parser.parse_args()
 
-    df = subprocess.run(
-        ('df', '-h'),
-        stdout=subprocess.PIPE,
-        text=True,
-        check=True,
+    sections = (
+        _lvm_usage(min_percent=args.min_percent),
+        _filesystem_usage(min_percent=args.min_percent),
     )
-
-    df_lines = df.stdout.splitlines()
-    df_header = df_lines[0]
-    df_lines_to_print = [
-        line for line in df_lines[1:]
-        if float(line.split()[4].rstrip('%')) >= args.min_percent
-    ]
-    if not df_lines_to_print:
-        return
-
-    print(df_header)
-    for line in df_lines_to_print:
-        print(line)
+    sys.stdout.write('\n'.join(section for section in sections if section))
 
 
 if __name__ == '__main__':
