@@ -19,8 +19,9 @@ hosts:
   host0.example.com:
     # Required. LVM thin pools
     thin_pools:
-      # Pool ID, referenced by guest storage configs. "default" is used when the
-      # guest doesn't specify a pool.
+      # Pool ID, referenced by guest storage configs. "default" is required, and
+      # is used when the guest doesn't specify a pool and for all system
+      # volumes.
       default:
         # Required. Volume group name.
         vg: host0-vg

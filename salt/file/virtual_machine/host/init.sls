@@ -18,6 +18,13 @@
 
 {% set host = pillar.virtual_machine.host %}
 
+{% set base_system = {
+    'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210808-728/debian-11-genericcloud-amd64-daily-20210808-728.raw',
+    'hash_type': 'sha512',
+    'hash': 'b855aabe6ee347274676ef7b6b36219daa9b7491f5a8d81d219d79ad091ada53aef8ef68be064b0d95a9e5c2f7991a8db7a797af069d3e57d73ea0c40d6d24f4',
+    'size': '2G',
+} %}
+
 
 virtual_machine_host_pkgs:
   pkg.installed:
@@ -39,3 +46,25 @@ lvchange --errorwhenfull y {{ pool.vg }}/{{ pool.lv }}:
   - onchanges:
     - thin_pool_{{ pool_id }}
 {% endfor %}
+
+
+{% set _base_system_dev =
+    '/dev/' + host.thin_pools.default.vg + '/base_system' %}
+{% set _base_system_hash_check =
+    base_system.hash_type + 'sum --check <<EOF\n' +
+    base_system.hash + ' ' + _base_system_dev + '\n' +
+    'EOF' %}
+base_system:
+  lvm.lv_present:
+  - name: base_system
+  - vgname: {{ host.thin_pools.default.vg }}/{{ host.thin_pools.default.lv }}
+  - size: {{ base_system.size }}
+  - thinvolume: true
+  cmd.run:
+  - name: >
+      curl --location --no-progress-meter
+      -o '{{ _base_system_dev }}' '{{ base_system.url }}'
+  - unless:
+    - {{ _base_system_hash_check | json }}
+  - check_cmd:
+    - {{ _base_system_hash_check | json }}
