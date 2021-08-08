@@ -16,7 +16,18 @@
 hosts:
 
   # Minion ID.
-  host0.example.com: {}
+  host0.example.com:
+    # Required. LVM thin pools
+    thin_pools:
+      # Pool ID, referenced by guest storage configs. "default" is used when the
+      # guest doesn't specify a pool.
+      default:
+        # Required. Volume group name.
+        vg: host0-vg
+        # Required. Pool logical volume name.
+        lv: thin_pool
+        # Required: Pool data size.
+        size: 128G
 
 # Required. Virtual machine guests.
 guests:
