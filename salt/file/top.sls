@@ -72,3 +72,15 @@ base:
   'G@role:media-center':
   - dlna.renderer
   - ssh.server
+
+  'G@role:virtual-machine:guest':
+  - ssh.server
+  - standard
+  - virtual_machine.guest
+
+  'G@role:virtual-machine:host':
+  - network.interfaces
+  - network.local_resolver
+  - ssh.server
+  - standard
+  - virtual_machine.host
