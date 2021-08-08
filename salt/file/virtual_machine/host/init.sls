@@ -16,12 +16,15 @@
 {% from 'virtual_machine/host/map.jinja' import virtual_machine_host %}
 
 
+{% set host = pillar.virtual_machine.host %}
+
+
 virtual_machine_host_pkgs:
   pkg.installed:
   - pkgs: {{ virtual_machine_host.pkgs | json }}
 
 
-{% for pool_id, pool in pillar.virtual_machine.host.thin_pools.items() %}
+{% for pool_id, pool in host.thin_pools.items() %}
 thin_pool_{{ pool_id }}:
   lvm.lv_present:
   - name: {{ pool.lv }}
