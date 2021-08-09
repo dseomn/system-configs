@@ -61,7 +61,7 @@ base_system:
   - size: {{ base_system.size }}
   - thinvolume: true
   cmd.run:
-  - name: >
+  - name: >-
       curl --location --no-progress-meter
       -o '{{ _base_system_dev }}' '{{ base_system.url }}'
   - unless:
