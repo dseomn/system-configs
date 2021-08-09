@@ -16,6 +16,7 @@
 base:
   '*':
   - convenience
+  - cron
   - disk_usage
   - mail.local_relay
   - trim
