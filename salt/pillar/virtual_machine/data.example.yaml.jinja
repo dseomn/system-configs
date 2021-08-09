@@ -37,3 +37,13 @@ guests:
   guest0.example.com:
     # Required. Which host this guest is on.
     host: host0.example.com
+    # Required. Storage configuration.
+    storage:
+      # Required. System (bootloader, root, etc.) volume.
+      system:
+        # Logical volume name. If unspecified, the default is
+        # <minion-id>_system. Note that the thin pool can't be specified because
+        # the default one is used for all system volumes.
+        lv: host0.example.com_system
+        # Required. System volume size.
+        size: 4G

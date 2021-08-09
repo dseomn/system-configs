@@ -68,3 +68,30 @@ base_system:
     - {{ _base_system_hash_check | json }}
   - check_cmd:
     - {{ _base_system_hash_check | json }}
+
+
+{% for guest_id, guest in host.guests.items() %}
+
+{% set guest_system_lv = guest.storage.system.get('lv', guest_id + '_system') %}
+
+# TODO(https://github.com/saltstack/salt/issues/60691): Merge cmd.run into
+# lvm.lv_present.
+{{ guest_system_lv }}:
+  cmd.run:
+  - name: >-
+      lvcreate
+      --snapshot
+      --setactivationskip n
+      --name {{ guest_system_lv }}
+      {{ host.thin_pools.default.vg }}/base_system
+  - creates: /dev/{{ host.thin_pools.default.vg }}/{{ guest_system_lv }}
+  - requires:
+    - base_system
+  lvm.lv_present:
+  - vgname: {{ host.thin_pools.default.vg }}/{{ host.thin_pools.default.lv }}
+  - size: {{ guest.storage.system.size }}
+  - thinvolume: true
+  - requires:
+    - cmd: {{ guest_system_lv }}
+
+{% endfor %}
