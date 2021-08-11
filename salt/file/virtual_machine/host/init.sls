@@ -74,6 +74,8 @@ base_system:
 {% for guest_id, guest in host.guests.items() %}
 
 {% set guest_system_lv = guest.storage.system.get('lv', guest_id + '_system') %}
+{% set guest_system_lv_path =
+    '/dev/' + host.thin_pools.default.vg + '/' +  guest_system_lv %}
 
 # TODO(https://github.com/saltstack/salt/issues/60691): Merge cmd.run into
 # lvm.lv_present.
@@ -85,7 +87,7 @@ base_system:
       --setactivationskip n
       --name {{ guest_system_lv }}
       {{ host.thin_pools.default.vg }}/base_system
-  - creates: /dev/{{ host.thin_pools.default.vg }}/{{ guest_system_lv }}
+  - creates: {{ guest_system_lv_path }}
   - requires:
     - base_system
   lvm.lv_present:
