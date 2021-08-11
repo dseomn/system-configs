@@ -88,13 +88,13 @@ base_system:
       --name {{ guest_system_lv }}
       {{ host.thin_pools.default.vg }}/base_system
   - creates: {{ guest_system_lv_path }}
-  - requires:
+  - require:
     - base_system
   lvm.lv_present:
   - vgname: {{ host.thin_pools.default.vg }}/{{ host.thin_pools.default.lv }}
   - size: {{ guest.storage.system.size }}
   - thinvolume: true
-  - requires:
+  - require:
     - cmd: {{ guest_system_lv }}
 
 {% endfor %}
