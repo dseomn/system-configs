@@ -29,6 +29,7 @@
 virtual_machine_host_pkgs:
   pkg.installed:
   - pkgs: {{ virtual_machine_host.pkgs | json }}
+  - install_recommends: false
 
 
 {% for pool_id, pool in host.thin_pools.items() %}
