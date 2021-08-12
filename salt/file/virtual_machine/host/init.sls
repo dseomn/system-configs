@@ -20,6 +20,7 @@
 
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
 # genericcloud instead of generic.
+# TODO(Debian >= 11): Switch to a stable image.
 {% set base_system = {
     'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210811-731/debian-11-generic-amd64-daily-20210811-731.raw',
     'hash_type': 'sha512',
