@@ -18,10 +18,12 @@
 
 {% set host = pillar.virtual_machine.host %}
 
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
+# genericcloud instead of generic.
 {% set base_system = {
-    'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210808-728/debian-11-genericcloud-amd64-daily-20210808-728.raw',
+    'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210811-731/debian-11-generic-amd64-daily-20210811-731.raw',
     'hash_type': 'sha512',
-    'hash': 'b855aabe6ee347274676ef7b6b36219daa9b7491f5a8d81d219d79ad091ada53aef8ef68be064b0d95a9e5c2f7991a8db7a797af069d3e57d73ea0c40d6d24f4',
+    'hash': '00c495097e75ce278ba22c10f1773a633f4dd4d055e6cff8d50194d7b2c03a1f0bff8f4c12e752fb672845183e91b327caef5f463b107a0167a3df5174d79f2b',
     'size': '2G',
 } %}
 
