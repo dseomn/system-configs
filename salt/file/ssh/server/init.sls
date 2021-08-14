@@ -68,14 +68,23 @@ sshd_port:
     - file: {{ nftables.config_dir }}
 
 
-/root/.ssh:
+{% for user, user_config in pillar.users.users.items()
+    if 'authorized_keys' in user_config.get('ssh', {}) %}
+
+~{{ user }}/.ssh:
   file.directory:
+  - user: {{ user }}
+  - group: {{ user }}
   - mode: 0700
   - onchanges_in:
     - ssh-server-config-changed
 
-/root/.ssh/authorized_keys:
+~{{ user }}/.ssh/authorized_keys:
   file.managed:
+  - user: {{ user }}
+  - group: {{ user }}
   - onchanges_in:
     - ssh-server-config-changed
-  - source: salt://ssh/server/authorized_keys
+  - contents_pillar: users:users:{{ user }}:ssh:authorized_keys
+
+{% endfor %}
