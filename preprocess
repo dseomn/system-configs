@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import argparse
+import getpass
 import os
 import string
 
@@ -30,6 +31,7 @@ def main():
   output = string.Template(template).substitute(
       HOME=os.path.expanduser('~'),
       REPO_ROOT=os.path.abspath(os.path.dirname(__file__)),
+      USER=getpass.getuser(),
       XDG_CACHE_HOME=os.environ.get('XDG_CACHE_HOME',
                                     os.path.expanduser('~/.cache')),
   )
