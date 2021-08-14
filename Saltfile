@@ -19,6 +19,9 @@ salt-call:
   pillar_root: salt/pillar
   state_output: changes
 
+salt-run:
+  config_dir: salt/config
+
 salt-ssh:
   config_dir: salt/config
   ssh_priv: agent-forwarding
