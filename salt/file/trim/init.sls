@@ -14,4 +14,5 @@
 
 
 fstrim.timer:
-  service.enabled: []
+  service.running:
+  - enable: True
