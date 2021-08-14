@@ -76,7 +76,6 @@ sshd_port:
 
 /root/.ssh/authorized_keys:
   file.managed:
-  - mode: 0600
   - onchanges_in:
     - ssh-server-config-changed
   - source: salt://ssh/server/authorized_keys
