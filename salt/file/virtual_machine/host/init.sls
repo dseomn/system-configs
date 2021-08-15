@@ -119,7 +119,7 @@ base_system:
       --cloud-init meta-data=<(printf "%s" "$CLOUD_INIT_META_DATA"),user-data=<(printf "%s" "$CLOUD_INIT_USER_DATA")
       --boot uefi
       --os-variant name={{ base_system.name }}
-      --disk {{ guest_system_lv_path }}
+      --disk {{ guest_system_lv_path }},boot.order=1
       {% for network in guest.network.values() -%}
       --network bridge={{ network.bridge }},mac={{ network.mac }}
       {% endfor -%}
