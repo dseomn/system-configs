@@ -105,6 +105,31 @@ base_system:
   - require:
     - cmd: {{ guest_system_lv }}
 
+{% set swap_paths = [] %}
+{% for swap in guest.storage.get('swap', []) %}
+{% set swap_vg = swap.get('vg', host.default_swap_vg) %}
+{% set swap_lv = swap.get('lv', guest_id + '_swap') %}
+{% set swap_path = '/dev/' + swap_vg + '/' + swap_lv %}
+{% do swap_paths.append(swap_path) %}
+# This can't safely use lvm.lv_present, because extending the volume could
+# expose data from the previously unallocated disk space to the VM.
+{{ swap_path }}:
+  cmd.run:
+  - name: >-
+      lvcreate
+      --wipesignatures n
+      --size {{ swap.size }}
+      --name {{ swap_lv }}
+      {{ swap_vg }}
+      &&
+      blkdiscard --zeroout {{ swap_path }}
+      &&
+      mkswap --uuid {{ swap.uuid }} {{ swap_path }}
+  - creates: {{ swap_path }}
+{% endfor %}
+
+# TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
+# other than the system one.
 {{ guest_id }}_install:
   cmd.run:
   - name: >-
@@ -120,6 +145,9 @@ base_system:
       --boot uefi
       --os-variant name={{ base_system.name }}
       --disk {{ guest_system_lv_path }},boot.order=1
+      {% for swap_path in swap_paths -%}
+      --disk {{ swap_path }}
+      {% endfor -%}
       {% for network in guest.network.values() -%}
       --network bridge={{ network.bridge }},mac={{ network.mac }}
       {% endfor -%}
@@ -145,6 +173,9 @@ base_system:
         users: []
   - require:
     - {{ guest_system_lv }}
+    {% for swap_path in swap_paths %}
+    - {{ swap_path }}
+    {% endfor %}
   - unless: virsh domstate --domain {{ guest_id }}
 
 # TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
