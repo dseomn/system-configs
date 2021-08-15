@@ -15,13 +15,18 @@
 
 {% from 'virtual_machine/host/map.jinja' import virtual_machine_host %}
 
+{% import_text 'users/bootstrap-passwordless-ssh-and-sudo.sh.jinja'
+    as bootstrap_users %}
+
 
 {% set host = pillar.virtual_machine.host %}
 
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
 # genericcloud instead of generic.
 # TODO(Debian >= 11): Switch to a stable image.
+# TODO(dseomn): Once debian11 is in osinfo-db, change the name to that.
 {% set base_system = {
+    'name': 'debiantesting',
     'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210811-731/debian-11-generic-amd64-daily-20210811-731.raw',
     'hash_type': 'sha512',
     'hash': '00c495097e75ce278ba22c10f1773a633f4dd4d055e6cff8d50194d7b2c03a1f0bff8f4c12e752fb672845183e91b327caef5f463b107a0167a3df5174d79f2b',
@@ -99,5 +104,65 @@ base_system:
   - thinvolume: true
   - require:
     - cmd: {{ guest_system_lv }}
+
+{{ guest_id }}_install:
+  cmd.run:
+  - name: >-
+      script --quiet --return --command
+      '
+      virt-install
+      --name {{ guest_id }}
+      --vcpus {{ guest.vcpus }}
+      --memory {{ guest.memory }}
+      --events on_poweroff=destroy,on_reboot=restart,on_crash=restart
+      --import
+      --cloud-init meta-data=<(printf "%s" "$CLOUD_INIT_META_DATA"),user-data=<(printf "%s" "$CLOUD_INIT_USER_DATA")
+      --boot uefi
+      --os-variant name={{ base_system.name }}
+      --disk {{ guest_system_lv_path }}
+      {% for network in guest.network.values() -%}
+      --network bridge={{ network.bridge }},mac={{ network.mac }}
+      {% endfor -%}
+      --graphics none
+      --console pty,target.type=serial
+      --autostart
+      --noreboot
+      --wait
+      '
+      /dev/null
+  - env:
+    - CLOUD_INIT_META_DATA: |
+        local-hostname: {{ guest_id }}
+    - CLOUD_INIT_USER_DATA: |
+        #cloud-config
+        manual_cache_clean: true
+        power_state:
+          mode: poweroff
+        runcmd:
+        - [sed, -i, -e, 's/,discard,/,/', /etc/fstab]  # Use fstrim instead.
+        - {{ bootstrap_users | json }}
+        - [touch, /etc/cloud/cloud-init.disabled]
+        users: []
+  - require:
+    - {{ guest_system_lv }}
+  - unless: virsh domstate --domain {{ guest_id }}
+
+# TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
+# TODO(salt >= 3003): Manage console.
+# TODO(https://github.com/saltstack/salt/issues/60700): Manage autostart.
+# TODO(https://github.com/saltstack/salt/pull/60297): Manage disks.
+{{ guest_id }}:
+  virt.running:
+  - cpu: {{ guest.vcpus }}
+  - mem: {{ guest.memory }}
+  - interfaces:
+    {% for network_name, network in guest.network.items() %}
+    - name: {{ network_name }}
+      type: bridge
+      source: {{ network.bridge }}
+      mac: {{ network.mac }}
+    {% endfor %}
+  - require:
+    - {{ guest_id }}_install
 
 {% endfor %}

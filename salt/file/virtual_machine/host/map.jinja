@@ -18,8 +18,16 @@
 {% set virtual_machine_host = salt.grains.filter_by({
     'Debian': {
         'pkgs': [
+            'dmidecode',
+            'libvirt-clients',
+            'libvirt-daemon-system',
             'lvm2',
+            'ovmf',
+            'python3-libvirt',
+            'qemu-system-x86',
+            'qemu-utils',
             'thin-provisioning-tools',
+            'virtinst',
         ],
     },
 }) %}

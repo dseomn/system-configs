@@ -37,6 +37,10 @@ guests:
   guest0.example.com:
     # Required. Which host this guest is on.
     host: host0.example.com
+    # Required. Number of CPUs.
+    vcpus: 2
+    # Required. Amount of memory in MiB.
+    memory: 256
     # Required. Storage configuration.
     storage:
       # Required. System (bootloader, root, etc.) volume.
@@ -47,3 +51,11 @@ guests:
         lv: host0.example.com_system
         # Required. System volume size.
         size: 4G
+    # Required. Network configuration.
+    network:
+      # Interface name.
+      br0:
+        # Required. Bridge this interface is on.
+        bridge: br0
+        # Required. MAC address.
+        mac: 00:00:5e:00:53:00
