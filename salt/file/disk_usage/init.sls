@@ -21,6 +21,13 @@
   - mode: 0755
   - source: salt://disk_usage/disk_usage_at_least.py
 
+{{ disk_usage.bin }} 5:
+  cron.present:
+  - identifier: facf3bb7-d24d-4f45-aaea-7886457b160b
+  - minute: random
+  - hour: random
+  - daymonth: random
+  - month: random
 {{ disk_usage.bin }} 80:
   cron.present:
   - identifier: 019261b3-a7df-49aa-a68e-3838302df043
