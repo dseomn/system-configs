@@ -23,13 +23,12 @@
 
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
 # genericcloud instead of generic.
-# TODO(Debian >= 11): Switch to a stable image.
 # TODO(dseomn): Once debian11 is in osinfo-db, change the name to that.
 {% set base_system = {
     'name': 'debiantesting',
-    'url': 'https://cloud.debian.org/images/cloud/bullseye/daily/20210811-731/debian-11-generic-amd64-daily-20210811-731.raw',
+    'url': 'https://cloud.debian.org/images/cloud/bullseye/20210814-734/debian-11-generic-amd64-20210814-734.raw',
     'hash_type': 'sha512',
-    'hash': '00c495097e75ce278ba22c10f1773a633f4dd4d055e6cff8d50194d7b2c03a1f0bff8f4c12e752fb672845183e91b327caef5f463b107a0167a3df5174d79f2b',
+    'hash': '9bcca16c653b2c701ca0acc63e5b5824f88a299be8fef1e200583db7cba7e9c677f3ca7741758ec0f7adaa852bdacea54976cfa6049459a4faf1fd97a2a8fabc',
     'size': '2G',
 } %}
 
