@@ -23,7 +23,8 @@
 
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
 # genericcloud instead of generic.
-# TODO(dseomn): Once debian11 is in osinfo-db, change the name to that.
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=980744): Change name to
+# debian11.
 {% set base_system = {
     'name': 'debiantesting',
     'url': 'https://cloud.debian.org/images/cloud/bullseye/20210814-734/debian-11-generic-amd64-20210814-734.raw',
