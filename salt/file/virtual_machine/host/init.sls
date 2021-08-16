@@ -144,9 +144,9 @@ base_system:
       --cloud-init meta-data=<(printf "%s" "$CLOUD_INIT_META_DATA"),user-data=<(printf "%s" "$CLOUD_INIT_USER_DATA")
       --boot uefi
       --os-variant name={{ base_system.name }}
-      --disk {{ guest_system_lv_path }},boot.order=1
+      --disk {{ guest_system_lv_path }},boot.order=1,driver.discard=unmap
       {% for swap_path in swap_paths -%}
-      --disk {{ swap_path }}
+      --disk {{ swap_path }},driver.discard=unmap
       {% endfor -%}
       {% for network in guest.network.values() -%}
       --network bridge={{ network.bridge }},mac={{ network.mac }}
