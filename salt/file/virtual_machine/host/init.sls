@@ -129,6 +129,33 @@ base_system:
   - creates: {{ swap_path }}
 {% endfor %}
 
+{% for data in guest.storage.get('data', []) %}
+{% set data_thin_pool_id = data.get('thin_pool', 'default') %}
+{% set data_thin_pool = host.thin_pools[data_thin_pool_id] %}
+{% set data_path = '/dev/' + data_thin_pool.vg + '/' + data.lv %}
+{% do extra_disk_paths.append(data_path) %}
+{{ data_path }}:
+  cmd.run:
+  - name: >-
+      lvcreate
+      --virtualsize {{ data.size }}
+      --name {{ data.lv }}
+      --thinpool {{ data_thin_pool.lv }}
+      {{ data_thin_pool.vg }}
+      &&
+      mkfs.ext4 -U {{ data.uuid }} {{ data_path }}
+  - creates: {{ data_path }}
+  - require:
+    - thin_pool_{{ data_thin_pool_id }}
+  lvm.lv_present:
+  - name: {{ data.lv }}
+  - vgname: {{ data_thin_pool.vg }}/{{ data_thin_pool.lv }}
+  - size: {{ data.size }}
+  - thinvolume: true
+  - require:
+    - cmd: {{ data_path }}
+{% endfor %}
+
 # TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
 # other than the system one.
 {{ guest_id }}_install:

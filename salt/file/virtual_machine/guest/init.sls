@@ -13,4 +13,4 @@
 # limitations under the License.
 
 
-# TODO(dseomn): Manage part of /etc/fstab for swap volumes.
+# TODO(dseomn): Manage part of /etc/fstab for swap and data volumes.

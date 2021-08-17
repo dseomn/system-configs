@@ -63,6 +63,18 @@ guests:
         size: 256M
         # Required. UUID of the swap area.
         uuid: 7968818d-f46d-4db2-b74d-076fddd44c1d
+      # Data volumes.
+      data:
+      - # Thin pool the volume is in. Default: "default".
+        thin_pool: default
+        # Required. Logical volume name.
+        lv: data_xmpp
+        # Required. Volume size.
+        size: 1T
+        # Required. Filesystem UUID.
+        uuid: c9f9b2b9-fb1c-42db-8319-f6b135697bc9
+        # Required. Mount point within the guest.
+        mount: /srv/xmpp
     # Required. Network configuration.
     network:
       # Interface name.
