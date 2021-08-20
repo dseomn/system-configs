@@ -46,6 +46,12 @@ inst-data.img:
 	mkdir -p inst-data.mnt
 	sudo mount -o loop "$@.new" inst-data.mnt
 	sudo cp -Lr inst-data/* inst-data.mnt
+	(cd .. && salt-run salt.cmd slsutil.renderer \
+		salt://users/bootstrap-passwordless-ssh-and-sudo.sh.jinja \
+		default_renderer=jinja \
+		with_pillar=true) | \
+		sudo tee inst-data.mnt/bootstrap-passwordless-ssh-and-sudo.sh \
+		> /dev/null
 	sudo umount inst-data.mnt
 	mv -f "$@.new" "$@"
 

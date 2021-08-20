@@ -15,5 +15,4 @@
 # limitations under the License.
 
 
-mkdir /srv/inst-data/output/ssh || exit 1
-cp /target/etc/ssh/ssh_host_*_key.pub /srv/inst-data/output/ssh || exit 1
+exec chroot /target sh - < /srv/inst-data/bootstrap-passwordless-ssh-and-sudo.sh
