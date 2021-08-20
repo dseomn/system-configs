@@ -51,6 +51,14 @@ EOF
 } || exit 1
 
 
+sed \
+  -e '/:$/ c virtual_machine_host :' \
+  -e '/\$default_filesystem$/ c 8192 8192 8192 $default_filesystem' \
+  < "$atomic_recipe" \
+  > "${recipe_dir}/10virtual_machine_host" \
+  || exit 1
+
+
 # Secondary device for storing dm-crypt keys.
 {
 cat > "${recipe_dir}/90keys" <<EOF
