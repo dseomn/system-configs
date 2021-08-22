@@ -51,9 +51,12 @@ EOF
 } || exit 1
 
 
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=385219): Remove the
+# delete-me LV.
 sed \
   -e '/:$/ c virtual_machine_host :' \
   -e '/\$default_filesystem$/ c 8192 8192 8192 $default_filesystem' \
+  -e '$ a 0 0 -1 $defaultignore{ } $lvmok{ } method{ keep } lv_name{ delete-me } .' \
   < "$atomic_recipe" \
   > "${recipe_dir}/10virtual_machine_host" \
   || exit 1
