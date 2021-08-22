@@ -294,5 +294,7 @@ wireguard_pkgs:
   file.managed:
   - source: salt://network/interfaces/nftables.conf.jinja
   - template: jinja
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir

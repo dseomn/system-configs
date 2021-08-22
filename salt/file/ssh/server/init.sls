@@ -64,8 +64,10 @@ sshd_port:
   - onchanges_in:
     - ssh-server-config-changed
   - source: salt://ssh/server/nftables.conf
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir
 
 
 {% for user, user_config in pillar.users.users.items()

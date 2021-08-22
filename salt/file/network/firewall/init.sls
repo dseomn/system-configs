@@ -23,6 +23,12 @@ nftables.conf:
   - source: salt://network/firewall/nftables.conf.jinja
   - template: jinja
 
-{{ nftables.config_dir }}:
+create_nftables_config_dir:
   file.directory:
+  - name: {{ nftables.config_dir }}
+manage_nftables_config_dir:
+  file.directory:
+  - name: {{ nftables.config_dir }}
   - clean: true
+  - require:
+    - create_nftables_config_dir

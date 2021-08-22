@@ -29,5 +29,7 @@ include:
   - require:
     - sls: network.firewall.nat_prerouting
     - sls: network.firewall.nat_output
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir

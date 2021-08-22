@@ -62,8 +62,10 @@ dnsmasq_running:
   - require:
     - sls: network.firewall.filter_postrouting
     - sls: network.firewall.nat_dstnat
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir
 
 {{ home_router.update_nftables_bin }}:
   file.managed:

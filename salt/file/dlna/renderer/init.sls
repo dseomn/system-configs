@@ -81,5 +81,7 @@ rygel_port:
   - template: jinja
   - defaults:
       rygel: {{ rygel | json }}
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir

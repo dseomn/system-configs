@@ -27,5 +27,7 @@ ssdp-client.conf:
   - source: salt://network/firewall/ssdp/client/nftables.conf
   - require:
     - sls: network.firewall.filter_output
+  - require:
+    - create_nftables_config_dir
   - require_in:
-    - file: {{ nftables.config_dir }}
+    - manage_nftables_config_dir
