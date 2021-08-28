@@ -14,7 +14,28 @@
 
 
 {% from 'backup/map.jinja' import backup %}
+{% from 'backup/source/map.jinja' import backup_source %}
 
 
-{{ backup.config_dir }}:
-  file.directory: []
+include:
+- backup
+
+
+create_backup_source_config_dir:
+  file.directory:
+  - name: {{ backup.config_dir }}/sources.d
+  - require:
+    - {{ backup.config_dir }}
+manage_backup_source_config_dir:
+  file.directory:
+  - name: {{ backup.config_dir }}/sources.d
+  - clean: true
+  - require:
+    - create_backup_source_config_dir
+
+
+{{ backup_source.backup_exec }}:
+  file.managed:
+  - mode: 0755
+  - source: salt://backup/source/backup_exec.py.jinja
+  - template: jinja

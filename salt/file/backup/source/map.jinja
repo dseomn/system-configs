@@ -15,8 +15,8 @@
  #}
 
 
-{% set backup = salt.grains.filter_by({
+{% set backup_source = salt.grains.filter_by({
     'Debian': {
-        'config_dir': '/etc/backup',
+        'backup_exec': '/usr/local/sbin/backup-exec',
     },
 }) %}

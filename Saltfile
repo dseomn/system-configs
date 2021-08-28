@@ -29,6 +29,7 @@ salt-ssh:
   extra_filerefs:
   - salt://acme/map.jinja
   - salt://backup/map.jinja
+  - salt://backup/source/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
