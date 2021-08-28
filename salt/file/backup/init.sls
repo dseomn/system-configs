@@ -18,3 +18,7 @@
 
 {{ backup.config_dir }}:
   file.directory: []
+
+
+{{ backup.data_dir }}:
+  file.directory: []

@@ -18,5 +18,6 @@
 {% set backup = salt.grains.filter_by({
     'Debian': {
         'config_dir': '/etc/backup',
+        'data_dir': '/srv/backup',
     },
 }) %}
