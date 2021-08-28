@@ -21,17 +21,23 @@ include:
 - backup
 
 
-create_backup_source_config_dir:
+{{ backup.config_dir }}/source:
   file.directory:
-  - name: {{ backup.config_dir }}/sources.d
   - require:
     - {{ backup.config_dir }}
-manage_backup_source_config_dir:
+
+
+create_backup_source_sources_d:
   file.directory:
-  - name: {{ backup.config_dir }}/sources.d
+  - name: {{ backup.config_dir }}/source/sources.d
+  - require:
+    - {{ backup.config_dir }}/source
+manage_backup_source_sources_d:
+  file.directory:
+  - name: {{ backup.config_dir }}/source/sources.d
   - clean: true
   - require:
-    - create_backup_source_config_dir
+    - create_backup_source_sources_d
 
 
 {{ backup_source.backup_exec }}:

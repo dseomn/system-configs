@@ -29,7 +29,7 @@ from typing import ContextManager, Optional, Sequence
 _NOW_UTC = datetime.datetime.now(tz=datetime.timezone.utc)
 
 # {% from 'backup/map.jinja' import backup %}
-_SOURCES_DIR = pathlib.Path('{{ backup.config_dir }}/sources.d')
+_SOURCES_DIR = pathlib.Path('{{ backup.config_dir }}/source/sources.d')
 
 
 class _Source(abc.ABC):
