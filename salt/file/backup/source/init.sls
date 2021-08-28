@@ -21,6 +21,11 @@ include:
 - backup
 
 
+backup_source_pkgs:
+  pkg.installed:
+  - pkgs: {{ backup_source.pkgs | json }}
+
+
 {{ backup.config_dir }}/source:
   file.directory:
   - require:
@@ -77,8 +82,46 @@ manage_backup_source_sources_d:
     - {{ backup.config_dir }}/source/ssh/known_hosts
 
 
+{{ backup.data_dir }}/source:
+  file.directory:
+  - require:
+    - {{ backup.data_dir }}
+
+
 {{ backup_source.backup_exec }}:
   file.managed:
   - mode: 0755
   - source: salt://backup/source/backup_exec.py.jinja
   - template: jinja
+
+
+{{ backup_source.backup_source_borg }}:
+  file.managed:
+  - mode: 0755
+  - contents: |
+      #!/bin/bash -e
+      export BORG_REPO='{{ pillar.backup.source.borg.repo }}'
+      exec borg --rsh='ssh -F {{ backup.config_dir }}/source/ssh/config' "$@"
+  - require:
+    - {{ backup.config_dir }}/source/ssh/config
+    - backup_source_pkgs
+
+backup_source_borg:
+  cron.present:
+  - name: >-
+      {{ backup_source.backup_exec }}
+      --backup-dir={{ backup.data_dir }}/source/borg
+      --
+      {{ backup_source.backup_source_borg }}
+      create
+      --numeric-owner
+      '::{{ pillar.backup.source.borg.archive }}'
+      .
+  - identifier: 9fb0268b-97eb-4c67-a4cb-f186e445eac9
+  - minute: random
+  - hour: random
+  - require:
+    - {{ backup_source.backup_exec }}
+    - manage_backup_source_sources_d
+    - {{ backup.data_dir }}/source
+    - {{ backup_source.backup_source_borg }}

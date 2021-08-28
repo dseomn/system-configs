@@ -17,6 +17,11 @@
 
 {% set backup_source = salt.grains.filter_by({
     'Debian': {
+        'pkgs': [
+            'borgbackup',
+            'rsync',
+        ],
         'backup_exec': '/usr/local/sbin/backup-exec',
+        'backup_source_borg': '/usr/local/sbin/backup-source-borg',
     },
 }) %}

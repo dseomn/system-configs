@@ -23,3 +23,10 @@ backup:
       # Required. known_hosts file contents to use for creating backups.
       known_hosts: |
         borg.example.com ecdsa-sha2-nistp256 ...
+
+    # Required. borgbackup configuration.
+    borg:
+      # Required. Repository to create backups in.
+      repo: borg@borg.example.com:/path/to/repo
+      # Required. Name of archives to create, optionally including placeholders.
+      archive: '{hostname}-{utcnow:%Y%m%dT%H%M%SZ}'
