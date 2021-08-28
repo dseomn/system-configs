@@ -40,6 +40,43 @@ manage_backup_source_sources_d:
     - create_backup_source_sources_d
 
 
+{{ backup.config_dir }}/source/ssh:
+  file.directory:
+  - mode: 0700
+  - require:
+    - {{ backup.config_dir }}/source
+
+{{ backup.config_dir }}/source/ssh/id_ecdsa:
+  cmd.run:
+  - name: >-
+      ssh-keygen -f {{ backup.config_dir }}/source/ssh/id_ecdsa -t ecdsa &&
+      cat {{ backup.config_dir }}/source/ssh/id_ecdsa.pub
+  - creates:
+    - {{ backup.config_dir }}/source/ssh/id_ecdsa
+    - {{ backup.config_dir }}/source/ssh/id_ecdsa.pub
+  - require:
+    - {{ backup.config_dir }}/source/ssh
+
+{{ backup.config_dir }}/source/ssh/known_hosts:
+  file.managed:
+  - contents_pillar: backup:source:ssh:known_hosts
+  - require:
+    - {{ backup.config_dir }}/source/ssh
+
+{{ backup.config_dir }}/source/ssh/config:
+  file.managed:
+  - contents: |
+      Match all
+        CheckHostIP no
+        IdentityFile {{ backup.config_dir }}/source/ssh/id_ecdsa
+        StrictHostKeyChecking yes
+        UserKnownHostsFile {{ backup.config_dir }}/source/ssh/known_hosts
+  - require:
+    - {{ backup.config_dir }}/source/ssh
+    - {{ backup.config_dir }}/source/ssh/id_ecdsa
+    - {{ backup.config_dir }}/source/ssh/known_hosts
+
+
 {{ backup_source.backup_exec }}:
   file.managed:
   - mode: 0755
