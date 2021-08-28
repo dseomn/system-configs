@@ -67,7 +67,7 @@ guests:
       data:
       - # Thin pool the volume is in. Default: "default".
         thin_pool: default
-        # Required. Logical volume name.
+        # Required. Logical volume name. Must be unique across all thin pools.
         lv: data_xmpp
         # Required. Volume size.
         size: 1T
@@ -75,6 +75,8 @@ guests:
         uuid: c9f9b2b9-fb1c-42db-8319-f6b135697bc9
         # Required. Mount point within the guest.
         mount: /srv/xmpp
+        # Whether to back up this volume or not. Default: true.
+        backup: true
     # Required. Network configuration.
     network:
       # Interface name.

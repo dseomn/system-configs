@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+{% from 'backup/map.jinja' import backup %}
 {% from 'virtual_machine/host/map.jinja' import virtual_machine_host %}
 
 {% import_text 'users/bootstrap-passwordless-ssh-and-sudo.sh.jinja'
@@ -32,6 +33,17 @@
     'hash': '9bcca16c653b2c701ca0acc63e5b5824f88a299be8fef1e200583db7cba7e9c677f3ca7741758ec0f7adaa852bdacea54976cfa6049459a4faf1fd97a2a8fabc',
     'size': '2G',
 } %}
+
+
+{% set sls_include = [] %}
+{% for guest in host.guests.values() %}
+  {% for data in guest.storage.get('data', []) %}
+    {% if data.get('backup', True) %}
+      {% do sls_include.append('backup.source') %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+include: {{ sls_include | unique | json }}
 
 
 virtual_machine_host_pkgs:
@@ -154,6 +166,25 @@ base_system:
   - thinvolume: true
   - require:
     - cmd: {{ data_path }}
+{% if data.get('backup', True) %}
+{{ backup.config_dir }}/source/sources.d/50-{{ data.lv }}.json:
+  file.managed:
+  - contents: {{
+        {
+            'name': data.lv,
+            'type': 'lvm_thin_snapshot',
+            'config': {
+                'vg': data_thin_pool.vg,
+                'lv': data.lv,
+            },
+        } | json | json
+    }}
+  - require:
+    - create_backup_source_sources_d
+    - {{ data_path }}
+  - require_in:
+    - manage_backup_source_sources_d
+{% endif %}
 {% endfor %}
 
 # TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
