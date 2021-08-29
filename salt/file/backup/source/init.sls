@@ -115,7 +115,7 @@ backup_source_borg:
       {{ backup_source.backup_source_borg }}
       create
       --numeric-owner
-      '::{{ pillar.backup.source.borg.archive }}'
+      '::{{ pillar.backup.source.borg.archive.replace("%", "\\%") }}'
       .
   - identifier: 9fb0268b-97eb-4c67-a4cb-f186e445eac9
   - minute: random
