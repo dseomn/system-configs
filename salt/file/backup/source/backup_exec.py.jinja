@@ -107,7 +107,6 @@ class _LvmThinSnapshotSource(_Source):
                     '--quiet',
                     '--quiet',
                     '--snapshot',
-                    '--permission=r',
                     '--setactivationskip=n',
                     f'--name={snapshot_lv}',
                     '--',
@@ -126,6 +125,18 @@ class _LvmThinSnapshotSource(_Source):
                     f'{self._vg}/{snapshot_lv}',
                 ),
                 check=True,
+            )
+
+            subprocess.run(
+                (
+                    'fsck',
+                    '-T',
+                    f'/dev/{self._vg}/{snapshot_lv}',
+                    '--',
+                    '-p'
+                ),
+                check=True,
+                stdout=subprocess.DEVNULL,
             )
 
             self.path.mkdir()
