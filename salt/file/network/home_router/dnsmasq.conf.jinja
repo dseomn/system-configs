@@ -55,6 +55,11 @@ enable-ra
     if 'home_router' in interface %}
 {% set segment = segments[interface.segment] %}
 {% set ipv4_prefix = '10.{}.{}'.format(site.id, segment.id) %}
+{% set ipv6_ula_prefix = '{}:{:02x}{:02x}'.format(
+    global.ula,
+    site.id,
+    segment.id,
+) %}
 
 interface={{ interface_name }}
 
@@ -67,10 +72,8 @@ dhcp-range=::100,::1ff,constructor:{{ interface_name }},slaac
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
 {% set other_host_ipv4 = '{}.{}'.format(ipv4_prefix, other_host.interface_id) %}
-{% set other_host_ipv6_ula = '{}:{:02x}{:02x}::{:x}'.format(
-    global.ula,
-    site.id,
-    segment.id,
+{% set other_host_ipv6_ula = '{}::{:x}'.format(
+    ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
 dhcp-host={{ '{},{},[::{:x}],{}'.format(
