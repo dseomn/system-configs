@@ -77,7 +77,7 @@ dhcp-range=::,constructor:{{ interface_name }},slaac
     ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
-dhcp-host={{ '{},{},[{}],{}'.format(
+dhcp-host={{ '{},{},[{}],{},10m'.format(
     other_host.mac,
     other_host_ipv4,
     other_host_ipv6_ula,
