@@ -67,8 +67,7 @@ interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
 interface-name={{ grains.host }},{{ interface_name }}
 
 dhcp-range={{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254
-dhcp-range={{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac
-dhcp-range=::,constructor:{{ interface_name }},slaac
+dhcp-range=::100,::1ff,constructor:{{ interface_name }},slaac
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
