@@ -220,6 +220,10 @@ base_system:
   - env:
     - CLOUD_INIT_META_DATA: |
         local-hostname: {{ guest_id }}
+        network-interfaces: |
+          # Interfaces are configured by
+          # /etc/udev/rules.d/75-cloud-ifupdown.rules and
+          # /etc/network/cloud-ifupdown-helper
     - CLOUD_INIT_USER_DATA: |
         #cloud-config
         manual_cache_clean: true
