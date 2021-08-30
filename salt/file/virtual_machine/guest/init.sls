@@ -13,4 +13,36 @@
 # limitations under the License.
 
 
-# TODO(dseomn): Manage part of /etc/fstab for swap and data volumes.
+{% set guest = pillar.virtual_machine.guest %}
+
+
+{% set mountpoint_states = [] %}
+{% for data in guest.storage.get('data', []) %}
+{% set mountpoint_state = 'mountpoint_' + data.uuid %}
+{% do mountpoint_states.append(mountpoint_state) %}
+{{ mountpoint_state }}:
+  file.directory:
+  - name: {{ data.mount }}
+  - makedirs: true
+{% endfor %}
+
+virtual_machine_guest_volumes:
+  file.blockreplace:
+  - name: /etc/fstab
+  - marker_start: '# START: salt virtual_machine.guest'
+  - marker_end: '# END: salt virtual_machine.guest'
+  - content: |
+      {% for swap in guest.storage.get('swap', []) -%}
+      UUID={{ swap.uuid }} none swap defaults 0 0
+      {% endfor -%}
+      {% for data in guest.storage.get('data', []) -%}
+      UUID={{ data.uuid }} {{ data.mount }} ext4 defaults,x-systemd.growfs 0 2
+      {% endfor %}
+  - append_if_not_found: true
+  - require: {{ mountpoint_states | json }}
+  cmd.run:
+  - name: >-
+      swapon --verbose --all 2>&1 &&
+      mount --verbose --all
+  - onchanges:
+    - file: virtual_machine_guest_volumes
