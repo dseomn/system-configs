@@ -30,6 +30,7 @@ salt-ssh:
   - salt://acme/map.jinja
   - salt://backup/map.jinja
   - salt://backup/source/map.jinja
+  - salt://common/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
