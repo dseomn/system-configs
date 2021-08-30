@@ -46,3 +46,25 @@ virtual_machine_guest_volumes:
       mount --verbose --all
   - onchanges:
     - file: virtual_machine_guest_volumes
+
+{% for data in guest.storage.get('data', []) %}
+{{ data.mount }}/.volume:
+  file.directory:
+  - mode: 700
+  - require:
+    - virtual_machine_guest_volumes
+
+# Make it possible to map user/group IDs to names in backed up copies of the
+# volume.
+{{ data.mount }}/.volume/passwd:
+  file.copy:
+  - source: /etc/passwd
+  - force: true
+  - preserve: true
+  # TODO(https://github.com/saltstack/salt/issues/55504): Remove the `unless`
+  # requisite.
+  - unless:
+    - cmp {{ data.mount }}/.volume/passwd /etc/passwd
+  - require:
+    -  {{ data.mount }}/.volume
+{% endfor %}
