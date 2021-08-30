@@ -16,13 +16,11 @@
 {% set guest = pillar.virtual_machine.guest %}
 
 
-{% set mountpoint_states = [] %}
+{% set mountpoints = [] %}
 {% for data in guest.storage.get('data', []) %}
-{% set mountpoint_state = 'mountpoint_' + data.uuid %}
-{% do mountpoint_states.append(mountpoint_state) %}
-{{ mountpoint_state }}:
+{% do mountpoints.append(data.mount) %}
+{{ data.mount }}:
   file.directory:
-  - name: {{ data.mount }}
   - makedirs: true
 {% endfor %}
 
@@ -39,7 +37,7 @@ virtual_machine_guest_volumes:
       UUID={{ data.uuid }} {{ data.mount }} ext4 defaults,x-systemd.growfs 0 2
       {% endfor %}
   - append_if_not_found: true
-  - require: {{ mountpoint_states | json }}
+  - require: {{ mountpoints | json }}
   cmd.run:
   - name: >-
       swapon --verbose --all 2>&1 &&
