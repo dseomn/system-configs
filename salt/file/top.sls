@@ -74,6 +74,9 @@ base:
   - dlna.renderer
   - ssh.server
 
+  'G@role:news-aggregator':
+  - news_aggregator
+
   'G@role:virtual-machine:guest':
   - ssh.server
   - standard
