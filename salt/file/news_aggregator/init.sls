@@ -84,11 +84,21 @@ rss2email_user:
     - /etc/rss2email.cfg
     - /srv/rss2email/data
 
-{{ common.local_bin }}/r2e-wrapper run:
+# TODO(https://github.com/rss2email/rss2email/issues/195): Merge these.
+{{ common.local_bin }}/r2e-wrapper run > /dev/null 2>&1:
   cron.present:
   - identifier: f907cedc-fb0b-4300-8f9e-70701fca6c7d
   - user: rss2email
   - minute: random
+  - require:
+    - {{ common.local_bin }}/r2e-wrapper
+    - rss2email_user
+{{ common.local_bin }}/r2e-wrapper run:
+  cron.present:
+  - identifier: b3b923e6-4838-42be-87a9-e493b0e09eb9
+  - user: rss2email
+  - minute: random
+  - hour: random
   - require:
     - {{ common.local_bin }}/r2e-wrapper
     - rss2email_user
