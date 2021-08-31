@@ -45,4 +45,5 @@ salt-ssh:
   - salt://news_aggregator/map.jinja
   - salt://pki/public.jinja
   - salt://uptime/map.jinja
+  - salt://vcs/map.jinja
   - salt://virtual_machine/host/map.jinja

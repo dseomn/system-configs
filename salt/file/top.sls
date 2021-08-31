@@ -77,6 +77,9 @@ base:
   'G@role:news-aggregator':
   - news_aggregator
 
+  'G@role:vcs':
+  - vcs
+
   'G@role:virtual-machine:guest':
   - ssh.server
   - standard
