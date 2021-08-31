@@ -20,3 +20,17 @@ domain: example.com
 # Required. https://en.wikipedia.org/wiki/Unique_local_address. Replace the X's
 # with your own random Global ID.
 ula: fdXX:XXXX:XXXX
+
+# Global home router configuration.
+home_router:
+  # Additional global names that should point at specific hosts.
+  aliases:
+    # Host name, under the domain above.
+    smtp:
+    -
+      # Site of the target host.
+      site: bos01
+      # Segment of the target host.
+      segment: lan
+      # Interface ID of the target host.
+      interface_id: 2

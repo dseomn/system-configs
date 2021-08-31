@@ -18,7 +18,8 @@
 
 {% set host = pillar.network.hosts[grains.id] %}
 {% set segments = pillar.network.segments %}
-{% set site = pillar.network.sites[host.site] %}
+{% set sites = pillar.network.sites %}
+{% set site = sites[host.site] %}
 {% set global = pillar.network.global %}
 
 {% set subdomain = '{}.{}'.format(host.site, global.domain) %}
@@ -91,6 +92,23 @@ host-record={{ '{}.{},{},{},{}'.format(
     other_host_ipv6_ula,
 ) }}
 {% endfor %}
+{% endfor %}
+{% endfor %}
+
+{% for alias_name, targets
+    in global.get('home_router', {}).get('aliases', {}).items() %}
+{% for target in targets %}
+host-record={{ '{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
+    alias_name,
+    global.domain,
+    sites[target.site].id,
+    segments[target.segment].id,
+    target.interface_id,
+    global.ula,
+    sites[target.site].id,
+    segments[target.segment].id,
+    target.interface_id,
+) }}
 {% endfor %}
 {% endfor %}
 
