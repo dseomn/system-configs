@@ -128,13 +128,7 @@ class _LvmThinSnapshotSource(_Source):
             )
 
             subprocess.run(
-                (
-                    'fsck',
-                    '-T',
-                    f'/dev/{self._vg}/{snapshot_lv}',
-                    '--',
-                    '-p'
-                ),
+                ('fsck', '-T', f'/dev/{self._vg}/{snapshot_lv}', '--', '-p'),
                 check=True,
                 stdout=subprocess.DEVNULL,
             )
