@@ -14,7 +14,12 @@
 
 {% set interface_ids = [] %}
 
-{% set ns = namespace(auto_dns=false) %}
+{% set ns = namespace(auto_ip=false, auto_dns=false) %}
+{% for ip in interface.get('ip', ()) %}
+  {% if 'auto' in ip %}
+    {% set ns.auto_ip = true %}
+  {% endif %}
+{% endfor %}
 {% for dns in interface.get('dns', ()) %}
   {% if 'auto' in dns %}
     {% set ns.auto_dns = true %}
@@ -25,11 +30,10 @@
 Name={{ interface_name }}
 
 [Network]
+DHCP={{ 'yes' if ns.auto_ip else 'no' }}
+IPv6AcceptRA={{ 'yes' if ns.auto_ip else 'no' }}
 {% for ip in interface.ip %}
-{% if 'auto' in ip %}
-DHCP=yes
-IPv6AcceptRA=yes
-{% elif 'interface_id' in ip %}
+{% if 'interface_id' in ip %}
 {% do interface_ids.append(ip.interface_id) %}
 {% set segment = segments[interface.segment] %}
 Address=10.{{ site.id }}.{{ segment.id }}.{{ ip.interface_id }}/24
