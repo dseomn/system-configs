@@ -38,8 +38,8 @@ vcs_pkgs:
   - group: {{ user }}
   - mode: 0700
   - require:
-    - /srv/vcs
-    - virtual_machine_guest_volumes
+    - /srv/vcs is mounted
+    - /srv/vcs is backed up
 
 ~{{ user }}/.bashrc:
   file.blockreplace:

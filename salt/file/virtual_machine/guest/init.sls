@@ -22,6 +22,11 @@
 {{ data.mount }}:
   file.directory:
   - makedirs: true
+
+{% if data.get('backup', True) %}
+{{ data.mount }} is backed up:
+  test.nop: []
+{% endif %}
 {% endfor %}
 
 virtual_machine_guest_volumes:
@@ -46,11 +51,20 @@ virtual_machine_guest_volumes:
     - file: virtual_machine_guest_volumes
 
 {% for data in guest.storage.get('data', []) %}
+{{ data.mount }} is mounted:
+  test.fail_without_changes:
+  - require:
+    - virtual_machine_guest_volumes
+  - unless:
+    - fun: mount.is_mounted
+      args:
+      - {{ data.mount }}
+
 {{ data.mount }}/.volume:
   file.directory:
   - mode: 700
   - require:
-    - virtual_machine_guest_volumes
+    - {{ data.mount }} is mounted
 
 # Make it possible to map user/group IDs to names in backed up copies of the
 # volume.

@@ -71,8 +71,8 @@ rss2email_user:
   - group: rss2email
   - mode: 0700
   - require:
-    - /srv/rss2email
-    - virtual_machine_guest_volumes
+    - /srv/rss2email is mounted
+    - /srv/rss2email is backed up
     - rss2email_user
 
 {{ common.local_bin }}/r2e-wrapper:
