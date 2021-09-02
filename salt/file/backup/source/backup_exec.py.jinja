@@ -210,7 +210,8 @@ def _sources() -> Sequence[_Source]:
 
 
 @contextlib.contextmanager
-def _backup_dir(backup_dir: Optional[pathlib.Path]) -> pathlib.Path:
+def _backup_dir(
+        backup_dir: Optional[pathlib.Path]) -> ContextManager[pathlib.Path]:
     if backup_dir is None:
         with tempfile.TemporaryDirectory() as temp_dir:
             yield pathlib.Path(temp_dir)
