@@ -33,6 +33,18 @@ acme_pkgs:
     # acme_cert() macro does.
     - sls: ddns
 
+{{ acme.certbot_config_dir }}/archive:
+  file.directory:
+  - mode: 0755
+  - require:
+    - acme_pkgs
+
+{{ acme.certbot_config_dir }}/live:
+  file.directory:
+  - mode: 0755
+  - require:
+    - acme_pkgs
+
 {{ acme.certbot_config_dir }}/renewal exists:
   file.directory:
   - name: {{ acme.certbot_config_dir }}/renewal

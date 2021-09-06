@@ -54,6 +54,8 @@ acme_cert_{{ name }}:
       "${CERTBOT_VALIDATION}"'
   - require:
     - acme_pkgs
+    - {{ acme.certbot_config_dir }}/archive
+    - {{ acme.certbot_config_dir }}/live
   - creates:
     - {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf
     - {{ acme.certbot_config_dir }}/live/{{ name }}/privkey.pem
