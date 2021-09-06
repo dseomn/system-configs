@@ -47,8 +47,15 @@ ddns_user:
   - shell: {{ ddns.user_shell }}
   - system: true
 
-{{ ddns.conf_dir }}:
+{{ ddns.conf_dir }} exists:
   file.directory:
+  - name: {{ ddns.conf_dir }}
+  - user: root
+  - group: {{ ddns.user_group }}
+  - dir_mode: 0750
+{{ ddns.conf_dir }} is clean:
+  file.directory:
+  - name: {{ ddns.conf_dir }}
   - user: root
   - group: {{ ddns.user_group }}
   - dir_mode: 0750
@@ -58,14 +65,24 @@ ddns_user:
     - group
     - mode
   - clean: true
+  - require:
+    - {{ ddns.conf_dir }} exists
 
 {% for provider, provider_records in pillar.ddns.items() %}
 
-{{ ddns.conf_dir }}/{{ provider }}:
+{{ ddns.conf_dir }}/{{ provider }} exists:
   file.directory:
-  - clean: true
+  - name: {{ ddns.conf_dir }}/{{ provider }}
+  - require:
+    - {{ ddns.conf_dir }} exists
   - require_in:
-    - file: {{ ddns.conf_dir }}
+    - {{ ddns.conf_dir }} is clean
+{{ ddns.conf_dir }}/{{ provider }} is clean:
+  file.directory:
+  - name: {{ ddns.conf_dir }}/{{ provider }}
+  - clean: true
+  - require:
+    - {{ ddns.conf_dir }}/{{ provider }} exists
 
 {% for record, record_data in provider_records.items() %}
 
@@ -76,8 +93,10 @@ ddns_user:
 {{ ddns.conf_dir }}/{{ provider }}/{{ record }}:
   file.managed:
   - contents: {{ record_data | json }}
+  - require:
+    - {{ ddns.conf_dir }}/{{ provider }} exists
   - require_in:
-    - file: {{ ddns.conf_dir }}/{{ provider }}
+    - {{ ddns.conf_dir }}/{{ provider }} is clean
 
 {% endfor %}
 {% endfor %}

@@ -33,8 +33,14 @@ acme_pkgs:
     # acme_cert() macro does.
     - sls: ddns
 
-{{ acme.certbot_config_dir }}/renewal:
+{{ acme.certbot_config_dir }}/renewal exists:
   file.directory:
-  - clean: true
+  - name: {{ acme.certbot_config_dir }}/renewal
   - require:
     - acme_pkgs
+{{ acme.certbot_config_dir }}/renewal is clean:
+  file.directory:
+  - name: {{ acme.certbot_config_dir }}/renewal
+  - clean: true
+  - require:
+    - {{ acme.certbot_config_dir }}/renewal exists

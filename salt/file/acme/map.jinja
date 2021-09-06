@@ -62,7 +62,7 @@ acme_cert_{{ name }}:
 {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf:
   file.exists:
   - require_in:
-    - {{ acme.certbot_config_dir }}/renewal
+    - {{ acme.certbot_config_dir }}/renewal is clean
   - require:
     - acme_cert_{{ name }}
 
