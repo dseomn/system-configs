@@ -45,14 +45,21 @@ acme_pkgs:
   - require:
     - acme_pkgs
 
-{{ acme.certbot_config_dir }}/renewal exists:
+{% for clean_dir in [
+    'renewal',
+    'renewal-hooks/deploy',
+    'renewal-hooks/post',
+    'renewal-hooks/pre',
+] %}
+{{ acme.certbot_config_dir }}/{{ clean_dir }} exists:
   file.directory:
-  - name: {{ acme.certbot_config_dir }}/renewal
+  - name: {{ acme.certbot_config_dir }}/{{ clean_dir }}
   - require:
     - acme_pkgs
-{{ acme.certbot_config_dir }}/renewal is clean:
+{{ acme.certbot_config_dir }}/{{ clean_dir }} is clean:
   file.directory:
-  - name: {{ acme.certbot_config_dir }}/renewal
+  - name: {{ acme.certbot_config_dir }}/{{ clean_dir }}
   - clean: true
   - require:
-    - {{ acme.certbot_config_dir }}/renewal exists
+    - {{ acme.certbot_config_dir }}/{{ clean_dir }} exists
+{% endfor %}
