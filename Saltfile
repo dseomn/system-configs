@@ -36,6 +36,7 @@ salt-ssh:
   - salt://disk_usage/map.jinja
   - salt://grub/map.jinja
   - salt://gvisor/map.jinja
+  - salt://irc/bouncer/map.jinja
   - salt://kubernetes/map.jinja
   - salt://kubernetes/runtime/map.jinja
   - salt://mail/map.jinja

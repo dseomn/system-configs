@@ -62,6 +62,9 @@ base:
   - ssh.server
   - standard
 
+  'G@role:irc:bouncer':
+  - irc.bouncer
+
   'G@role:kubernetes':
   - kubernetes
   - kubernetes.runtime
