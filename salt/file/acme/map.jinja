@@ -38,7 +38,7 @@
 {% macro acme_cert(name, group='root', dns_provider='dyn.dns.he.net') %}
 acme_cert_{{ name }}:
   cmd.run:
-  - name: >
+  - name: >-
       {{ acme.certbot_bin }}
       certonly
       --non-interactive
