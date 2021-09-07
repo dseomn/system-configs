@@ -90,3 +90,13 @@ sshd_port:
   - contents_pillar: users:users:{{ user }}:ssh:authorized_keys
 
 {% endfor %}
+
+
+/root/.ssh:
+  file.directory:
+  - mode: 0700
+
+/root/.ssh/authorized_keys:
+  file.managed:
+  - source: salt://ssh/server/authorized_keys_accumulated.jinja
+  - template: jinja
