@@ -14,6 +14,7 @@
 
 
 {% from 'backup/map.jinja' import backup %}
+{% from 'common/map.jinja' import common %}
 
 
 {{ backup.config_dir }}:
@@ -21,4 +22,8 @@
 
 
 {{ backup.data_dir }}:
+  file.directory: []
+
+
+{{ common.local_lib }}/backup:
   file.directory: []
