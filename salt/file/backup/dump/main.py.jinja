@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import argparse
+import contextlib
+import os
+import pathlib
+import shlex
+import subprocess
+import sys
+import tempfile
+
+# {% from 'common/map.jinja' import common %}
+_SOURCES_DIR = pathlib.Path('{{ common.local_lib }}/backup/dump/sources')
+
+
+def _args():
+    parser = argparse.ArgumentParser(
+        description='Dump data to a volume for backups.')
+    parser.add_argument(
+        '--volume-uuid',
+        required=True,
+        help='UUID of the volume to dump to.',
+    )
+    parser.add_argument(
+        'source',
+        choices=tuple(source.name for source in _SOURCES_DIR.iterdir()),
+        help='Source to dump.',
+    )
+
+    ssh_original_command = os.getenv('SSH_ORIGINAL_COMMAND')
+    if ssh_original_command is None:
+        argv = sys.argv
+    elif len(sys.argv) > 1:
+        raise ValueError(
+            f'Unable to merge command {sys.argv!r} and $SSH_ORIGINAL_COMMAND '
+            f'{ssh_original_command!r}')
+    else:
+        argv = shlex.split(ssh_original_command)
+        if not argv or argv[0] != 'backup-dump':
+            raise ValueError(
+                f'Wrong $SSH_ORIGINAL_COMMAND: {ssh_original_command!r}')
+
+    return parser.parse_args(argv[1:])
+
+
+def main() -> None:
+    args = _args()
+    with contextlib.ExitStack() as exit_stack:
+        mountpoint = exit_stack.enter_context(tempfile.TemporaryDirectory())
+        subprocess.run(
+            ('mount', '--', f'UUID={args.volume_uuid}', mountpoint),
+            check=True,
+        )
+        exit_stack.callback(
+            subprocess.run,
+            ('umount', '--', mountpoint),
+            check=True,
+        )
+        exit_stack.callback(os.chdir, os.getcwd())
+        os.chdir(mountpoint)
+        subprocess.run(
+            (str(_SOURCES_DIR.joinpath(args.source)),),
+            check=True,
+        )
+
+
+if __name__ == '__main__':
+    main()
