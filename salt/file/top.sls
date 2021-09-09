@@ -94,3 +94,6 @@ base:
   - ssh.server
   - standard
   - virtual_machine.host
+
+  'G@role:xmpp':
+  - xmpp
