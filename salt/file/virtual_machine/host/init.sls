@@ -42,6 +42,9 @@
       {% do sls_include.append('backup.source') %}
     {% endif %}
   {% endfor %}
+  {% if guest.get('backup_dump') %}
+    {% do sls_include.append('backup.source') %}
+  {% endif %}
 {% endfor %}
 include: {{ sls_include | unique | json }}
 
@@ -258,5 +261,32 @@ base_system:
     {% endfor %}
   - require:
     - {{ guest_id }}_install
+
+{% for dump in guest.get('backup_dump', ()) %}
+{% set dump_name = dump.get('name', 'dump_' + dump.source) %}
+{% set dump_thin_pool_id = dump.get('thin_pool', 'default') %}
+{% set dump_thin_pool = host.thin_pools[dump_thin_pool_id] %}
+{{ backup.config_dir }}/source/sources.d/50-{{ dump_name }}.json:
+  file.managed:
+  - contents: {{
+        {
+            'name': dump_name,
+            'type': 'virtual_machine_ssh_dump',
+            'config': {
+                'guest': guest_id,
+                'dump_source': dump.source,
+                'temp_volume_vg': dump_thin_pool.vg,
+                'temp_volume_thin_pool_lv': dump_thin_pool.lv,
+                'temp_volume_size': dump.size,
+            },
+        } | json | json
+    }}
+  - require:
+    - create_backup_source_sources_d
+    - {{ guest_id }}
+    - thin_pool_{{ dump_thin_pool_id }}
+  - require_in:
+    - manage_backup_source_sources_d
+{% endfor %}
 
 {% endfor %}

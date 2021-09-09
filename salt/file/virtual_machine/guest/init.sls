@@ -13,7 +13,15 @@
 # limitations under the License.
 
 
+{% from 'common/map.jinja' import common %}
+
+
 {% set guest = pillar.virtual_machine.guest %}
+
+
+{% set includes = [
+    'ssh.server',
+] %}
 
 
 {% set mountpoint_states = [] %}
@@ -81,3 +89,27 @@ virtual_machine_guest_volumes:
   - require:
     -  {{ data.mount }}/.volume
 {% endfor %}
+
+
+{% if 'backup_dump' in guest %}
+{% do includes.append('backup.dump') %}
+
+virtual_machine_guest_backup_dump_authorized_keys:
+  file.accumulated:
+  - filename: /root/.ssh/authorized_keys
+  - text: >-
+      restrict,command="{{ common.local_sbin}}/backup-dump"
+      {{ guest.backup_dump_ssh_public_key }}
+  - require:
+    - {{ common.local_sbin}}/backup-dump
+  - require_in:
+    - file: /root/.ssh/authorized_keys
+
+{% for dump in guest['backup_dump'] %}
+{{ common.local_lib }}/backup/dump/sources/{{ dump.source }} is dumped:
+  test.nop: []
+{% endfor %}
+{% endif %}
+
+
+include: {{ includes | json }}

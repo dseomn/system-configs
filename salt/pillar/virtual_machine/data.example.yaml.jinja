@@ -31,6 +31,9 @@ hosts:
         size: 128G
     # Required. Default volume group name for guest swap volumes.
     default_swap_vg: host0-vg
+    # Required if any guests use backup_dump. SSH public key to use for backup
+    # dumps.
+    backup_dump_ssh_public_key: ecdsa-sha2-nistp256 ...
 
 # Required. Virtual machine guests.
 guests:
@@ -77,6 +80,18 @@ guests:
         mount: /srv/xmpp
         # Whether to back up this volume or not. Default: true.
         backup: true
+    # Configuration for the backup.dump state. (This is separate from backing up
+    # volumes above.)
+    backup_dump:
+    - # Name on the host. Must be unique on the host. Default: dump_<source>.
+      name: dump_mariadb
+      # Required. Source name on the guest, passed to backup-dump.
+      source: mariadb
+      # Thin pool to use for a temporary volume to dump the data to. Default:
+      # "default".
+      thin_pool: default
+      # Required. Size of temporary volume to dump the data to.
+      size: 1G
     # Required. Network configuration.
     network:
       # Interface name.
