@@ -25,11 +25,14 @@ import pathlib
 import subprocess
 import tempfile
 from typing import ContextManager, Optional, Sequence
+import uuid
 
 _NOW_UTC = datetime.datetime.now(tz=datetime.timezone.utc)
 
 # {% from 'backup/map.jinja' import backup %}
-_SOURCES_DIR = pathlib.Path('{{ backup.config_dir }}/source/sources.d')
+_CONFIG_DIR = pathlib.Path('{{ backup.config_dir }}')
+_SOURCES_DIR = _CONFIG_DIR.joinpath('source/sources.d')
+_SSH_CONFIG = _CONFIG_DIR.joinpath('source/ssh/config')
 
 
 class _Source(abc.ABC):
@@ -156,8 +159,140 @@ class _LvmThinSnapshotSource(_Source):
             yield
 
 
+class _VirtualMachineSshDumpSource(_Source):
+    """A mount of a temporary volume populated by ssh'ing to a VM."""
+
+    def __init__(
+        self,
+        name: str,
+        *,
+        guest: str,
+        dump_source: str,
+        temp_volume_vg: str,
+        temp_volume_thin_pool_lv: str,
+        temp_volume_size: str,
+    ):
+        """Initializer.
+
+        Args:
+            name: See _Source.
+            guest: Virtual machine name.
+            dump_source: Source to dump in the VM.
+            temp_volume_vg: VG with a thin pool to make a temporary volume in.
+            temp_volume_thin_pool_lv: Thin pool to make a temporary volume in.
+            temp_volume_size: Size of the temporary volume.
+        """
+        super().__init__(name)
+        self._guest = guest
+        self._dump_source = dump_source
+        self._temp_volume_vg = temp_volume_vg
+        self._temp_volume_thin_pool_lv = temp_volume_thin_pool_lv
+        self._temp_volume_size = temp_volume_size
+
+    @contextlib.contextmanager
+    def context(self) -> ContextManager[None]:
+        """See base class."""
+        dump_lv = f'backup_{_NOW_UTC.strftime("%Y%m%dT%H%M%SZ")}_{self.name}'
+        dump_uuid = str(uuid.uuid4())
+        dump_dev = f'/dev/{self._temp_volume_vg}/{dump_lv}'
+        dump_dev_target = 'vdz'
+
+        with contextlib.ExitStack() as exit_stack:
+            subprocess.run(
+                (
+                    'lvcreate',
+                    '--quiet',
+                    '--quiet',
+                    f'--virtualsize={self._temp_volume_size}',
+                    f'--name={dump_lv}',
+                    f'--thinpool={self._temp_volume_thin_pool_lv}',
+                    '--',
+                    self._temp_volume_vg,
+                ),
+                check=True,
+            )
+            exit_stack.callback(
+                subprocess.run,
+                (
+                    'lvremove',
+                    '--quiet',
+                    '--quiet',
+                    '--yes',
+                    '--',
+                    f'{self._temp_volume_vg}/{dump_lv}',
+                ),
+                check=True,
+            )
+
+            subprocess.run(
+                ('mkfs.ext4', '-q', '-U', dump_uuid, dump_dev),
+                check=True,
+            )
+
+            subprocess.run(
+                (
+                    'virsh',
+                    '--quiet',
+                    'attach-disk',
+                    f'--domain={self._guest}',
+                    f'--source={dump_dev}',
+                    f'--target={dump_dev_target}',
+                    '--live',
+                ),
+                check=True,
+            )
+            try:
+                subprocess.run(
+                    (
+                        'ssh',
+                        '-F',
+                        str(_SSH_CONFIG),
+                        self._guest,
+                        'backup-dump',
+                        f'--volume-uuid={dump_uuid}',
+                        self._dump_source,
+                    ),
+                    check=True,
+                )
+            finally:
+                subprocess.run(
+                    (
+                        'virsh',
+                        '--quiet',
+                        'detach-disk',
+                        f'--domain={self._guest}',
+                        f'--target={dump_dev_target}',
+                        '--live',
+                    ),
+                    check=True,
+                )
+
+            self.path.mkdir()
+            exit_stack.callback(self.path.rmdir)
+
+            subprocess.run(
+                (
+                    'mount',
+                    '-o',
+                    'ro',
+                    '--',
+                    dump_dev,
+                    str(self.path),
+                ),
+                check=True,
+            )
+            exit_stack.callback(
+                subprocess.run,
+                ('umount', '--', str(self.path)),
+                check=True,
+            )
+
+            yield
+
+
 _SOURCE_FACTORY_BY_TYPE = {
     'lvm_thin_snapshot': _LvmThinSnapshotSource,
+    'virtual_machine_ssh_dump': _VirtualMachineSshDumpSource,
 }
 
 
