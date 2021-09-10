@@ -13,7 +13,9 @@
 # limitations under the License.
 
 
+{% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'common/map.jinja' import common %}
+{% from 'network/firewall/map.jinja' import nftables %}
 {% from 'xmpp/map.jinja' import xmpp %}
 
 
@@ -23,7 +25,9 @@
 
 
 include:
+- acme
 - backup.dump
+- network.firewall
 - virtual_machine.guest
 
 
@@ -32,8 +36,76 @@ xmpp_pkgs:
   - pkgs: {{ xmpp.pkgs }}
 
 
-# TODO(dseomn): Configure ejabberd.
-# TODO(dseomn): service.enabled and service.running
+/srv/ejabberd/mod_log_chat:
+  file.directory:
+  - user: {{ xmpp.ejabberd_user }}
+  - group: {{ xmpp.ejabberd_group }}
+  - mode: 0700
+  - require:
+    - /srv/ejabberd is mounted
+    - /srv/ejabberd is backed up
+    - xmpp_pkgs
+
+/srv/ejabberd/mod_muc_log:
+  file.directory:
+  - user: {{ xmpp.ejabberd_user }}
+  - group: {{ xmpp.ejabberd_group }}
+  - mode: 0700
+  - require:
+    - /srv/ejabberd is mounted
+    - /srv/ejabberd is backed up
+    - xmpp_pkgs
+
+{{ nftables.config_dir }}/50-ejabberd.conf:
+  file.managed:
+  - contents: |
+      add rule inet filter input tcp dport { 5222, 5223, 5269, 5270 } accept
+  - require:
+    - create_nftables_config_dir
+  - require_in:
+    - manage_nftables_config_dir
+
+{% for domain in pillar.xmpp.domains %}
+{{ acme_cert(domain, group=xmpp.ejabberd_group) }}
+{{ acme_cert('conference.' + domain, group=xmpp.ejabberd_group) }}
+{% endfor %}
+
+{{ acme.certbot_config_dir }}/renewal-hooks/post/50-xmpp:
+  file.managed:
+  - mode: 0755
+  - contents: |
+      #!/bin/bash
+      exec systemctl reload ejabberd.service
+  - require:
+    - {{ acme.certbot_config_dir }}/renewal-hooks/post exists
+    - xmpp_pkgs
+  - require_in:
+    - {{ acme.certbot_config_dir }}/renewal-hooks/post is clean
+
+{{ xmpp.ejabberd_config_file }}:
+  file.managed:
+  - source: salt://xmpp/ejabberd.yml.jinja
+  - template: jinja
+  - require:
+    - xmpp_pkgs
+    {% for domain in pillar.xmpp.domains %}
+    - {{ acme.certbot_config_dir }}/live/{{ domain }}/fullchain.pem
+    - {{ acme.certbot_config_dir }}/live/{{ domain }}/privkey.pem
+    - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/fullchain.pem
+    - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/privkey.pem
+    {% endfor %}
+    - /srv/ejabberd/mod_log_chat
+    - /srv/ejabberd/mod_muc_log
+
+ejabberd_enabled:
+  service.enabled:
+  - name: ejabberd.service
+
+ejabberd_running:
+  service.running:
+  - name: ejabberd.service
+  - watch:
+    - {{ xmpp.ejabberd_config_file }}
 
 {{ common.local_lib }}/backup/dump/sources/ejabberd:
   file.managed:

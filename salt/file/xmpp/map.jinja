@@ -19,6 +19,11 @@
     'Debian': {
         'pkgs': [
             'ejabberd',
+            'ejabberd-mod-log-chat',
         ],
+        'ejabberd_user': 'ejabberd',
+        'ejabberd_group': 'ejabberd',
+        'ejabberd_config_file': '/etc/ejabberd/ejabberd.yml',
+        'ejabberd_rotate_logs': False,
     },
 }) %}

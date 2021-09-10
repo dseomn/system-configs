@@ -1,0 +1,114 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+{% from 'acme/map.jinja' import acme %}
+{% from 'xmpp/map.jinja' import xmpp %}
+
+
+hosts: {{ pillar.xmpp.domains | list | json }}
+
+{% if not xmpp.ejabberd_rotate_logs %}
+log_rotate_size: infinity
+{% endif %}
+
+access_rules:
+  local_user:
+  - allow:
+    - user_glob: '*'
+
+auth_password_format: scram
+disable_sasl_mechanisms:
+- X-OAUTH2
+
+certfiles:
+{% for domain in pillar.xmpp.domains %}
+- {{ acme.certbot_config_dir }}/live/{{ domain }}/fullchain.pem
+- {{ acme.certbot_config_dir }}/live/{{ domain }}/privkey.pem
+- {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/fullchain.pem
+- {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/privkey.pem
+{% endfor %}
+s2s_use_starttls: required
+listen:
+- port: 5222
+  ip: '::'
+  module: ejabberd_c2s
+  max_stanza_size: 65536
+  starttls_required: true
+- port: 5223
+  ip: '::'
+  module: ejabberd_c2s
+  max_stanza_size: 65536
+  tls: true
+- port: 5269
+  ip: '::'
+  module: ejabberd_s2s_in
+  max_stanza_size: 131072
+- port: 5270
+  ip: '::'
+  module: ejabberd_s2s_in
+  max_stanza_size: 131072
+  tls: true
+
+modules:
+  mod_adhoc: {}
+  mod_avatar: {}
+  mod_blocking: {}
+  mod_caps: {}
+  mod_carboncopy: {}
+  mod_client_state: {}
+  mod_disco: {}
+  mod_last: {}
+  mod_log_chat:
+    # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=994027): Uncomment
+    # the next line.
+    #path: /srv/ejabberd/mod_log_chat
+    format: html
+  mod_mam:
+    clear_archive_on_room_destroy: false
+    default: always
+  mod_muc:
+    access_register: local_user
+    default_room_options:
+      logging: true
+      mam: true
+  mod_muc_admin: {}
+  mod_muc_log:
+    outdir: /srv/ejabberd/mod_muc_log
+    timezone: universal
+  mod_offline:
+    store_groupchat: true
+  mod_ping: {}
+  mod_pres_counter: {}
+  mod_privacy: {}
+  mod_private: {}
+  mod_pubsub:
+    access_createnode: local_user
+    force_node_config:
+      storage:bookmarks:
+        # https://github.com/processone/ejabberd/blob/3114ce4ed28e039803af732c1d29f6d0982fba29/ejabberd.yml.example#L213
+        access_model: whitelist
+    plugins:
+    - flat
+    - pep
+  mod_push: {}
+  mod_push_keepalive: {}
+  mod_roster:
+    versioning: true
+  mod_stream_mgmt:
+    resend_on_timeout: if_offline
+  mod_time: {}
+  mod_vcard: {}
+  mod_vcard_xupdate: {}
+  mod_version: {}
