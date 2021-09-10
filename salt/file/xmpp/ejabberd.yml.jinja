@@ -79,12 +79,18 @@ modules:
     clear_archive_on_room_destroy: false
     default: always
   mod_muc:
+    access: all
+    access_admin: none
+    access_create: local_user
+    access_mam: local_user
+    access_persistent: local_user
     access_register: local_user
     default_room_options:
       logging: true
       mam: true
   mod_muc_admin: {}
   mod_muc_log:
+    access_log: none
     outdir: /srv/ejabberd/mod_muc_log
     timezone: universal
   mod_offline:
