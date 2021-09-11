@@ -18,6 +18,7 @@ base:
   - convenience
   - cron
   - disk_usage
+  - lost_found
   - mail.local_relay
   - trim
   - uptime
