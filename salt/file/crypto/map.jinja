@@ -1,0 +1,68 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{#
+ # Recommendations:
+ # https://wiki.mozilla.org/Security/Server_Side_TLS
+ # https://www.keylength.com/
+ #
+ # Tests:
+ # https://www.ssllabs.com/ssltest/index.html
+ # https://xmpp.net/
+ #}
+
+{% set crypto = {} %}
+
+{#
+ # OpenSSL
+ #
+ # Documentation:
+ # ciphers(1ssl)
+ # SSL_CTX_set_security_level(3ssl)
+ #
+ # TODO(dseomn): Increase general_ciphers to @SECLEVEL=3 once it's easier to get
+ # Let's Encrypt certs with a CA path that meets that level. See
+ # https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679
+ # for a CA path that would work, but is a pain to set up. At level 3,
+ # 'HIGH:!kRSA' can probably be simplified to 'DEFAULT'.
+ #}
+{% macro _protocols_disabled_to_string(protocols) -%}
+  {%- for protocol in protocols -%}
+    -{{ protocol }}
+    {%- if not loop.last %} {% endif -%}
+  {%- endfor -%}
+{%- endmacro %}
+{% do crypto.update({
+    'openssl': {
+        'ciphers_to_string': ':'.join,
+        'protocols_disabled_to_string': _protocols_disabled_to_string,
+        'general_ciphers': (
+            'HIGH',
+            '!kRSA',
+            '!eNULL',
+            '!aNULL',
+            '@SECLEVEL=2',
+            '@STRENGTH',
+        ),
+        'general_protocols_disabled': (
+            'SSLv2',
+            'SSLv3',
+            'TLSv1',
+            'TLSv1.1',
+        ),
+    },
+}) %}

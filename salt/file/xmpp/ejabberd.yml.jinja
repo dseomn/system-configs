@@ -14,6 +14,7 @@
 
 
 {% from 'acme/map.jinja' import acme %}
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'xmpp/map.jinja' import xmpp %}
 
 
@@ -38,6 +39,16 @@ certfiles:
 - {{ acme.certbot_config_dir }}/live/{{ domain }}/privkey.pem
 - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/fullchain.pem
 - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/privkey.pem
+{% endfor %}
+c2s_ciphers: {{ crypto.openssl.general_ciphers | json }}
+c2s_protocol_options:
+{% for protocol in crypto.openssl.general_protocols_disabled %}
+- no_{{ protocol.lower().replace('.', '_') }}
+{% endfor %}
+s2s_ciphers: {{ crypto.openssl.general_ciphers | json }}
+s2s_protocol_options:
+{% for protocol in crypto.openssl.general_protocols_disabled %}
+- no_{{ protocol.lower().replace('.', '_') }}
 {% endfor %}
 s2s_use_starttls: required
 listen:

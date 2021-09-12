@@ -15,6 +15,7 @@
 
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'common/map.jinja' import common %}
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'irc/bouncer/map.jinja' import irc_bouncer %}
 {% from 'network/firewall/map.jinja' import nftables %}
 
@@ -103,7 +104,11 @@ znc_files:
       LoadModule = adminlog
       LoadModule = log
       SSLCertFile = {{ acme.certbot_config_dir }}/live/{{ pillar.irc.bouncer.name }}/fullchain.pem
+      SSLCiphers = {{ crypto.openssl.ciphers_to_string(
+          crypto.openssl.general_ciphers) }}
       SSLKeyFile = {{ acme.certbot_config_dir }}/live/{{ pillar.irc.bouncer.name }}/privkey.pem
+      SSLProtocols = {{ crypto.openssl.protocols_disabled_to_string(
+          crypto.openssl.general_protocols_disabled) }}
       Version = 1.8.2
       <Listener ircs-u>
         AllowIRC = true
