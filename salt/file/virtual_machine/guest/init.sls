@@ -77,17 +77,22 @@ virtual_machine_guest_volumes:
 
 # Make it possible to map user/group IDs to names in backed up copies of the
 # volume.
-{{ data.mount }}/.volume/passwd:
+{% for target, source in {
+    'group': '/etc/group',
+    'passwd': '/etc/passwd',
+}.items() %}
+{{ data.mount }}/.volume/{{ target }}:
   file.copy:
-  - source: /etc/passwd
+  - source: {{ source }}
   - force: true
   - preserve: true
   # TODO(https://github.com/saltstack/salt/issues/55504): Remove the `unless`
   # requisite.
   - unless:
-    - cmp {{ data.mount }}/.volume/passwd /etc/passwd
+    - cmp {{ data.mount }}/.volume/{{ target }} {{ source }}
   - require:
     -  {{ data.mount }}/.volume
+{% endfor %}
 {% endfor %}
 
 
