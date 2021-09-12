@@ -14,6 +14,7 @@
 
 
 {% from 'acme/map.jinja' import acme %}
+{% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'xmpp/map.jinja' import xmpp %}
 
@@ -29,7 +30,13 @@ access_rules:
   - allow:
     - user_glob: '*'
 
-auth_password_format: scram
+auth_method:
+- external
+auth_use_cache: false
+extauth_program: >-
+  {{ common.local_lib }}/ejabberd-authentication
+  --config={{ xmpp.ejabberd_config_dir }}/users.passwd
+  --max-passwords-per-user={{ pillar.xmpp.get('max_passwords_per_user', 25) }}
 disable_sasl_mechanisms:
 - X-OAUTH2
 

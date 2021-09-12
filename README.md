@@ -23,4 +23,13 @@ key, for use with out-of-band certificate provisioning. It serves the same
 purpose as self-signed certificates, but uses a separate CA and EE certificate
 to avoid some issues with self-signed certificates.
 
+[`salt/file/xmpp/ejabberd_authentication.py`](salt/file/xmpp/ejabberd_authentication.py)
+is an [ejabberd external authentication
+script](https://docs.ejabberd.im/admin/configuration/authentication/#external-script)
+that makes it possible to have multiple passwords per user (e.g., so a user can
+use a different password on each of their devices). It uses a simple
+configuration file in the style of
+[passwd](https://en.wikipedia.org/wiki/Passwd#Password_file) or
+[shadow](https://en.wikipedia.org/wiki/Passwd#Shadow_file) files
+
 This is not an officially supported Google product.

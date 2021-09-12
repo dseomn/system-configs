@@ -82,12 +82,33 @@ xmpp_pkgs:
   - require_in:
     - {{ acme.certbot_config_dir }}/renewal-hooks/post is clean
 
+{{ common.local_lib }}/ejabberd-authentication:
+  file.managed:
+  - mode: 0755
+  - source: salt://xmpp/ejabberd_authentication.py
+
+{{ xmpp.ejabberd_config_dir }}/users.passwd:
+  file.managed:
+  - mode: 0640
+  - user: root
+  - group: {{ xmpp.ejabberd_group }}
+  - contents: |
+      {%- for domain_name, domain in pillar.xmpp.domains.items() %}
+      {%- for username, user in domain.users.items() %}
+      {%- for crypted_password in user.crypted_passwords %}
+      {{ username }}:{{ domain_name }}:{{ crypted_password }}
+      {%- endfor %}
+      {%- endfor %}
+      {%- endfor %}
+
 {{ xmpp.ejabberd_config_file }}:
   file.managed:
   - source: salt://xmpp/ejabberd.yml.jinja
   - template: jinja
   - require:
     - xmpp_pkgs
+    - {{ common.local_lib }}/ejabberd-authentication
+    - {{ xmpp.ejabberd_config_dir }}/users.passwd
     {% for domain in pillar.xmpp.domains %}
     - {{ acme.certbot_config_dir }}/live/{{ domain }}/fullchain.pem
     - {{ acme.certbot_config_dir }}/live/{{ domain }}/privkey.pem
@@ -105,6 +126,8 @@ ejabberd_running:
   service.running:
   - name: ejabberd.service
   - watch:
+    - {{ common.local_lib }}/ejabberd-authentication
+    - {{ xmpp.ejabberd_config_dir }}/users.passwd
     - {{ xmpp.ejabberd_config_file }}
 
 {{ common.local_lib }}/backup/dump/sources/ejabberd:

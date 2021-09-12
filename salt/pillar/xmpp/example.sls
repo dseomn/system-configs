@@ -14,7 +14,21 @@
 
 xmpp:
 
+  # Maximum number of passwords a single user can have configured below.
+  # Default: 25.
+  max_passwords_per_user: 25
+
   # Required. Domains to serve XMPP for.
   domains:
 
-    example.com: {}
+    example.com:
+
+      # Required. Users in the domain.
+      users:
+
+        alice:
+          # Required. Hashed salted passwords. See
+          # https://docs.python.org/3/library/crypt.html#crypt.crypt for how to
+          # generate them.
+          crypted_passwords:
+          - '$6$...'
