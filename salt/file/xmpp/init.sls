@@ -117,3 +117,18 @@ ejabberd_running:
     - xmpp_pkgs
   - require_in:
     - {{ common.local_lib }}/backup/dump/sources is clean
+
+# https://github.com/processone/ejabberd/blob/655dcbcb7467db3cb0f89cf99d34cc2244e6c84f/src/mod_mam.erl#L98-L103
+# http://erlang.org/faq/mnesia.html#idp32901264
+{% set _du = 'du --apparent-size --human-readable --summarize' %}
+{{ _du }} --threshold=768M {{ xmpp.ejabberd_data_dir }}:
+  cron.present:
+  - identifier: 51226146-e8b8-4e73-8a8e-ecdf09f95185
+  - minute: random
+  - hour: random
+  - dayweek: random
+{{ _du }} --threshold=1G {{ xmpp.ejabberd_data_dir }}:
+  cron.present:
+  - identifier: 6ae7a5b7-6a2b-4ce2-8979-30e5c825e6f3
+  - minute: random
+  - hour: random
