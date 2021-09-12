@@ -33,6 +33,8 @@ auth_password_format: scram
 disable_sasl_mechanisms:
 - X-OAUTH2
 
+acme:
+  auto: false
 certfiles:
 {% for domain in pillar.xmpp.domains %}
 - {{ acme.certbot_config_dir }}/live/{{ domain }}/fullchain.pem
