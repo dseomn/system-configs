@@ -80,6 +80,13 @@ guests:
         mount: /srv/xmpp
         # Whether to back up this volume or not. Default: true.
         backup: true
+      # Volumes passed through to the guest without any additional management by
+      # salt on the host.
+      passthrough:
+      - # Required. Filesystem UUID.
+        uuid: 39fa5af1-4c7e-4fd3-b263-4d6d5f0c1449
+        # Required. Mount point within the guest.
+        mount: /srv/backups
     # Configuration for the backup.dump state. (This is separate from backing up
     # volumes above.)
     backup_dump:

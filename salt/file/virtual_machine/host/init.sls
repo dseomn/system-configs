@@ -190,6 +190,13 @@ base_system:
 {% endif %}
 {% endfor %}
 
+{% for passthrough in guest.storage.get('passthrough', ()) %}
+{% set passthrough_path = '/dev/disk/by-uuid/' + passthrough.uuid %}
+{% do extra_disk_paths.append(passthrough_path) %}
+{{ passthrough_path }}:
+  file.exists: []
+{% endfor %}
+
 # TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
 # other than the system one.
 {{ guest_id }}_install:

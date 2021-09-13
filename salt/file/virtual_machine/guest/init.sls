@@ -24,8 +24,11 @@
 ] %}
 
 
+{% set mountpoints = [] %}
 {% set mountpoint_states = [] %}
+
 {% for data in guest.storage.get('data', []) %}
+{% do mountpoints.append(data.mount) %}
 {% do mountpoint_states.append(data.mount + ' exists') %}
 {{ data.mount }} exists:
   file.directory:
@@ -36,6 +39,15 @@
 {{ data.mount }} is backed up:
   test.nop: []
 {% endif %}
+{% endfor %}
+
+{% for passthrough in guest.storage.get('passthrough', ()) %}
+{% do mountpoints.append(passthrough.mount) %}
+{% do mountpoint_states.append(passthrough.mount + ' exists') %}
+{{ passthrough.mount }} exists:
+  file.directory:
+  - name: {{ passthrough.mount }}
+  - makedirs: true
 {% endfor %}
 
 virtual_machine_guest_volumes:
@@ -49,6 +61,9 @@ virtual_machine_guest_volumes:
       {% endfor -%}
       {% for data in guest.storage.get('data', []) -%}
       UUID={{ data.uuid }} {{ data.mount }} ext4 defaults,x-systemd.growfs 0 2
+      {% endfor -%}
+      {% for passthrough in guest.storage.get('passthrough', ()) -%}
+      UUID={{ passthrough.uuid }} {{ passthrough.mount }} ext4 defaults 0 2
       {% endfor %}
   - append_if_not_found: true
   - require: {{ mountpoint_states | json }}
@@ -59,21 +74,21 @@ virtual_machine_guest_volumes:
   - onchanges:
     - file: virtual_machine_guest_volumes
 
-{% for data in guest.storage.get('data', []) %}
-{{ data.mount }} is mounted:
+{% for mountpoint in mountpoints %}
+{{ mountpoint }} is mounted:
   test.fail_without_changes:
   - require:
     - virtual_machine_guest_volumes
   - unless:
     - fun: mount.is_mounted
       args:
-      - {{ data.mount }}
+      - {{ mountpoint }}
 
-{{ data.mount }}/.volume:
+{{ mountpoint }}/.volume:
   file.directory:
   - mode: 700
   - require:
-    - {{ data.mount }} is mounted
+    - {{ mountpoint }} is mounted
 
 # Make it possible to map user/group IDs to names in backed up copies of the
 # volume.
@@ -81,7 +96,7 @@ virtual_machine_guest_volumes:
     'group': '/etc/group',
     'passwd': '/etc/passwd',
 }.items() %}
-{{ data.mount }}/.volume/{{ target }}:
+{{ mountpoint }}/.volume/{{ target }}:
   file.copy:
   - source: {{ source }}
   - force: true
@@ -89,9 +104,9 @@ virtual_machine_guest_volumes:
   # TODO(https://github.com/saltstack/salt/issues/55504): Remove the `unless`
   # requisite.
   - unless:
-    - cmp {{ data.mount }}/.volume/{{ target }} {{ source }}
+    - cmp {{ mountpoint }}/.volume/{{ target }} {{ source }}
   - require:
-    -  {{ data.mount }}/.volume
+    -  {{ mountpoint }}/.volume
 {% endfor %}
 {% endfor %}
 
