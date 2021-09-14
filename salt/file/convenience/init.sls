@@ -23,6 +23,7 @@
             'man-db',
             'manpages',
             'netcat-openbsd',
+            'rsync',
             'tmux',
             'traceroute',
             'wget',
