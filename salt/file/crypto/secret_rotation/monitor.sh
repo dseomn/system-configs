@@ -15,6 +15,7 @@
 # limitations under the License.
 
 
-{% for rotate_after_days, filenames in accumulator.items() %}
-find {{ ' '.join(filenames) }} -type f -mtime +{{ rotate_after_days }}
+{% for comment, filenames in accumulator.items() %}
+# {{ comment }}
+find {{ ' '.join(filenames) }} -type f -mtime +{{ 4 * 365 }}
 {% endfor %}
