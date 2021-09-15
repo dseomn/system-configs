@@ -41,6 +41,18 @@
 }) %}
 
 {#
+ # OpenSSH
+ #
+ # Documentation:
+ # ssh-keygen(1)
+ #}
+{% do crypto.update({
+    'openssh': {
+        'keygen_args': ('-t', 'ecdsa', '-b', '384'),
+    },
+}) %}
+
+{#
  # OpenSSL
  #
  # Documentation:
