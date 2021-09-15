@@ -15,6 +15,7 @@
  #}
 
 
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'ddns/map.jinja' import ddns %}
 
 
@@ -45,8 +46,7 @@ acme_cert_{{ name }}:
       --agree-tos
       --email '{{ acme.email }}'
       --domain '{{ name }}'
-      --key-type ecdsa
-      --elliptic-curve secp384r1
+      {{ ' '.join(crypto.certbot.args) }}
       --preferred-challenges dns
       --manual
       --manual-auth-hook

@@ -29,6 +29,18 @@
 {% set crypto = {} %}
 
 {#
+ # Certbot
+ #
+ # Documentation:
+ # https://certbot.eff.org/docs/using.html
+ #}
+{% do crypto.update({
+    'certbot': {
+        'args': ('--key-type', 'ecdsa', '--elliptic-curve', 'secp384r1'),
+    },
+}) %}
+
+{#
  # OpenSSL
  #
  # Documentation:
