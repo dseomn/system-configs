@@ -15,7 +15,7 @@
 # limitations under the License.
 
 
-{% for comment, filenames in accumulator.items() %}
+{% for comment, filenames in accumulator | dictsort %}
 # {{ comment }}
 find {{ ' '.join(filenames) }} -type f -mtime +{{ 4 * 365 }}
 {% endfor %}
