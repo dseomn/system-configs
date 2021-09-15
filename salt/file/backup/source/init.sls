@@ -15,10 +15,12 @@
 
 {% from 'backup/map.jinja' import backup %}
 {% from 'backup/source/map.jinja' import backup_source %}
+{% from 'ssh/map.jinja' import ssh %}
 
 
 include:
 - backup
+- crypto.secret_rotation
 
 
 backup_source_pkgs:
@@ -51,16 +53,7 @@ manage_backup_source_sources_d:
   - require:
     - {{ backup.config_dir }}/source
 
-{{ backup.config_dir }}/source/ssh/id_ecdsa:
-  cmd.run:
-  - name: >-
-      ssh-keygen -f {{ backup.config_dir }}/source/ssh/id_ecdsa -t ecdsa &&
-      cat {{ backup.config_dir }}/source/ssh/id_ecdsa.pub
-  - creates:
-    - {{ backup.config_dir }}/source/ssh/id_ecdsa
-    - {{ backup.config_dir }}/source/ssh/id_ecdsa.pub
-  - require:
-    - {{ backup.config_dir }}/source/ssh
+{{ ssh.key(backup.config_dir + '/source/ssh/id') }}
 
 {{ backup.config_dir }}/source/ssh/known_hosts:
   file.managed:
@@ -73,12 +66,12 @@ manage_backup_source_sources_d:
   - contents: |
       Match all
         CheckHostIP no
-        IdentityFile {{ backup.config_dir }}/source/ssh/id_ecdsa
+        IdentityFile {{ backup.config_dir }}/source/ssh/id
         StrictHostKeyChecking yes
         UserKnownHostsFile {{ backup.config_dir }}/source/ssh/known_hosts
   - require:
     - {{ backup.config_dir }}/source/ssh
-    - {{ backup.config_dir }}/source/ssh/id_ecdsa
+    - {{ backup.config_dir }}/source/ssh/id
     - {{ backup.config_dir }}/source/ssh/known_hosts
 
 
