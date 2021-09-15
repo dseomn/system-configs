@@ -63,6 +63,7 @@ rss2email_user:
       [feed.{{ email | regex_replace('[^\\w\\d]', '-') }}.{{ feed_id }}]
       url = {{ feed_url }}
       to = {{ email }}
+      bonus-header = X-Feed-ID: {{ feed_id }}
       {% endfor %}
       {% endfor %}
 
