@@ -23,10 +23,12 @@
 }) %}
 
 {% from 'network/firewall/map.jinja' import nftables %}
+{% from 'ssh/map.jinja' import ssh %}
 
 
 include:
 - network.firewall
+- crypto.secret_rotation
 
 
 ssh-server-config-changed:
@@ -48,6 +50,8 @@ sshd_running:
   - watch:
     - file: sshd_config
 
+{{ ssh.key(sshd.config_directory + '/ssh_host_key') }}
+
 sshd_config:
   file.managed:
   - name: {{ sshd.config_directory }}/sshd_config
@@ -57,6 +61,8 @@ sshd_config:
   - template: jinja
   - defaults:
       sshd: {{ sshd | json }}
+  - require:
+    - {{ sshd.config_directory }}/ssh_host_key
 
 sshd_port:
   file.managed:
