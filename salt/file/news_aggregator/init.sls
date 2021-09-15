@@ -53,6 +53,7 @@ rss2email_user:
     - rss2email_user
   - contents: |
       [DEFAULT]
+      from = rss2email@{{ grains.id }}
       force-from = True
       name-format = {feed-title}
       trust-guid = True
