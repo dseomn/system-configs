@@ -42,6 +42,7 @@ salt-ssh:
   - salt://kubernetes/map.jinja
   - salt://kubernetes/runtime/map.jinja
   - salt://mail/map.jinja
+  - salt://nas/map.jinja
   - salt://network/firewall/map.jinja
   - salt://network/home_router/dns/map.jinja
   - salt://network/home_router/map.jinja

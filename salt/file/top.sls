@@ -78,6 +78,9 @@ base:
   - dlna.renderer
   - ssh.server
 
+  'G@role:nas':
+  - nas
+
   'G@role:news-aggregator':
   - news_aggregator
 
