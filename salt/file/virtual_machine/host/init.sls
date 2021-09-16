@@ -241,6 +241,11 @@ base_system:
           mode: poweroff
         runcmd:
         - [sed, -i, -e, 's/,discard,/,/', /etc/fstab]  # Use fstrim instead.
+        # TODO(https://github.com/canonical/cloud-init/pull/1021): Remove the
+        # next command.
+        - [sed, -i, -e,
+           's/^::1 \(ip6-localhost ip6-loopback\)$/::1 localhost \1/',
+           /etc/hosts]
         - {{ bootstrap_users | json }}
         - [touch, /etc/cloud/cloud-init.disabled]
         users: []
