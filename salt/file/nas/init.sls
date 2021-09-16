@@ -69,7 +69,6 @@ nas_user:
 {{ nas.rsync_config_file }}:
   file.managed:
   - contents: |
-      address = localhost
       daemon uid = nas
       daemon gid = nas
       use chroot = false
@@ -80,6 +79,8 @@ nas_user:
       path = {{ share.volume.replace('%', '%%') }}
       {% endfor %}
   - require: {{ (['nas_user'] + share_requisites) | json }}
+
+{% do open_tcp_ports.append(873) %}
 
 rsync_enabled:
   service.enabled:
