@@ -40,9 +40,10 @@ recipient_delimiter = +
 
 # Instead of delivering to a local mailbox by default, send local mail to root
 # if it doesn't match any alias.
-alias_maps = hash:/etc/aliases static:root
-alias_database = hash:/etc/aliases
-local_recipient_maps = proxy:unix:passwd.byname hash:/etc/aliases
+alias_maps = ${default_database_type}:/etc/aliases static:root
+alias_database = ${default_database_type}:/etc/aliases
+local_recipient_maps =
+  proxy:unix:passwd.byname ${default_database_type}:/etc/aliases
 
 
 # Where to send all remote mail.

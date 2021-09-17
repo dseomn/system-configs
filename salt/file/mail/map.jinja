@@ -19,6 +19,7 @@
     'Debian': {
         'pkgs': (
             'postfix',
+            'postfix-cdb',
         ),
         'postfix_service': 'postfix',
         'postfix_config_dir': '/etc/postfix',
@@ -28,6 +29,7 @@
 
 {% set _postfix_main_cf_boilerplate %}
 compatibility_level = 2
+default_database_type = cdb
 {% endset %}
 
 
