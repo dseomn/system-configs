@@ -13,7 +13,43 @@
 # limitations under the License.
 
 
+{% from 'mail/map.jinja' import mail %}
+
+
+include:
+- pki.public
+
+
+mail_pkgs:
+  pkg.installed:
+  - pkgs: {{ mail.pkgs | json }}
+
+
+postfix_enabled:
+  service.enabled:
+  - name: {{ mail.postfix_service }}
+  - require:
+    - mail_pkgs
+
+postfix_running:
+  service.running:
+  - name: {{ mail.postfix_service }}
+  - require:
+    - mail_pkgs
+
 /etc/aliases:
   file.managed:
   - source: salt://mail/aliases.jinja
   - template: jinja
+{{ mail.postalias('/etc/aliases') }}
+
+{{ mail.postfix_config_dir }}/main.cf:
+  file.managed:
+  - source: salt://mail/main.cf.jinja
+  - template: jinja
+  - require:
+    - mail_pkgs
+    - /etc/aliases
+    - sls: pki.public
+  - watch_in:
+    - postfix_running

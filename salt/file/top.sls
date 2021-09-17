@@ -19,7 +19,7 @@ base:
   - cron
   - disk_usage
   - lost_found
-  - mail.local_relay
+  - mail
   - trim
   - uptime
 

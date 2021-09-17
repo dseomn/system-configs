@@ -17,10 +17,26 @@
 
 {% set mail = salt.grains.filter_by({
     'Debian': {
-        'postfix': {
-            'pkg': 'postfix',
-            'service': 'postfix',
-            'config_directory': '/etc/postfix',
-        },
+        'pkgs': (
+            'postfix',
+        ),
+        'postfix_service': 'postfix',
+        'postfix_config_dir': '/etc/postfix',
     },
+}) %}
+
+
+{% macro _postalias(filename) %}
+postalias {{ filename }}:
+  cmd.run:
+  - require:
+    - mail_pkgs
+    - {{ mail.postfix_config_dir }}/main.cf
+  - onchanges:
+    - {{ filename }}
+{% endmacro %}
+
+
+{% do mail.update({
+    'postalias': _postalias,
 }) %}
