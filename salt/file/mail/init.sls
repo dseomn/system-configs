@@ -15,4 +15,5 @@
 
 /etc/aliases:
   file.managed:
-  - source: salt://mail/aliases
+  - source: salt://mail/aliases.jinja
+  - template: jinja

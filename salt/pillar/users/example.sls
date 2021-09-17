@@ -23,6 +23,9 @@ users:
       # Whether the user is an admin of the local system. Default: false.
       admin: true
 
+      # Required. User's email address.
+      email: example@example.com
+
       # SSH configuration.
       ssh:
         # Contents of ~/.ssh/authorized_keys.

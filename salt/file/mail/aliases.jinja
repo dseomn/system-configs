@@ -13,7 +13,15 @@
 # limitations under the License.
 
 
-root: david@mandelberg.org
+{% set admins = [] %}
+{% for username, user in pillar.users.users.items() %}
+{{ username }}: {{ user.email }}
+{% if user.get('admin', False) %}
+{% do admins.append(username) %}
+{% endif %}
+{% endfor %}
+
+root: {{ admins | join(', ') }}
 
 # https://tools.ietf.org/html/rfc2142#section-4
 abuse: root
