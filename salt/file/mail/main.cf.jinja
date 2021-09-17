@@ -13,11 +13,11 @@
 # limitations under the License.
 
 
+{% from 'mail/map.jinja' import mail %}
 {% from 'pki/public.jinja' import public_pki %}
 
 
-# http://www.postfix.org/COMPATIBILITY_README.html
-compatibility_level = 2
+{{ mail.postfix_main_cf_boilerplate }}
 
 
 # Host identity.

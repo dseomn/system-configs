@@ -26,6 +26,11 @@
 }) %}
 
 
+{% set _postfix_main_cf_boilerplate %}
+compatibility_level = 2
+{% endset %}
+
+
 {% macro _postalias(filename) %}
 postalias {{ filename }}:
   cmd.run:
@@ -38,5 +43,6 @@ postalias {{ filename }}:
 
 
 {% do mail.update({
+    'postfix_main_cf_boilerplate': _postfix_main_cf_boilerplate,
     'postalias': _postalias,
 }) %}
