@@ -25,8 +25,8 @@ myhostname = {{ grains.fqdn }}
 mydomain = {{ grains.domain }}
 
 
-# Accept mail from localhost only.
-inet_interfaces = loopback-only
+# Accept mail only from the local system.
+master_service_disable = inet
 mynetworks_style = host
 
 
