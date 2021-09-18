@@ -18,7 +18,7 @@
 
 {{ common.local_sbin }}/monitor-secret-age:
   file.managed:
-  - source: salt://crypto/secret_rotation/monitor.sh
+  - source: salt://crypto/secret_rotation/monitor.sh.jinja
   - mode: 0755
   - template: jinja
   cron.present:
