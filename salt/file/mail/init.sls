@@ -43,7 +43,7 @@ postfix_running:
   - template: jinja
 {{ mail.postalias('/etc/aliases') }}
 
-{{ mail.postfix_config_dir }}/main.cf:
+{{ mail.postfix_config_dir() }}/main.cf:
   file.managed:
   - source: salt://mail/main.cf.jinja
   - template: jinja

@@ -22,32 +22,80 @@
             'postfix-cdb',
         ),
         'postfix_service': 'postfix',
-        'postfix_config_dir': '/etc/postfix',
+        '_postfix_config_dir': '/etc/postfix',
     },
 }) %}
 
 
-{% set _postfix_main_cf_boilerplate %}
+{% macro _postfix_config_dir(instance=None) -%}
+  {%- if instance is none -%}
+    {{ mail._postfix_config_dir }}
+  {%- else -%}
+    {{ mail._postfix_config_dir | path_join('..', instance) }}
+  {%- endif -%}
+{%- endmacro %}
+
+
+{% macro _postfix_main_cf_boilerplate(instance=None, child_instances=()) %}
 compatibility_level = 2
+
+multi_instance_enable = yes
+{% if instance is none %}
+multi_instance_wrapper = ${command_directory}/postmulti -p --
+multi_instance_directories =
+  {%- for child in child_instances | sort %}
+  {{ _postfix_config_dir(child) }}
+  {%- endfor %}
+{% else %}
+multi_instance_name = {{ instance }}
+{{ salt.cmd.run_stdout(' '.join((
+    'postconf',
+    '-c',
+    _postfix_config_dir(instance),
+    '-n',
+    'data_directory',
+    'queue_directory',
+))) }}
+authorized_submit_users =
+{% endif %}
 
 default_database_type = cdb
 
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
-{% endset %}
+{% endmacro %}
 
 
-{% macro _postalias(filename) %}
-postalias {{ filename }}:
+{% macro _postfix_instance(instance) %}
+{{ instance }}:
+  cmd.run:
+  - name: postmulti -e init && postmulti -e create -I {{ instance }}
+  - creates: {{ _postfix_config_dir(instance) }}
+  - require:
+    - mail_pkgs
+  file.accumulated:
+  - filename: {{ _postfix_config_dir() }}/main.cf
+  - text: ''
+  - require:
+    - cmd: {{ instance }}
+  - require_in:
+    - file: {{ _postfix_config_dir() }}/main.cf
+{% endmacro %}
+
+
+{% macro _postalias(filename, instance=None) %}
+postalias -c {{ _postfix_config_dir(instance) }} {{ filename }}:
   cmd.run:
   - require:
     - mail_pkgs
-    - {{ mail.postfix_config_dir }}/main.cf
+    - {{ _postfix_config_dir(instance) }}/main.cf
   - onchanges:
     - {{ filename }}
 {% endmacro %}
 
 
 {% do mail.update({
+    'postfix_config_dir': _postfix_config_dir,
     'postfix_main_cf_boilerplate': _postfix_main_cf_boilerplate,
+    'postfix_instance': _postfix_instance,
     'postalias': _postalias,
 }) %}

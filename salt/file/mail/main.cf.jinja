@@ -17,7 +17,8 @@
 {% from 'pki/public.jinja' import public_pki %}
 
 
-{{ mail.postfix_main_cf_boilerplate }}
+{{ mail.postfix_main_cf_boilerplate(
+    child_instances=accumulator | default({})) }}
 
 
 # Host identity.
