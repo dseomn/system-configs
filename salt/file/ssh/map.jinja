@@ -29,6 +29,7 @@
     - {{ filename }}
     - {{ filename }}.pub
   file.accumulated:
+  - name: SSH keys
   - filename: {{ common.local_sbin }}/monitor-secret-age
   - text: {{ filename }}
   - require:
