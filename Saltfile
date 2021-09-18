@@ -32,7 +32,6 @@ salt-ssh:
   - salt://backup/source/map.jinja
   - salt://common/map.jinja
   - salt://crypto/map.jinja
-  - salt://crypto/secret_rotation/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
