@@ -29,7 +29,10 @@
 
 {% set _postfix_main_cf_boilerplate %}
 compatibility_level = 2
+
 default_database_type = cdb
+
+smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 {% endset %}
 
 
