@@ -26,7 +26,9 @@
  # https://xmpp.net/
  #}
 
-{% set crypto = {} %}
+{% set crypto = {
+    'secret_rotate_after_days': 4 * 365,
+} %}
 
 {#
  # Certbot

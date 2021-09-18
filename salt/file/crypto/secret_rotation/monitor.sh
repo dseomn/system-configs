@@ -15,7 +15,15 @@
 # limitations under the License.
 
 
+{% from 'crypto/map.jinja' import crypto %}
+
+
 {% for comment, filenames in accumulator | dictsort %}
 # {{ comment }}
-find {{ ' '.join(filenames) }} -type f -mtime +{{ 4 * 365 }}
+find \
+  {%- for filename in filenames | sort %}
+  '{{ filename }}' \
+  {%- endfor %}
+  -type f \
+  -mtime +{{ crypto.secret_rotate_after_days }}
 {% endfor %}
