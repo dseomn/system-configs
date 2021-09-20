@@ -18,6 +18,7 @@
 {% set common =  salt.grains.filter_by({
     'Debian': {
         'local_bin': '/usr/local/bin',
+        'local_etc': '/usr/local/etc',
         'local_lib': '/usr/local/lib',
         'local_sbin': '/usr/local/sbin',
         'nologin_shell': '/usr/sbin/nologin',
