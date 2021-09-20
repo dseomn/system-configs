@@ -24,6 +24,13 @@
  # Tests:
  # https://www.ssllabs.com/ssltest/index.html
  # https://xmpp.net/
+ #
+ # Some things below are split into general and strict levels. General is for
+ # settings that work well with generally available clients/servers. E.g., it
+ # uses a generally-trusted trust anchor (Let's Encrypt) and ciphers that most
+ # modern clients/servers can work with. Strict is for settings that only
+ # interoperate with a limited set of clients/servers, where each connection
+ # between a client and a server is configured out of band.
  #}
 
 {% set crypto = {
