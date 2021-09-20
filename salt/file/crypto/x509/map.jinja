@@ -1,0 +1,85 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% from 'common/map.jinja' import common %}
+{% from 'crypto/map.jinja' import crypto %}
+
+
+{% macro _boilerplate_certificate(name, group='root') %}
+boilerplate_certificate_{{ name }}:
+  cmd.run:
+  - name: >-
+      mkdir -p {{ common.local_etc }}/x509/{{ name }}
+      &&
+      {{ common.local_bin }}/boilerplate-certificate
+      --name={{ name }}
+      --key={{ common.local_etc }}/x509/{{ name }}/privkey.pem
+      --cert={{ common.local_etc }}/x509/{{ name }}/cert.pem
+      --key-algorithm={{ crypto.openssl.strict_key_algorithm }}
+      {%- for key_option in crypto.openssl.strict_key_options %}
+      --key-option={{ key_option }}
+      {%- endfor %}
+      --days={{ crypto.secret_validity_period_days }}
+      &&
+      openssl x509
+      -in {{ common.local_etc }}/x509/{{ name }}/cert.pem
+      -{{ crypto.openssl.digest }}
+      -fingerprint
+  - creates:
+    - {{ common.local_etc }}/x509/{{ name }}/privkey.pem
+    - {{ common.local_etc }}/x509/{{ name }}/cert.pem
+  - require:
+    - {{ common.local_etc }}/x509
+    - {{ common.local_bin }}/boilerplate-certificate
+
+{{ common.local_etc }}/x509/{{ name }}/privkey.pem:
+  file.managed:
+  - create: false
+  - replace: false
+  - group: {{ group }}
+  - mode: 0640
+  - require:
+    - boilerplate_certificate_{{ name }}
+{{ common.local_etc }}/x509/{{ name }}/privkey.pem should be rotated:
+  file.accumulated:
+  - name: boilerplate certificate keys
+  - filename: {{ common.local_sbin }}/monitor-secret-age
+  - text: {{ common.local_etc }}/x509/{{ name }}/privkey.pem
+  - require:
+    - {{ common.local_etc }}/x509/{{ name }}/privkey.pem
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-secret-age
+
+{{ common.local_etc }}/x509/{{ name }}/cert.pem:
+  file.exists:
+  - require:
+    - boilerplate_certificate_{{ name }}
+{{ common.local_etc }}/x509/{{ name }}/cert.pem should be rotated:
+  file.accumulated:
+  - name: boilerplate certificates
+  - filename: {{ common.local_sbin }}/monitor-x509-validity-period
+  - text: {{ common.local_etc }}/x509/{{ name }}/cert.pem
+  - require:
+    - {{ common.local_etc }}/x509/{{ name }}/cert.pem
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-x509-validity-period
+{% endmacro %}
+
+
+{% set x509 = {
+    'boilerplate_certificate': _boilerplate_certificate,
+} %}

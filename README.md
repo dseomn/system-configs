@@ -17,4 +17,10 @@ administrator might want to take action:
   Alerts when the system's uptime is too high (and the system should be
   rebooted).
 
+[`salt/file/crypto/x509/boilerplate_certificate.py`](salt/file/crypto/x509/boilerplate_certificate.py)
+provides a relatively easy way to create X.509/PKIX boilerplate around a public
+key, for use with out-of-band certificate provisioning. It serves the same
+purpose as self-signed certificates, but uses a separate CA and EE certificate
+to avoid some issues with self-signed certificates.
+
 This is not an officially supported Google product.
