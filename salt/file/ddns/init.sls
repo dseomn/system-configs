@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'ddns/map.jinja' import ddns %}
 
 
@@ -86,19 +87,33 @@ ddns_user:
   - require_in:
     - {{ ddns.conf_dir }} is clean
 
-{% for record, record_data in provider_records.items() %}
+{% for record_name, record_value in provider_records.items() %}
 
-{% if record.endswith(('.A', '.AAAA')) %}
+{% if record_name.endswith(('.A', '.AAAA')) %}
   {% set _ddns.enable_cron = True %}
 {% endif %}
 
-{{ ddns.conf_dir }}/{{ provider }}/{{ record }}:
+{% if record_value is none %}
+{{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
   file.managed:
-  - contents: {{ record_data | json }}
+  - replace: false
+  - contents: {{ ('password=' + crypto.generate_password()) | json }}
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
   - require_in:
     - {{ ddns.conf_dir }}/{{ provider }} is clean
+{% else %}
+# Make sure the link target exists: {{ provider_records[record_value] }}
+{{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
+  file.symlink:
+  - target: {{ record_value }}
+  - user: root
+  - group: {{ ddns.user_group }}
+  - require:
+    - {{ ddns.conf_dir }}/{{ provider }} exists
+  - require_in:
+    - {{ ddns.conf_dir }}/{{ provider }} is clean
+{% endif %}
 
 {% endfor %}
 {% endfor %}
