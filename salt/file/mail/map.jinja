@@ -83,6 +83,32 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 {% endmacro %}
 
 
+{% macro _postmap_contents(mapping) -%}
+{% for key, value in mapping.items() -%}
+{{ key }} {{ value }}
+{% endfor -%}
+{% endmacro %}
+
+
+{% macro _postmap(database, instance=None, files=None) %}
+{% set config_dir = _postfix_config_dir(instance) %}
+{% set filename = config_dir | path_join(database) %}
+{% set onchanges = [filename] %}
+{% if files is none %}
+  {% set flags = '' %}
+{% else %}
+  {% set flags = '-F' %}
+  {% do onchanges.extend(files) %}
+{% endif %}
+postmap {{ flags }} -c {{ config_dir }} {{ filename }}:
+  cmd.run:
+  - require:
+    - mail_pkgs
+    - {{ config_dir }}/main.cf
+  - onchanges: {{ onchanges | json }}
+{% endmacro %}
+
+
 {% macro _postalias(filename, instance=None) %}
 postalias -c {{ _postfix_config_dir(instance) }} {{ filename }}:
   cmd.run:
@@ -98,5 +124,7 @@ postalias -c {{ _postfix_config_dir(instance) }} {{ filename }}:
     'postfix_config_dir': _postfix_config_dir,
     'postfix_main_cf_boilerplate': _postfix_main_cf_boilerplate,
     'postfix_instance': _postfix_instance,
+    'postmap_contents': _postmap_contents,
+    'postmap': _postmap,
     'postalias': _postalias,
 }) %}
