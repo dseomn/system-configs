@@ -13,11 +13,16 @@
 # limitations under the License.
 
 
+{% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'ddns/map.jinja' import ddns %}
 
 
 {% set _ddns = namespace(enable_cron=False) %}
+
+
+include:
+- crypto.secret_rotation
 
 
 ddns_deps:
@@ -102,6 +107,15 @@ ddns_user:
     - {{ ddns.conf_dir }}/{{ provider }} exists
   - require_in:
     - {{ ddns.conf_dir }}/{{ provider }} is clean
+{{ ddns.conf_dir }}/{{ provider }}/{{ record_name }} should be rotated:
+  file.accumulated:
+  - name: dynamic DNS passwords
+  - filename: {{ common.local_sbin }}/monitor-secret-age
+  - text: {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}
+  - require:
+    - {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-secret-age
 {% else %}
 # Make sure the link target exists: {{ provider_records[record_value] }}
 {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
