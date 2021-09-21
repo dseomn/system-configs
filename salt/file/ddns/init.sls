@@ -83,6 +83,8 @@ ddns_user:
   - clean: true
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
+  - require_in:
+    - {{ ddns.conf_dir }} is clean
 
 {% for record, record_data in provider_records.items() %}
 
