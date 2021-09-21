@@ -33,9 +33,14 @@
  # between a client and a server is configured out of band.
  #}
 
+{% macro _generate_password() -%}
+  {{ salt.cmd.run_stdout(
+      "python3 -c 'import secrets; print(secrets.token_urlsafe(nbytes=32))'") }}
+{%- endmacro %}
 {% set crypto = {
     'secret_rotate_after_days': 4 * 365,
     'secret_validity_period_days': 6 * 365,
+    'generate_password': _generate_password,
 } %}
 
 {#
