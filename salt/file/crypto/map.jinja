@@ -80,9 +80,9 @@
  # for a CA path that would work, but is a pain to set up. At level 3,
  # 'HIGH:!kRSA' can probably be simplified to 'DEFAULT'.
  #}
-{% macro _protocols_disabled_to_string(protocols) -%}
+{% macro _protocols_disabled_to_string(protocols, disable_prefix='-') -%}
   {%- for protocol in protocols -%}
-    -{{ protocol }}
+    {{ disable_prefix }}{{ protocol }}
     {%- if not loop.last %} {% endif -%}
   {%- endfor -%}
 {%- endmacro %}
