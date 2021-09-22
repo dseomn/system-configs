@@ -53,3 +53,16 @@ postfix_running:
     - crypto_pkgs
   - watch_in:
     - postfix_running
+
+
+echo mail delivery test:
+  cron.present:
+  - identifier: 492b832c-fd8f-446b-821f-7bfd7ee44b9b
+  # Spread out the emails throughout the day, to make it very likely that emails
+  # from different hosts will arrive in the same order each time, making it
+  # easier to see changes from the previous time.
+  - minute: random
+  - hour: random
+  # But test all hosts on the same day, to make it easy to check all hosts at
+  # once, the day after the test.
+  - daymonth: 1
