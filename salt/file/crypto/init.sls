@@ -13,9 +13,10 @@
 # limitations under the License.
 
 
-{% from 'pki/public.jinja' import public_pki %}
-
-
-pki_pkg:
+crypto_pkgs:
   pkg.installed:
-  - name: {{ public_pki.pkg }}
+  - pkgs: {{ salt.grains.filter_by({
+      'Debian': [
+          'ca-certificates',
+      ],
+  }) | json }}

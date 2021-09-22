@@ -17,7 +17,7 @@
 
 
 include:
-- pki.public
+- crypto
 
 
 mail_pkgs:
@@ -50,6 +50,6 @@ postfix_running:
   - require:
     - mail_pkgs
     - /etc/aliases
-    - sls: pki.public
+    - crypto_pkgs
   - watch_in:
     - postfix_running

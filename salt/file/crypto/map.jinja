@@ -44,6 +44,9 @@
     'secret_rotate_after_days': 4 * 365,
     'secret_validity_period_days': 6 * 365,
     'generate_password': _generate_password,
+    'general_ca_file': salt.grains.filter_by({
+        'Debian': '/etc/ssl/certs/ca-certificates.crt',
+    }),
 } %}
 
 {#

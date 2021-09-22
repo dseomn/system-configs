@@ -47,7 +47,6 @@ salt-ssh:
   - salt://network/home_router/dns/map.jinja
   - salt://network/home_router/map.jinja
   - salt://news_aggregator/map.jinja
-  - salt://pki/public.jinja
   - salt://stunnel/map.jinja
   - salt://uptime/map.jinja
   - salt://vcs/map.jinja
