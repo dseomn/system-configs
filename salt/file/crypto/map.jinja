@@ -33,6 +33,9 @@
  # between a client and a server is configured out of band.
  #}
 
+{#
+ # General configuration that's not software-specific
+ #}
 {% macro _generate_password() -%}
   {{ salt.cmd.run_stdout(
       "python3 -c 'import secrets; print(secrets.token_urlsafe(nbytes=32))'") }}
