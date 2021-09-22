@@ -17,6 +17,7 @@
 
 
 include:
+- crypto
 - crypto.secret_rotation
 
 
@@ -27,6 +28,8 @@ include:
   file.managed:
   - source: salt://crypto/x509/boilerplate_certificate.py
   - mode: 0755
+  - require:
+    - crypto_pkgs
 
 {{ common.local_sbin }}/monitor-x509-validity-period:
   file.managed:

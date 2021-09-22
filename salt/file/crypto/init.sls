@@ -18,5 +18,6 @@ crypto_pkgs:
   - pkgs: {{ salt.grains.filter_by({
       'Debian': [
           'ca-certificates',
+          'openssl',
       ],
   }) | json }}
