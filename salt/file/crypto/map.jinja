@@ -35,6 +35,13 @@
 
 {#
  # General configuration that's not software-specific
+ #
+ # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=790943): It looks like
+ # /etc/ssl/certs/ssl-cert-snakeoil.pem has proper links to it in /etc/ssl/certs
+ # to be trusted when that directory is used for trusted CAs. However,
+ # /etc/ssl/certs/ca-certificates.crt does not appear to contain the snake oil
+ # certificate. So use the all-in-one file below instead of the directory, even
+ # though the directory might be better for performance.
  #}
 {% macro _generate_password() -%}
   {{ salt.cmd.run_stdout(
