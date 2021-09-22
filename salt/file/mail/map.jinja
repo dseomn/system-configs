@@ -83,9 +83,12 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 {% endmacro %}
 
 
-{% macro _postmap_contents(mapping) -%}
-{% for key, value in mapping.items() -%}
-{{ key }} {{ value }}
+{% macro _postmap_contents(mapping_or_collection) -%}
+{% for key in mapping_or_collection -%}
+{{ key }} {{
+    mapping_or_collection[key]
+    if mapping_or_collection is mapping
+    else 'x' }}
 {% endfor -%}
 {% endmacro %}
 
