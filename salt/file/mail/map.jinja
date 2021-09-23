@@ -38,6 +38,7 @@
 
 {% macro _postfix_main_cf_boilerplate(instance=None, child_instances=()) %}
 compatibility_level = 2
+parent_domain_matches_subdomains =
 
 multi_instance_enable = yes
 {% if instance is none %}
