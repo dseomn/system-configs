@@ -79,6 +79,8 @@ authorized_submit_users =
 default_database_type = cdb
 _database_dir = ${default_database_type}:${config_directory}
 
+message_size_limit = {{ 32 * 1024 * 1024 }}
+
 lmtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 smtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 smtpd_tls_fingerprint_digest = {{ crypto.openssl.digest }}
