@@ -15,6 +15,9 @@
  #}
 
 
+{% from 'crypto/map.jinja' import crypto %}
+
+
 {% set mail = salt.grains.filter_by({
     'Debian': {
         'pkgs': (
@@ -73,6 +76,10 @@ authorized_submit_users =
 
 default_database_type = cdb
 _database_dir = ${default_database_type}:${config_directory}
+
+lmtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
+smtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
+smtpd_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
