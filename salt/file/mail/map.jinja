@@ -23,16 +23,33 @@
         ),
         'postfix_service': 'postfix',
         '_postfix_config_dir': '/etc/postfix',
+        '_postfix_data_dir': '/var/lib/postfix',
+        '_postfix_queue_dir': '/var/spool/postfix',
     },
 }) %}
 
 
-{% macro _postfix_config_dir(instance=None) -%}
+{% macro _postfix_dir(main_dir, instance) -%}
   {%- if instance is none -%}
-    {{ mail._postfix_config_dir }}
+    {{ main_dir }}
   {%- else -%}
-    {{ mail._postfix_config_dir | path_join('..', instance) }}
+    {{ main_dir | path_join('..', instance) }}
   {%- endif -%}
+{%- endmacro %}
+
+
+{% macro _postfix_config_dir(instance=None) -%}
+  {{- _postfix_dir(mail._postfix_config_dir, instance=instance) -}}
+{%- endmacro %}
+
+
+{% macro _postfix_data_dir(instance=None) -%}
+  {{- _postfix_dir(mail._postfix_data_dir, instance=instance) -}}
+{%- endmacro %}
+
+
+{% macro _postfix_queue_dir(instance=None) -%}
+  {{- _postfix_dir(mail._postfix_queue_dir, instance=instance) -}}
 {%- endmacro %}
 
 
@@ -49,14 +66,8 @@ multi_instance_directories =
   {%- endfor %}
 {% else %}
 multi_instance_name = {{ instance }}
-{{ salt.cmd.run_stdout(' '.join((
-    'postconf',
-    '-c',
-    _postfix_config_dir(instance),
-    '-n',
-    'data_directory',
-    'queue_directory',
-))) }}
+data_directory = {{ _postfix_data_dir(instance) }}
+queue_directory = {{ _postfix_queue_dir(instance) }}
 authorized_submit_users =
 {% endif %}
 
@@ -126,6 +137,8 @@ postalias -c {{ _postfix_config_dir(instance) }} {{ filename }}:
 
 {% do mail.update({
     'postfix_config_dir': _postfix_config_dir,
+    'postfix_data_dir': _postfix_data_dir,
+    'postfix_queue_dir': _postfix_queue_dir,
     'postfix_main_cf_boilerplate': _postfix_main_cf_boilerplate,
     'postfix_instance': _postfix_instance,
     'postmap_contents': _postmap_contents,
