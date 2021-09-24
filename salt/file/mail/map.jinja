@@ -90,6 +90,8 @@ smtpd_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
+smtpd_tls_auth_only = yes
+
 smtpd_tls_received_header = yes
 {% endmacro %}
 
