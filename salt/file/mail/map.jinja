@@ -81,6 +81,9 @@ _database_dir = ${default_database_type}:${config_directory}
 
 message_size_limit = {{ 32 * 1024 * 1024 }}
 
+authorized_flush_users =
+authorized_mailq_users =
+
 lmtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 smtp_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 smtpd_tls_fingerprint_digest = {{ crypto.openssl.digest }}
