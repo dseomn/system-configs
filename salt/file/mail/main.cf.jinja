@@ -36,10 +36,13 @@ recipient_delimiter = +
 
 
 # Use aliases to external email addresses for all local recipients. If no alias
-# exists for a user, send it to root by default. If something somehow manages to
-# get through without an alias, reject it. (owner_request_special is needed to
-# prevent static:root from triggering special logic that rewrites the MAIL FROM
-# address when a ${user}-owner alias is found.)
+# exists for a user, send it to root by default. (This is different from the
+# luser_relay parameter. luser_relay controls delivery for unknown recipients;
+# this controls delivery for known recipients who aren't listed in
+# /etc/aliases.) If something somehow manages to get through without an alias,
+# reject it. (owner_request_special is needed to prevent static:root from
+# triggering special logic that rewrites the MAIL FROM address when a
+# ${user}-owner alias is found.)
 local_recipient_maps =
   proxy:unix:passwd.byname ${default_database_type}:/etc/aliases
 allow_mail_to_commands =
