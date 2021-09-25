@@ -19,7 +19,10 @@
 
 cat < /srv/crypttab >> /target/etc/crypttab || exit 1
 
-# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=618862): Delete this
-# workaround. See also https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=983708.
+# TODO(dseomn): Make the crypttab work with both Debian's custom logic and
+# systemd, then delete this workaround. See:
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=618862
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=983708
+# https://github.com/systemd/systemd/pull/17524
 ln -s /dev/null \
   /target/etc/systemd/system/systemd-cryptsetup@system_crypt.service || exit 1
