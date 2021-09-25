@@ -74,6 +74,9 @@ base:
   - ssh.server
   - standard
 
+  'G@role:mail:outbound':
+  - mail.outbound
+
   'G@role:media-center':
   - dlna.renderer
   - ssh.server

@@ -1,0 +1,68 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+{% from 'crypto/map.jinja' import crypto %}
+{% from 'mail/map.jinja' import mail %}
+
+
+{{ mail.postfix_main_cf_boilerplate(instance='postfix-outbound') }}
+
+# Identity.
+myhostname = {{ grains.fqdn }}
+mydomain = {{ grains.domain }}
+myorigin = {{ pillar.mail.system.domain }}
+mynetworks =
+mydestination =
+recipient_delimiter = +
+
+# How mail comes in.
+master_service_disable = !submissions/inet inet
+smtpd_tls_chain_files =
+  {{ default_certificate.key }}
+  {{ default_certificate.fullchain }}
+tls_server_sni_maps = ${_database_dir}/tls_server_sni
+smtpd_tls_security_level = encrypt
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_client_restrictions = permit_sasl_authenticated reject
+
+# Permissions.
+smtpd_sender_login_maps = ${_database_dir}/smtpd_sender_login
+smtpd_sender_restrictions = reject_sender_login_mismatch permit
+smtpd_relay_restrictions =
+  check_sasl_access ${_database_dir}/smtpd_relay_restrictions_sasl
+  reject
+
+# TODO(dseomn): Set up DKIM signing.
+
+# Mail routing.
+alias_maps =
+alias_database =
+local_recipient_maps = fail:no_local_recipients
+local_transport = error:5.1.1 Bad destination mailbox address
+relay_domains = ${_database_dir}/relay_domains
+relay_recipient_maps = ${_database_dir}/relay_recipient
+relay_transport = {{ pillar.mail.outbound.local_relay }}
+default_transport = {{ pillar.mail.outbound.default_relay }}
+
+# How mail goes out.
+smtp_tls_servername = nexthop
+smtp_tls_security_level = secure
+smtp_tls_secure_cert_match = nexthop
+smtp_tls_CAfile = {{ crypto.general_ca_file }}
+smtp_sasl_auth_enable = yes
+smtp_sasl_tls_verified_security_options = noanonymous
+smtp_sasl_password_maps = ${_database_dir}/smtp_sasl_password
