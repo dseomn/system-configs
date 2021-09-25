@@ -1,0 +1,57 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Mail accounts.
+
+# Account name. This is used as a lookup key for what email addresses the
+# account can send email as. In this case, it matches all email addresses with a
+# domain of router-bos01.example.com.
+'@router-bos01.example.com':
+
+  # Whether this account is also a mailbox. Default: false. If true, the account
+  # name is also the email address of the mailbox, so it wouldn't make sense for
+  # the account name above to have a mailbox.
+  mailbox: false
+
+  # Where this account can send email to.
+  #
+  #   all: Default. The account can send email anywhere.
+  #   local: The account can only send emails to other accounts or aliases in
+  #     this mail system.
+  recipients: local
+
+  # Required. Crypted password in Dovecot's format. See
+  # https://doc.dovecot.org/configuration_manual/authentication/password_schemes/
+  # and see below for another way to specify passwords. This is wrapped in a
+  # jinja if condition because not all of the minions that need account
+  # information need access to crypted account passwords.
+  {% if include_passwords %}
+  dovecot_password: '{ARGON2ID}$argon2id$...'
+  {% endif %}
+
+# Account name. In this case, the account can only send email as itself. And
+# because mailbox is true, it also receives email at this address.
+alice@example.com:
+
+  mailbox: true
+
+  # Multiple passwords for the same account. '' has the password for
+  # alice@example.com, client1 has the password for alice+client1@example.com,
+  # etc. Each login name has the exact same access to the account.
+  {% if include_passwords %}
+  dovecot_password:
+    '': '{ARGON2ID}$argon2id$...'
+    client1: '{ARGON2ID}$argon2id$...'
+    client2: '{ARGON2ID}$argon2id$...'
+  {% endif %}

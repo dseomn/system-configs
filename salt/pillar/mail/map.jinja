@@ -1,0 +1,83 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{# NOTE: Set include_passwords before importing this file. #}
+
+
+{% import_yaml 'mail/accounts.yaml.jinja' as _accounts with context %}
+{% import_yaml 'mail/aliases.yaml.jinja' as _aliases %}
+{% import_yaml 'mail/system.yaml.jinja' as _system %}
+
+
+{# Normalization and setting explicit defaults. #}
+{% for account_name, account in _accounts.items() %}
+    {% do account.setdefault('mailbox', False) %}
+    {% do account.setdefault('recipients', 'all') %}
+    {% if not include_passwords %}
+      {% do account.update({'dovecot_password': {}}) %}
+    {% elif account.dovecot_password is string %}
+      {% do account.update(
+          {'dovecot_password': {'': account.dovecot_password}}) %}
+    {% endif %}
+{% endfor %}
+
+
+{# Derived information. #}
+{% set _logins_by_account = {} %}
+{% set _authoritative_domains = [] %}
+{% set _recipient_addresses = [] %}
+{% set _recipient_domains = [] %}
+
+{% for account_name, account in _accounts.items() %}
+  {% set account_user, account_domain = account_name.split('@') %}
+
+  {% do _logins_by_account.update({account_name: {}}) %}
+  {% for password_id, password in account.dovecot_password.items() %}
+    {% if password_id  %}
+      {% set login_name = '{}+{}@{}'.format(
+          account_user, password_id, account_domain) %}
+    {% else %}
+      {% set login_name = account_name %}
+    {% endif %}
+    {% do _logins_by_account[account_name].update({login_name: password}) %}
+  {% endfor %}
+
+  {% do _authoritative_domains.append(account_domain) %}
+  {% if account.mailbox %}
+    {% do _recipient_addresses.append(account_name) %}
+    {% do _recipient_domains.append(account_domain) %}
+  {% endif %}
+{% endfor %}
+
+{% for alias_from, alias_to in _aliases.items() %}
+  {% set alias_from_user, alias_from_domain = alias_from.split('@') %}
+
+  {% do _authoritative_domains.append(alias_from_domain) %}
+  {% do _recipient_addresses.append(alias_from) %}
+  {% do _recipient_domains.append(alias_from_domain) %}
+{% endfor %}
+
+
+{% set mail = {
+    'accounts': _accounts,
+    'aliases': _aliases,
+    'authoritative_domains': _authoritative_domains | sort | unique,
+    'logins_by_account': _logins_by_account,
+    'recipient_addresses': _recipient_addresses | sort | unique,
+    'recipient_domains': _recipient_domains | sort | unique,
+    'system': _system,
+} %}
