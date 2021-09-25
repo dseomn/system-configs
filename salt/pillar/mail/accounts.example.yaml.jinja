@@ -26,9 +26,9 @@
 
   # Where this account can send email to.
   #
-  #   all: Default. The account can send email anywhere.
-  #   local: The account can only send emails to other accounts or aliases in
-  #     this mail system.
+  #   local: Default. The account can only send emails to other accounts or
+  #     aliases in this mail system.
+  #   all: The account can send email anywhere.
   recipients: local
 
   # Required. Crypted password in Dovecot's format. See
@@ -45,6 +45,8 @@
 alice@example.com:
 
   mailbox: true
+
+  recipients: all
 
   # Multiple passwords for the same account. '' has the password for
   # alice@example.com, client1 has the password for alice+client1@example.com,
