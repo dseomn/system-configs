@@ -13,11 +13,14 @@
 # limitations under the License.
 
 
+{% from 'common/map.jinja' import common %}
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'mail/map.jinja' import mail %}
 
 
 include:
 - crypto
+- crypto.secret_rotation
 
 
 mail_pkgs:
@@ -43,6 +46,50 @@ postfix_running:
   - template: jinja
 {{ mail.postalias('/etc/aliases') }}
 
+{% set relay_password_file =
+    mail.postfix_config_dir() + '/smtp_sasl_password_' +
+    pillar.mail.local_relay.relay %}
+{{ relay_password_file }}:
+  file.managed:
+  - mode: 0600
+  - replace: false
+  - contents: {{ crypto.generate_password() | json }}
+  - require:
+    - mail_pkgs
+show dovecot_password for relay:
+  cmd.run:
+  - name: >-
+      printf '%s' "$SCRIPT" | python3 - {{ relay_password_file }}
+  - env:
+    - SCRIPT: |
+        import crypt
+        import sys
+        with open(sys.argv[1], mode='rt') as password_file:
+            password = password_file.read().rstrip('\n')
+        crypted = crypt.crypt(password, crypt.METHOD_SHA512)
+        print('{SHA512-CRYPT}' + crypted)
+  - onchanges:
+    - {{ relay_password_file }}
+{{ relay_password_file }} should be rotated:
+  file.accumulated:
+  - name: local mail relay passwords
+  - filename: {{ common.local_sbin }}/monitor-secret-age
+  - text: {{ relay_password_file }}
+  - require:
+    - {{ relay_password_file }}
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-secret-age
+{{ mail.postfix_config_dir() }}/smtp_sasl_password:
+  file.managed:
+  - source: salt://mail/smtp_sasl_password.jinja
+  - mode: 0600
+  - template: jinja
+  - context:
+      relay_password_file: {{ relay_password_file }}
+  - require:
+    - {{ relay_password_file }}
+{{ mail.postmap('smtp_sasl_password') }}
+
 {{ mail.postfix_config_dir() }}/main.cf:
   file.managed:
   - source: salt://mail/main.cf.jinja
@@ -50,7 +97,7 @@ postfix_running:
   - require:
     - mail_pkgs
     - /etc/aliases
-    - crypto_pkgs
+    - {{ mail.postfix_config_dir() }}/smtp_sasl_password
   - watch_in:
     - postfix_running
 

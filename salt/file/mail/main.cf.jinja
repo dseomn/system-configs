@@ -55,7 +55,16 @@ mailbox_transport = error:5.1.1 Bad destination mailbox address
 
 
 # Where to send all remote mail.
-relayhost = [mail.mandelberg.org]:submission
-smtp_tls_security_level = secure
-smtp_tls_secure_cert_match = nexthop
-smtp_tls_CAfile = {{ crypto.general_ca_file }}
+relayhost = [{{ pillar.mail.local_relay.relay }}]
+smtp_tcp_port = submissions
+smtp_tls_wrappermode = yes
+smtp_tls_servername = nexthop
+smtp_tls_security_level = fingerprint
+smtp_tls_fingerprint_cert_match =
+  {%- for fingerprint in pillar.mail.local_relay[
+      'relay_fingerprints_' + crypto.openssl.digest] %}
+  {{ fingerprint }}
+  {%- endfor %}
+smtp_sasl_auth_enable = yes
+smtp_sasl_tls_verified_security_options = noanonymous
+smtp_sasl_password_maps = ${_database_dir}/smtp_sasl_password
