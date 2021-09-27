@@ -88,6 +88,7 @@ base:
   - news_aggregator
 
   'G@role:port-mux':
+  - ddns
   - port_mux
 
   'G@role:vcs':
