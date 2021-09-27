@@ -130,6 +130,11 @@ ddns_user:
   - require_in:
     - {{ ddns.conf_dir }}/{{ provider }} is clean
 {% endif %}
+warn about {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
+  test.configurable_test_state:
+  - warnings: Update configuration with the dynamic DNS provider.
+  - onchanges:
+    - {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}
 
 {% endfor %}
 {% endfor %}
