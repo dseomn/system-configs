@@ -59,6 +59,8 @@ ddns_user:
   - user: root
   - group: {{ ddns.user_group }}
   - dir_mode: 0750
+  - require:
+    - ddns_user
 {{ ddns.conf_dir }} is clean:
   file.directory:
   - name: {{ ddns.conf_dir }}
@@ -143,6 +145,9 @@ LOGGER_ERROR_ARGS="" {{ ddns.bin }}:
   - user: {{ ddns.user }}
   - minute: "*/10"
   - commented: {{ (not _ddns.enable_cron) | json }}
+  - require:
+    - ddns_user
+    - {{ ddns.bin }}
 LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
   cron.present:
   - identifier: 4dd2d722-295b-4276-a886-e46f541903d6
@@ -150,3 +155,6 @@ LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
   - minute: 5
   - hour: "*/4"
   - commented: {{ (not _ddns.enable_cron) | json }}
+  - require:
+    - ddns_user
+    - {{ ddns.bin }}
