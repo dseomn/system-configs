@@ -87,6 +87,9 @@ base:
   'G@role:news-aggregator':
   - news_aggregator
 
+  'G@role:port-mux':
+  - port_mux
+
   'G@role:vcs':
   - vcs
 
