@@ -94,6 +94,8 @@ znc_files:
     - create_nftables_config_dir
   - require_in:
     - manage_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes
 
 /etc/znc/configs/znc.conf:
   file.managed:

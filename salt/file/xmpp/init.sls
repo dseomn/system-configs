@@ -64,6 +64,8 @@ xmpp_pkgs:
     - create_nftables_config_dir
   - require_in:
     - manage_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes
 
 {% for domain in pillar.xmpp.domains %}
 {{ acme_cert(domain, group=xmpp.ejabberd_group) }}

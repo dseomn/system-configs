@@ -16,12 +16,20 @@
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
+warn about firewall changes:
+  test.configurable_test_state:
+  - warnings: >-
+      Run `sudo systemctl restart {{ nftables.service }}` to pick up firewall
+      changes, then test ssh with `ssh -S none {{ grains.id }}`
+
 nftables.conf:
   file.managed:
   - name: {{ nftables.config_file }}
   - mode: 0755
   - source: salt://network/firewall/nftables.conf.jinja
   - template: jinja
+  - onchanges_in:
+    - warn about firewall changes
 
 create_nftables_config_dir:
   file.directory:
@@ -32,3 +40,5 @@ manage_nftables_config_dir:
   - clean: true
   - require:
     - create_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes

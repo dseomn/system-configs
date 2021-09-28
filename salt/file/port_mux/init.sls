@@ -72,3 +72,5 @@ include:
     - create_nftables_config_dir
   - require_in:
     - manage_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes

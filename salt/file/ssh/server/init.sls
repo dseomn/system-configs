@@ -69,6 +69,7 @@ sshd_port:
   - name: {{ nftables.config_dir }}/50-ssh.conf
   - onchanges_in:
     - ssh-server-config-changed
+    - warn about firewall changes
   - source: salt://ssh/server/nftables.conf
   - require:
     - create_nftables_config_dir
