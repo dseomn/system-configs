@@ -102,6 +102,21 @@ show dovecot_password for relay:
     - postfix_running
 
 
+# Check if there's any queued mail in any postfix instance. The -j for json
+# format is because json format has no output if the queue is empty, despite not
+# being as human-readable. This might have some false alerts if it happens to
+# run when a queue has barely-delayed emails. If that happens enough, it might
+# be worth writing a script to filter out too-recent queue entries. The
+# frequency of this cronjob is a balance between finding out sooner if there's
+# an issue, and not filling up the queue if all mail is delayed for a while
+# (including the mails about delayed mail).
+postmulti -x postqueue -j:
+  cron.present:
+  - identifier: c512650f-a208-4abd-b48a-4e21eef53177
+  - minute: random
+  - hour: random
+
+
 echo mail delivery test:
   cron.present:
   - identifier: 492b832c-fd8f-446b-821f-7bfd7ee44b9b
