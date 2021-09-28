@@ -70,6 +70,11 @@ show dovecot_password for relay:
         print('{SHA512-CRYPT}' + crypted)
   - onchanges:
     - {{ relay_password_file }}
+  test.configurable_test_state:
+  - warnings: >-
+      Update salt/pillar/mail/accounts.yaml.jinja with new dovecot_password.
+  - onchanges:
+    - cmd: show dovecot_password for relay
 {{ relay_password_file }} should be rotated:
   file.accumulated:
   - name: local mail relay passwords
