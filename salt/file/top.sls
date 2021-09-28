@@ -106,5 +106,8 @@ base:
   - standard
   - virtual_machine.host
 
+  'G@role:web:static':
+  - web.static
+
   'G@role:xmpp':
   - xmpp
