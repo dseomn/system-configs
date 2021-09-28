@@ -1,0 +1,104 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% from 'port_mux/map.jinja' import port_mux %}
+
+
+{% set apache_httpd = salt.grains.filter_by({
+    'Debian': {
+        'pkgs': ('apache2',),
+        'service': 'apache2',
+        'config_dir': '/etc/apache2',
+        'default_conf_enabled': (
+            'other-vhosts-access-log.conf',
+            'security.conf',
+        ),
+        'default_mods_enabled': (
+            'alias.load',
+            'authz_core.load',
+            'dir.conf',
+            'dir.load',
+            'env.load',
+            'filter.load',
+            'headers.load',
+            'http2.conf',
+            'http2.load',
+            'mime.load',
+            'mpm_event.conf',
+            'mpm_event.load',
+            'reqtimeout.conf',
+            'reqtimeout.load',
+            'setenvif.conf',
+            'setenvif.load',
+        ),
+    },
+}) %}
+
+
+{% macro _enable_fragment(type, name, require) %}
+{{ apache_httpd.config_dir }}/{{ type }}-available/{{ name }}:
+  file.exists:
+  - require:
+    - apache_httpd_pkgs
+    {% for requirement in require %}
+    - {{ requirement | json }}
+    {% endfor %}
+{{ apache_httpd.config_dir }}/{{ type }}-enabled/{{ name }}:
+  file.symlink:
+  - target: ../{{ type }}-available/{{ name }}
+  - require:
+    - {{ apache_httpd.config_dir }}/{{ type }}-enabled exists
+    - {{ apache_httpd.config_dir }}/{{ type }}-available/{{ name }}
+  - require_in:
+    - {{ apache_httpd.config_dir }}/{{ type }}-enabled is clean
+  - watch_in:
+    - apache_httpd_running
+{% endmacro %}
+
+
+{% macro _enable_conf(name, require=()) %}
+{{ _enable_fragment(type='conf', name=name, require=require) }}
+{% endmacro %}
+
+
+{% macro _enable_mod(name, require=()) %}
+{{ _enable_fragment(type='mods', name=name, require=require) }}
+{% endmacro %}
+
+
+{% macro _port_mux_vhost_config() %}
+{%- if port_mux.has_upstream %}
+RemoteIPProxyProtocol On
+RemoteIPProxyProtocolExceptions 127.0.0.1 ::1
+{%- endif %}
+{%- endmacro %}
+
+
+{% macro _https_vhost_config(fullchain, privkey) %}
+SSLEngine on
+SSLCertificateFile {{ fullchain }}
+SSLCertificateKeyFile {{ privkey }}
+Header always set Strict-Transport-Security "max-age={{ 365 * 24 * 60 * 60 }}"
+{%- endmacro %}
+
+
+{% do apache_httpd.update({
+    'enable_conf': _enable_conf,
+    'enable_mod': _enable_mod,
+    'port_mux_vhost_config': _port_mux_vhost_config,
+    'https_vhost_config': _https_vhost_config,
+}) %}
