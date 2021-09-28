@@ -25,6 +25,11 @@ locale_present:
 locale_set:
   locale.system:
   - name: {{ standard.locale }}
+warn about locale_set:
+  test.configurable_test_state:
+  - warnings: Reboot to pick up changes to system locale.
+  - onchanges:
+    - locale_set
 
 
 UTC:
