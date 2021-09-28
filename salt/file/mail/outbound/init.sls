@@ -49,6 +49,7 @@ include:
         'fullchain':
             acme.certbot_config_dir + '/live/' + certificate_name +
             '/fullchain.pem',
+        'onchanges': ('acme_cert_' + certificate_name,),
     }
 }) %}
 {% elif certificate.type == 'strict' %}
@@ -62,12 +63,24 @@ include:
         'key': common.local_etc + '/x509/' + certificate_name + '/privkey.pem',
         'fullchain':
             common.local_etc + '/x509/' + certificate_name + '/cert.pem',
+        'onchanges': ('boilerplate_certificate_' + certificate_name,),
     }
 }) %}
 {% else %}
 {{ {}['error: unknown certificate type: ' + certificate.type] }}
 {% endif %}
 {% endfor %}
+
+restart postfix on changes to certificates:
+  test.succeed_with_changes:
+  - onchanges:
+    {% for certificate in certificates.values() %}
+    {% for onchanges in certificate.onchanges %}
+    - {{ onchanges }}
+    {% endfor %}
+    {% endfor %}
+  - watch_in:
+    - postfix_running
 
 
 {{ mail.postfix_instance(postfix_instance) }}
@@ -104,6 +117,7 @@ include:
     - postfix_running
 
 {% set tls_server_sni_files = [] %}
+{% set tls_server_sni_onchanges_extra = [] %}
 {{ postfix_config_dir }}/tls_server_sni:
   file.managed:
   # Even though the contents of this file aren't sensitive, it looks like
@@ -114,6 +128,7 @@ include:
       {%- for certificate_name, certificate in certificates.items() %}
       {%- do tls_server_sni_files.extend(
           (certificate.key, certificate.fullchain)) %}
+      {%- do tls_server_sni_onchanges_extra.extend(certificate.onchanges) %}
       {{ certificate_name }} {{ certificate.key }} {{ certificate.fullchain }}
       {%- endfor %}
   - require:
@@ -122,6 +137,7 @@ include:
     'tls_server_sni',
     instance=postfix_instance,
     files=tls_server_sni_files,
+    onchanges_extra=tls_server_sni_onchanges_extra,
 ) }}
 
 {{ dovecot.config_dir }}/50-{{ postfix_instance }}.conf:

@@ -141,10 +141,11 @@ smtpd_tls_received_header = yes
 {% endmacro %}
 
 
-{% macro _postmap(database, instance=None, files=None) %}
+{% macro _postmap(database, instance=None, files=None, onchanges_extra=()) %}
 {% set config_dir = _postfix_config_dir(instance) %}
 {% set filename = config_dir | path_join(database) %}
 {% set onchanges = [filename] %}
+{% do onchanges.extend(onchanges_extra) %}
 {% if files is none %}
   {% set flags = '' %}
 {% else %}
