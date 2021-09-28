@@ -18,3 +18,8 @@
   - makedirs: true
   - source: salt://power/logind.conf.jinja
   - template: jinja
+warn about systemd-logind:
+  test.configurable_test_state:
+  - warnings: Reboot to pick up changes to systemd-logind.
+  - onchanges:
+    - /etc/systemd/logind.conf.d/50-power.conf
