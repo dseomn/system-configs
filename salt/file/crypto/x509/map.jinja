@@ -19,7 +19,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% macro _boilerplate_certificate(name, group='root') %}
+{% macro _boilerplate_certificate(name, warning_on_change, group='root') %}
 boilerplate_certificate_{{ name }}:
   cmd.run:
   - name: >-
@@ -45,6 +45,10 @@ boilerplate_certificate_{{ name }}:
   - require:
     - {{ common.local_etc }}/x509
     - {{ common.local_bin }}/boilerplate-certificate
+  test.configurable_test_state:
+  - warnings: {{ warning_on_change | json }}
+  - onchanges:
+    - cmd: boilerplate_certificate_{{ name }}
 
 {{ common.local_etc }}/x509/{{ name }}/privkey.pem:
   file.managed:

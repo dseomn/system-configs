@@ -52,7 +52,11 @@ include:
     }
 }) %}
 {% elif certificate.type == 'strict' %}
-{{ x509.boilerplate_certificate(certificate_name) }}
+{{ x509.boilerplate_certificate(
+    certificate_name,
+    warning_on_change=(
+        'Update salt/pillar/mail/local_relay.sls with new fingerprint.'),
+) }}
 {% do certificates.update({
     certificate_name: {
         'key': common.local_etc + '/x509/' + certificate_name + '/privkey.pem',
