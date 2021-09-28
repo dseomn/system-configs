@@ -19,7 +19,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% macro _key(filename) %}
+{% macro _key(filename, warning_on_change) %}
 {{ filename }}:
   cmd.run:
   - name: >-
@@ -36,6 +36,10 @@
     - cmd: {{ filename }}
   - require_in:
     - file: {{ common.local_sbin }}/monitor-secret-age
+  test.configurable_test_state:
+  - warnings: {{ warning_on_change | json }}
+  - onchanges:
+    - cmd: {{ filename }}
 {% endmacro %}
 
 

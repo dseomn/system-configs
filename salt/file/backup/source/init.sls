@@ -53,7 +53,12 @@ manage_backup_source_sources_d:
   - require:
     - {{ backup.config_dir }}/source
 
-{{ ssh.key(backup.config_dir + '/source/ssh/id') }}
+{{ ssh.key(
+    backup.config_dir + '/source/ssh/id',
+    warning_on_change=(
+        'Update salt/pillar/virtual_machine/data.yaml.jinja and/or remote '
+        'borgbackup server with new SSH public key.'),
+) }}
 
 {{ backup.config_dir }}/source/ssh/known_hosts:
   file.managed:

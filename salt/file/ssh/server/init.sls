@@ -51,7 +51,12 @@ sshd_running:
     - file: sshd_config
     - {{ sshd.config_directory }}/ssh_host_key
 
-{{ ssh.key(sshd.config_directory + '/ssh_host_key') }}
+{{ ssh.key(
+    sshd.config_directory + '/ssh_host_key',
+    warning_on_change=(
+        'Update ~/.ssh/known_hosts with new SSH host public key. Possibly also '
+        'update salt/pillar/backup/source/init.sls'),
+) }}
 
 sshd_config:
   file.managed:
