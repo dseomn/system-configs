@@ -14,7 +14,7 @@
 
 port_mux:
 
-  # Required. TLS port multiplexing.
+  # Required by port_mux servers. TLS port multiplexing.
   tls:
 
     # Server name from the SNI extension.
@@ -25,3 +25,10 @@ port_mux:
         # https://nginx.org/en/docs/stream/ngx_stream_proxy_module.html#proxy_pass
         # for the syntax. The backend must support the proxy protocol.
         backend: some-backend.example.com:443
+
+  # Required by port_mux backends.
+  upstream:
+
+    # List of IPv6 upstreams.
+    ipv6:
+    - 2001:db8::1
