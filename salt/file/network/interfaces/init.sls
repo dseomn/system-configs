@@ -45,12 +45,19 @@ include:
 - network.firewall
 
 
+warn about network interface changes:
+  test.configurable_test_state:
+  - warnings: Reboot to pick up network interface changes.
+
+
 # Disable other tools that might try to configure the network.
 {% if grains.os_family == 'Debian' %}
 /etc/network/interfaces:
   file.managed:
   - contents: |
       # This system uses systemd-networkd to configure its interfaces.
+  - onchanges_in:
+    - warn about network interface changes
 {% endif %}
 
 
@@ -69,6 +76,8 @@ systemd_networkd:
     - group
     - mode
   - clean: true
+  - onchanges_in:
+    - warn about network interface changes
 
 
 {% set bridge_name_by_segment = {} %}
@@ -101,6 +110,8 @@ systemd_networkd:
       bridge_name: {{ bridge_name }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 {% endfor %}
 
 
@@ -122,6 +133,8 @@ systemd_networkd:
       global: {{ global | json }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 
 {% elif 'bridge_segment' in interface %}
 
@@ -134,6 +147,8 @@ systemd_networkd:
       bridge_name: {{ bridge_name_by_segment[interface.bridge_segment] }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 
 {% elif 'bridge_segments' in interface %}
 
@@ -146,6 +161,8 @@ systemd_networkd:
       bridge_segments: {{ interface.bridge_segments | json }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 {% for segment_name in interface.bridge_segments %}
 {{ system.config_directory }}/30-{{ interface_name }}.{{ segment_name }}.netdev:
   file.managed:
@@ -156,6 +173,8 @@ systemd_networkd:
       vlan_id: {{ segments[segment_name].id }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 {{ system.config_directory }}/30-{{ interface_name }}.{{ segment_name }}.network:
   file.managed:
   - source: salt://network/interfaces/bridge-member.network.jinja
@@ -165,6 +184,8 @@ systemd_networkd:
       bridge_name: {{ bridge_name_by_segment[segment_name] }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 {% endfor %}
 
 {% elif 'access_point' in interface %}
@@ -286,6 +307,8 @@ wireguard_pkgs:
       global: {{ global | json }}
   - require_in:
     - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
 
 {% endfor %}
 
