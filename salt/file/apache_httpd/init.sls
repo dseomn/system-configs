@@ -86,6 +86,14 @@ apache_httpd_running:
 
 {% if port_mux.has_upstream %}
 {{ apache_httpd.enable_mod('remoteip.load') }}
+
+# Don't trust information from the proxy protocol for authorization.
+{{ apache_httpd.config_dir }}/mods-enabled/authz_host.load:
+  file.absent:
+  - require:
+    - {{ apache_httpd.config_dir }}/mods-enabled is clean
+  - watch_in:
+    - apache_httpd_running
 {% endif %}
 
 {{ apache_httpd.config_dir }}/ports.conf.orig:
