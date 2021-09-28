@@ -23,5 +23,5 @@ port_mux:
       443:
         # Required. Backend. See
         # https://nginx.org/en/docs/stream/ngx_stream_proxy_module.html#proxy_pass
-        # for the syntax.
+        # for the syntax. The backend must support the proxy protocol.
         backend: some-backend.example.com:443

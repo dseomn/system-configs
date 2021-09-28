@@ -44,8 +44,13 @@ include:
         {%- endfor %}
       }
       server {
-        listen [::]:{{ tls_port }} ipv6only=off;
+        # This uses two `listen` statements instead of a single one with
+        # ipv6only=off because of how addresses are sent to the backend. E.g.,
+        # see https://bz.apache.org/bugzilla/show_bug.cgi?id=63349
+        listen 0.0.0.0:{{ tls_port }};
+        listen [::]:{{ tls_port }} ipv6only=on;
         ssl_preread on;
+        proxy_protocol on;
         proxy_pass $port_mux_tls_{{ tls_port }}_backend;
       }
       {%- endfor %}
