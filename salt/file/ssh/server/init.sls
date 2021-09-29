@@ -49,6 +49,7 @@ sshd_running:
   - name: {{ sshd.service }}
   - watch:
     - file: sshd_config
+    - {{ sshd.config_directory }}/ssh_host_key
 
 {{ ssh.key(sshd.config_directory + '/ssh_host_key') }}
 
