@@ -71,11 +71,25 @@
   {% do _recipient_domains.append(alias_from_domain) %}
 {% endfor %}
 
+{% set _authoritative_domains = _authoritative_domains | sort | unique %}
+{% set _authoritative_non_sub_domains = [] %}
+{% for domain in _authoritative_domains %}
+  {% set ns = namespace(is_subdomain=False) %}
+  {% for other_domain in _authoritative_domains
+      if domain.endswith('.' + other_domain) %}
+    {% set ns.is_subdomain = True %}
+  {% endfor %}
+  {% if not ns.is_subdomain %}
+    {% do _authoritative_non_sub_domains.append(domain) %}
+  {% endif %}
+{% endfor %}
+
 
 {% set mail = {
     'accounts': _accounts,
     'aliases': _aliases,
-    'authoritative_domains': _authoritative_domains | sort | unique,
+    'authoritative_domains': _authoritative_domains,
+    'authoritative_non_sub_domains': _authoritative_non_sub_domains,
     'logins_by_account': _logins_by_account,
     'recipient_addresses': _recipient_addresses | sort | unique,
     'recipient_domains': _recipient_domains | sort | unique,

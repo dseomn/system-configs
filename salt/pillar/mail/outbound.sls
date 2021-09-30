@@ -20,6 +20,7 @@
 mail:
   accounts: {{ mail.accounts | json }}
   authoritative_domains: {{ mail.authoritative_domains | json }}
+  authoritative_non_sub_domains: {{ mail.authoritative_non_sub_domains | json }}
   logins_by_account: {{ mail.logins_by_account | json }}
   outbound: {{ outbound | json }}
   recipient_addresses: {{ mail.recipient_addresses | json }}
