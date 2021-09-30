@@ -255,6 +255,13 @@ base_system:
     - {{ extra_disk_path }}
     {% endfor %}
   - unless: virsh domstate --domain {{ guest_id }}
+warn about {{ guest_id }}_install:
+  test.configurable_test_state:
+  - warnings: >-
+      Add SSH host key to ~/.ssh/known_hosts, add new VM to salt/config/roster,
+      and run `salt-ssh {{ guest_id }} state.apply`
+  - onchanges:
+    - {{ guest_id }}_install
 
 # TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
 # TODO(salt >= 3003): Manage console.
