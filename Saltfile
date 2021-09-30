@@ -18,6 +18,7 @@ salt-call:
   file_root: salt/file
   pillar_root: salt/pillar
   state_output: changes
+  state_verbose: false
 
 salt-run:
   config_dir: salt/config
@@ -26,6 +27,7 @@ salt-ssh:
   config_dir: salt/config
   ssh_priv: agent-forwarding
   state_output: changes
+  state_verbose: false
   extra_filerefs:
   - salt://acme/map.jinja
   - salt://apache_httpd/map.jinja
