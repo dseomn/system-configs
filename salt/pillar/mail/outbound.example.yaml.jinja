@@ -21,6 +21,21 @@ certificates:
     # their meanings.
     type: general
 
+# Required. DKIM selectors.
+dkim_selectors:
+  # Required. Availabe RSA selectors.
+  rsa:
+  - mail-outbound-202108-rsa
+  - mail-outbound-202109-rsa
+  # Required. Available ed25519 selectors.
+  ed25519:
+  - mail-outbound-202108-ed25519
+  - mail-outbound-202109-ed25519
+  # Required. Which of the available selectors are used for new signatures.
+  active:
+    rsa: mail-outbound-202109-rsa
+    ed25519: mail-outbound-202109-ed25519
+
 # SASL usernames and passwords for use as a client.
 passwords:
   '[my-isp.example.net]:submission': 'alice:password'

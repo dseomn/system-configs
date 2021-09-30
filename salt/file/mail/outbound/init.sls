@@ -17,6 +17,7 @@
 {% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
+{% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
 {% from 'mail/map.jinja' import mail %}
 {% from 'network/firewall/map.jinja' import nftables %}
@@ -30,8 +31,10 @@
 include:
 - acme
 - crypto
+- crypto.secret_rotation
 - crypto.x509
 - mail
+- mail.dkimpy_milter
 - mail.dovecot
 - network.firewall
 
@@ -84,6 +87,136 @@ restart postfix on changes to certificates:
     {% endfor %}
   - watch_in:
     - postfix_running
+
+
+{{ postfix_queue_dir }}/dkimpy-milter:
+  file.directory:
+  - user: {{ dkimpy_milter.user }}
+  - group: {{ dkimpy_milter.group }}
+  - dir_mode: 0750
+  - require:
+    - {{ postfix_instance }}
+
+{{ dkimpy_milter.config_dir }}/domain:
+  file.managed:
+  - contents: |
+      {%- for domain in pillar.mail.authoritative_non_sub_domains %}
+      {{ domain }}
+      {%- endfor %}
+  - require:
+    - {{ dkimpy_milter.config_dir }} exists
+  - require_in:
+    - {{ dkimpy_milter.config_dir }} is clean
+  - watch_in:
+    - dkimpy_milter_running
+
+{% for key_type in ('rsa', 'ed25519') %}
+{% for selector in pillar.mail.outbound.dkim_selectors[key_type] %}
+dkim key {{ selector }}:
+  cmd.run:
+  - name: >-
+      dknewkey
+      --ktype={{ key_type }}
+      {{ dkimpy_milter.config_dir }}/{{ selector }}
+      &&
+      printf '%s' "$SHOW_RECORD_SCRIPT" |
+        python3 - {{ dkimpy_milter.config_dir }}/{{ selector }}.dns
+  - env:
+    - SHOW_RECORD_SCRIPT: |
+        import sys
+        with open(sys.argv[1], mode='rt') as record_file:
+          record = record_file.read()
+        original_tags = {}
+        for tag_spec in record.split(';'):
+          tag_name, _, tag_value = tag_spec.partition('=')
+          original_tags[tag_name.strip()] = tag_value.strip()
+        # https://www.iana.org/assignments/dkim-parameters/dkim-parameters.xhtml#dkim-parameters-5
+        # https://www.iana.org/assignments/dkim-parameters/dkim-parameters.xhtml#dkim-parameters-9
+        tags = {
+            'v': original_tags.pop('v'),
+            'h': original_tags.pop('h', None),
+            'k': original_tags.pop('k'),
+            'p': original_tags.pop('p'),
+            's': 'email',
+        }
+        if original_tags:
+          raise ValueError(original_tags)
+        print(
+            '; '.join(
+                f'{tag_name}={tag_value}'
+                for tag_name, tag_value in tags.items()
+                if tag_value is not None))
+  - creates:
+    - {{ dkimpy_milter.config_dir }}/{{ selector }}.key
+    - {{ dkimpy_milter.config_dir }}/{{ selector }}.dns
+  - require:
+    - {{ dkimpy_milter.config_dir }} exists
+  test.configurable_test_state:
+  - warnings: >-
+      Add
+      {%- for domain in pillar.mail.authoritative_non_sub_domains %}
+      {{ selector }}._domainkey.{{ domain }}.
+      {%- endfor %}
+      TXT record(s), and remove any old DKIM records.
+  - onchanges:
+    - cmd: dkim key {{ selector }}
+{{ dkimpy_milter.config_dir }}/{{ selector }}.key:
+  file.exists:
+  - require:
+    - dkim key {{ selector }}
+  - require_in:
+    - {{ dkimpy_milter.config_dir }} is clean
+{{ dkimpy_milter.config_dir }}/{{ selector }}.dns:
+  file.exists:
+  - require:
+    - dkim key {{ selector }}
+  - require_in:
+    - {{ dkimpy_milter.config_dir }} is clean
+{% endfor %}
+{% endfor %}
+{% set dkim_key_rsa =
+    dkimpy_milter.config_dir + '/' +
+    pillar.mail.outbound.dkim_selectors.active.rsa + '.key' %}
+{% set dkim_key_ed25519 =
+    dkimpy_milter.config_dir + '/' +
+    pillar.mail.outbound.dkim_selectors.active.ed25519 + '.key' %}
+active dkim keys should be rotated:
+  file.accumulated:
+  - name: active dkim keys
+  - filename: {{ common.local_sbin }}/monitor-secret-age
+  - text:
+    - {{ dkim_key_rsa }}
+    - {{ dkim_key_ed25519 }}
+  - require:
+    - {{ dkim_key_rsa }}
+    - {{ dkim_key_ed25519 }}
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-secret-age
+
+{{ dkimpy_milter.config_file }}:
+  file.managed:
+  - contents: |
+      {{ dkimpy_milter.conf_boilerplate() | indent(6) }}
+      Socket local:{{ postfix_queue_dir }}/dkimpy-milter/sign
+      Mode s
+      Domain file:{{ dkimpy_milter.config_dir }}/domain
+      SubDomains yes
+      InternalHosts csl:
+      Canonicalization relaxed/simple
+      Selector {{ pillar.mail.outbound.dkim_selectors.active.rsa }}
+      KeyFile {{ dkim_key_rsa }}
+      SelectorEd25519 {{ pillar.mail.outbound.dkim_selectors.active.ed25519 }}
+      KeyFileEd25519 {{ dkim_key_ed25519 }}
+  - require:
+    - {{ dkimpy_milter.config_dir }} exists
+    - {{ postfix_queue_dir }}/dkimpy-milter
+    - {{ dkimpy_milter.config_dir }}/domain
+    - {{ dkim_key_rsa }}
+    - {{ dkim_key_ed25519 }}
+  - require_in:
+    - {{ dkimpy_milter.config_dir }} is clean
+  - watch_in:
+    - dkimpy_milter_running
 
 
 {{ postfix_config_dir }}/master.cf:

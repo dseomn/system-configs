@@ -46,7 +46,9 @@ smtpd_relay_restrictions =
   check_sasl_access ${_database_dir}/smtpd_relay_restrictions_sasl
   reject
 
-# TODO(dseomn): Set up DKIM signing.
+# DKIM signing.
+smtpd_milters = unix:dkimpy-milter/sign
+non_smtpd_milters = unix:dkimpy-milter/sign
 
 # Mail routing.
 alias_maps =
