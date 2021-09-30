@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Required. X509 certificates. All will be enabled as server certificates,
-# and the first one will be the default without SNI or when no name matches.
+# Required. X509 certificates. All will be enabled as server certificates, and
+# the first one will be the default without SNI or when no name matches. See the
+# certificates macro in salt/file/crypto/x509/map.jinja for the format.
 certificates:
-  # Common/DNS name.
   mail-outbound.example.com:
-    # Required. 'general' or 'strict', see salt/file/crypto/map.jinja for
-    # their meanings.
     type: general
 
 # Required. DKIM selectors.

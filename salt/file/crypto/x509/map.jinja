@@ -15,6 +15,7 @@
  #}
 
 
+{% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 
@@ -84,6 +85,66 @@ boilerplate_certificate_{{ name }}:
 {% endmacro %}
 
 
+{#
+ # Creates multiple certificates of different types.
+ #
+ # Args:
+ #  certificates_in: Mapping from certificate name to a mapping that determines
+ #    how to create the certificate. The inner mapping has a single key, 'type'
+ #    that cn be either 'general' or 'strict'.
+ #  warning_on_boilerplate_cert_change: See the warning_on_change paramter to
+ #    boilerplate_certificate.
+ #  certificates_out: Pass in an empty mutable mapping, and it will be modified
+ #    to have keys matching certificates_in. Values will be mappings with keys
+ #    'key' (path to private key), 'fullchain' (path to EE cert or full cert
+ #    chain), and 'onchanges' (collection of states to use in onchanges
+ #    requisites to run when the certificate changes).
+ #}
+{% macro _certificates(
+    certificates_in,
+    warning_on_boilerplate_cert_change,
+    certificates_out) %}
+{% for certificate_name, certificate in certificates_in.items() %}
+
+{% if certificate.type == 'general' %}
+
+{{ acme_cert(certificate_name) }}
+{% do certificates_out.update({
+    certificate_name: {
+        'key':
+            acme.certbot_config_dir + '/live/' + certificate_name +
+            '/privkey.pem',
+        'fullchain':
+            acme.certbot_config_dir + '/live/' + certificate_name +
+            '/fullchain.pem',
+        'onchanges': ('acme_cert_' + certificate_name,),
+    }
+}) %}
+
+{% elif certificate.type == 'strict' %}
+
+{{ _boilerplate_certificate(
+    certificate_name, warning_on_change=warning_on_boilerplate_cert_change) }}
+{% do certificates_out.update({
+    certificate_name: {
+        'key': common.local_etc + '/x509/' + certificate_name + '/privkey.pem',
+        'fullchain':
+            common.local_etc + '/x509/' + certificate_name + '/cert.pem',
+        'onchanges': ('boilerplate_certificate_' + certificate_name,),
+    }
+}) %}
+
+{% else %}
+
+{{ {}['error: unknown certificate type: ' + certificate.type] }}
+
+{% endif %}
+
+{% endfor %}
+{% endmacro %}
+
+
 {% set x509 = {
     'boilerplate_certificate': _boilerplate_certificate,
+    'certificates': _certificates,
 } %}

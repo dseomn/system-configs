@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-{% from 'acme/map.jinja' import acme, acme_cert %}
+{% from 'acme/map.jinja' import acme %}
 {% from 'common/map.jinja' import common %}
-{% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
@@ -43,39 +42,11 @@ include:
 
 
 {% set certificates = {} %}
-{% for certificate_name, certificate in
-    pillar.mail.outbound.certificates.items() %}
-{% if certificate.type == 'general' %}
-{{ acme_cert(certificate_name) }}
-{% do certificates.update({
-    certificate_name: {
-        'key':
-            acme.certbot_config_dir + '/live/' + certificate_name +
-            '/privkey.pem',
-        'fullchain':
-            acme.certbot_config_dir + '/live/' + certificate_name +
-            '/fullchain.pem',
-        'onchanges': ('acme_cert_' + certificate_name,),
-    }
-}) %}
-{% elif certificate.type == 'strict' %}
-{{ x509.boilerplate_certificate(
-    certificate_name,
-    warning_on_change=(
+{{ x509.certificates(
+    certificates_in=pillar.mail.outbound.certificates,
+    warning_on_boilerplate_cert_change=(
         'Update salt/pillar/mail/local_relay.sls with new fingerprint.'),
-) }}
-{% do certificates.update({
-    certificate_name: {
-        'key': common.local_etc + '/x509/' + certificate_name + '/privkey.pem',
-        'fullchain':
-            common.local_etc + '/x509/' + certificate_name + '/cert.pem',
-        'onchanges': ('boilerplate_certificate_' + certificate_name,),
-    }
-}) %}
-{% else %}
-{{ {}['error: unknown certificate type: ' + certificate.type] }}
-{% endif %}
-{% endfor %}
+    certificates_out=certificates) }}
 
 restart postfix on changes to certificates:
   test.succeed_with_changes:
