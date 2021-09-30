@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-{% from 'acme/map.jinja' import acme %}
 {% from 'common/map.jinja' import common %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
@@ -47,17 +46,6 @@ include:
     warning_on_boilerplate_cert_change=(
         'Update salt/pillar/mail/local_relay.sls with new fingerprint.'),
     certificates_out=certificates) }}
-
-restart postfix on changes to certificates:
-  test.succeed_with_changes:
-  - onchanges:
-    {% for certificate in certificates.values() %}
-    {% for onchanges in certificate.onchanges %}
-    - {{ onchanges }}
-    {% endfor %}
-    {% endfor %}
-  - watch_in:
-    - postfix_running
 
 
 {{ postfix_queue_dir }}/dkimpy-milter:
@@ -221,29 +209,8 @@ active dkim keys should be rotated:
   - watch_in:
     - postfix_running
 
-{% set tls_server_sni_files = [] %}
-{% set tls_server_sni_onchanges_extra = [] %}
-{{ postfix_config_dir }}/tls_server_sni:
-  file.managed:
-  # Even though the contents of this file aren't sensitive, it looks like
-  # postmap copies the permissions to the database file, and that file contains
-  # the private keys pointed to here.
-  - mode: 0600
-  - contents: |
-      {%- for certificate_name, certificate in certificates.items() %}
-      {%- do tls_server_sni_files.extend(
-          (certificate.key, certificate.fullchain)) %}
-      {%- do tls_server_sni_onchanges_extra.extend(certificate.onchanges) %}
-      {{ certificate_name }} {{ certificate.key }} {{ certificate.fullchain }}
-      {%- endfor %}
-  - require:
-    - {{ postfix_instance }}
-{{ mail.postmap(
-    'tls_server_sni',
-    instance=postfix_instance,
-    files=tls_server_sni_files,
-    onchanges_extra=tls_server_sni_onchanges_extra,
-) }}
+{{ mail.postfix_certificates(
+    certificates=certificates, instance=postfix_instance) }}
 
 {{ dovecot.config_dir }}/50-{{ postfix_instance }}.conf:
   file.managed:
@@ -345,22 +312,6 @@ active dkim keys should be rotated:
     - {{ postfix_config_dir }}/smtp_sasl_password
   - watch_in:
     - postfix_running
-
-
-{{ acme.certbot_config_dir }}/renewal-hooks/post/50-mail-outbound:
-  file.managed:
-  - mode: 0755
-  - contents: |
-      #!/bin/bash -e
-      postmap -F -c {{ postfix_config_dir }} \
-        {{ postfix_config_dir }}/tls_server_sni
-      systemctl reload-or-restart {{ mail.postfix_service }}
-  - require:
-    - {{ acme.certbot_config_dir }}/renewal-hooks/post exists
-    - mail_pkgs
-    - {{ postfix_config_dir }}/tls_server_sni
-  - require_in:
-    - {{ acme.certbot_config_dir }}/renewal-hooks/post is clean
 
 
 {{ nftables.config_dir }}/50-mail-outbound.conf:
