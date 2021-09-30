@@ -26,3 +26,28 @@
         'nonexistent_path': '/nonexistent',
     }
 }) %}
+
+
+# Note that this does not use group.present, because it shouldn't create the
+# group.
+{% macro _user_in_group(user, group) %}
+{{ user }} is a member of {{ group }}:
+  cmd.run:
+  - name: adduser '{{ user }}' '{{ group }}'
+  - unless:
+    - |
+        case "$(id -G -n '{{ user }}')" in
+          '{{ group }} '*|*' {{ group }} '*|*' {{ group }}'|'{{ group }}')
+            exit 0
+            ;;
+        esac
+        exit 1
+  {% for key, value in kwargs.items() %}
+  - {{ key }}: {{ value | json }}
+  {% endfor %}
+{% endmacro %}
+
+
+{% do common.update({
+    'user_in_group': _user_in_group,
+}) %}
