@@ -36,6 +36,9 @@ include:
 - network.firewall
 
 
+{{ mail.postfix_instance(postfix_instance) }}
+
+
 {% set certificates = {} %}
 {% for certificate_name, certificate in
     pillar.mail.outbound.certificates.items() %}
@@ -82,8 +85,6 @@ restart postfix on changes to certificates:
   - watch_in:
     - postfix_running
 
-
-{{ mail.postfix_instance(postfix_instance) }}
 
 {{ postfix_config_dir }}/master.cf:
   file.blockreplace:
