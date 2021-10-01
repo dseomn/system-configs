@@ -24,6 +24,17 @@
 
 
 {# Normalization and setting explicit defaults. #}
+{% for account_name, account in _accounts.items() | list %}
+  {% if account is none %}
+    {#
+     # If the only key in the account is dovecot_password, and that's in a `{%
+     # if include_passwords %}` block, then the account is parsed as null
+     # instead of an empty dictionary when include_passwords is False.
+     #}
+    {% do _accounts.update({account_name: {}}) %}
+  {% endif %}
+{% endfor %}
+
 {% for account_name, account in _accounts.items() %}
   {% do account.setdefault('mailbox', False) %}
   {% do account.setdefault('recipients', 'local') %}
