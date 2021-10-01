@@ -37,7 +37,7 @@ smtpd_tls_security_level = encrypt
 smtpd_sasl_auth_enable = yes
 smtpd_sasl_type = dovecot
 smtpd_sasl_path = private/auth
-smtpd_client_restrictions = permit_sasl_authenticated reject
+smtpd_client_restrictions = permit_sasl_authenticated defer
 
 # Permissions.
 smtpd_sender_login_maps = ${_database_dir}/smtpd_sender_login
