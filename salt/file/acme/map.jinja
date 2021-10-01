@@ -38,6 +38,12 @@
  #}
 {% macro acme_cert(name, group='root', dns_provider='dyn.dns.he.net') %}
 acme_cert_{{ name }}:
+  test.fail_without_changes:
+  - name: >-
+      DDNS password changed. Update DNS provider before attempting to get an
+      ACME certificate.
+  - onchanges:
+    - {{ ddns.conf_dir }}/{{ dns_provider }}/_acme-challenge.{{ name }}.TXT
   cmd.run:
   - name: >-
       {{ acme.certbot_bin }}
@@ -63,6 +69,8 @@ acme_cert_{{ name }}:
     - {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf
     - {{ acme.certbot_config_dir }}/live/{{ name }}/privkey.pem
     - {{ acme.certbot_config_dir }}/live/{{ name }}/fullchain.pem
+  - prereq_in:
+    - test: acme_cert_{{ name }}
 
 {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf:
   file.exists:
