@@ -48,7 +48,7 @@ postfix_running:
 
 {% set relay_password_file =
     mail.postfix_config_dir() + '/smtp_sasl_password_' +
-    pillar.mail.local_relay.relay %}
+    pillar.mail.common.outbound.name %}
 {{ relay_password_file }}:
   file.managed:
   - mode: 0600

@@ -14,11 +14,13 @@
 
 mail:
 
-  local_relay:
+  common:
 
-    # Required. Where to send all local mail.
-    relay: mail-outbound.example.com
-
-    # Required. Fingerprints of the relay's server certificates.
-    relay_fingerprints_sha512:
-    - 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00
+    # Required. How to connect to mail.outbound hosts.
+    outbound:
+      # Required. DNS name that points to mail.outbound host(s).
+      name: mail-outbound.example.com
+      # Required. Fingerprints of the server certificates that will be used for
+      # the name above.
+      cert_fingerprints_sha512:
+      - 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00

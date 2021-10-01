@@ -55,14 +55,14 @@ mailbox_transport = error:5.1.1 Bad destination mailbox address
 
 
 # Where to send all remote mail.
-relayhost = [{{ pillar.mail.local_relay.relay }}]
+relayhost = [{{ pillar.mail.common.outbound.name }}]
 smtp_tcp_port = submissions
 smtp_tls_wrappermode = yes
 smtp_tls_servername = nexthop
 smtp_tls_security_level = fingerprint
 smtp_tls_fingerprint_cert_match =
-  {%- for fingerprint in pillar.mail.local_relay[
-      'relay_fingerprints_' + crypto.openssl.digest] %}
+  {%- for fingerprint in pillar.mail.common.outbound[
+      'cert_fingerprints_' + crypto.openssl.digest] %}
   {{ fingerprint }}
   {%- endfor %}
 smtp_sasl_auth_enable = yes

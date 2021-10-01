@@ -44,7 +44,7 @@ include:
 {{ x509.certificates(
     certificates_in=pillar.mail.outbound.certificates,
     warning_on_boilerplate_cert_change=(
-        'Update salt/pillar/mail/local_relay.sls with new fingerprint.'),
+        'Update salt/pillar/mail/common.sls with new fingerprint.'),
     certificates_out=certificates) }}
 
 
