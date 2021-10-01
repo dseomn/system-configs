@@ -48,9 +48,11 @@ transports:
     implicit_tls: true
     # Which certificate above to use as a client certificate. Default: none.
     certificate: mail-outbound.example.com
-    # TODO(dseomn): Make server certificate verification configurable.
 
 # Required. Where to send mail for the local domain(s).
+# TODO(dseomn): Use pillar.mail.common.inbound instead of making this separately
+# configurable. Reconsider `transports` too. E.g., maybe always use
+# pillar.mail.common.outbound.name as the client cert.
 local_relay: relay-strict:[mail-inbound.example.com]:submissions
 
 # Required. Where to send all other mail.
