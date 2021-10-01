@@ -25,14 +25,14 @@
 
 {# Normalization and setting explicit defaults. #}
 {% for account_name, account in _accounts.items() %}
-    {% do account.setdefault('mailbox', False) %}
-    {% do account.setdefault('recipients', 'local') %}
-    {% if not include_passwords %}
-      {% do account.update({'dovecot_password': {}}) %}
-    {% elif account.dovecot_password is string %}
-      {% do account.update(
-          {'dovecot_password': {'': account.dovecot_password}}) %}
-    {% endif %}
+  {% do account.setdefault('mailbox', False) %}
+  {% do account.setdefault('recipients', 'local') %}
+  {% if not include_passwords %}
+    {% do account.update({'dovecot_password': {}}) %}
+  {% elif account.dovecot_password is string %}
+    {% do account.update(
+        {'dovecot_password': {'': account.dovecot_password}}) %}
+  {% endif %}
 {% endfor %}
 
 
