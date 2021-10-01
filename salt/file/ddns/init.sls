@@ -119,7 +119,6 @@ ddns_user:
   - require_in:
     - file: {{ common.local_sbin }}/monitor-secret-age
 {% else %}
-# Make sure the link target exists: {{ provider_records[record_value] }}
 {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
   file.symlink:
   - target: {{ record_value }}
@@ -127,6 +126,7 @@ ddns_user:
   - group: {{ ddns.user_group }}
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
+    - {{ ddns.conf_dir }}/{{ provider }}/{{ record_value }}
   - require_in:
     - {{ ddns.conf_dir }}/{{ provider }} is clean
 {% endif %}
