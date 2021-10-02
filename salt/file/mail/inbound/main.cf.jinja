@@ -1,0 +1,61 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+{% from 'crypto/map.jinja' import crypto %}
+{% from 'mail/map.jinja' import mail %}
+
+
+{{ mail.postfix_main_cf_boilerplate(instance='postfix-inbound') }}
+
+# Identity.
+myhostname = {{ grains.fqdn }}
+mydomain = {{ grains.domain }}
+myorigin = {{ pillar.mail.system.domain }}
+mynetworks =
+mydestination =
+recipient_delimiter = +
+
+# How mail comes in.
+smtpd_tls_chain_files =
+  {{ default_certificate.key }}
+  {{ default_certificate.fullchain }}
+tls_server_sni_maps = ${_database_dir}/tls_server_sni
+smtpd_tls_security_level = may
+
+# Permissions.
+smtpd_relay_restrictions = reject_unauth_destination
+
+# TODO(dseomn): Verify DKIM (and maybe SPF and DMARC?). Check for spam. Maybe
+# make a header that's cleared for unauthenticated clients and set for
+# authenticated ones? Anything else?
+
+# Mail routing.
+alias_maps =
+alias_database =
+local_recipient_maps = fail:no_local_recipients
+local_transport = error:5.1.1 Bad destination mailbox address
+virtual_mailbox_domains = ${_database_dir}/virtual_mailbox_domains
+virtual_mailbox_maps = ${_database_dir}/virtual_mailbox
+virtual_alias_domains =
+virtual_alias_maps = ${_database_dir}/virtual_alias
+virtual_transport = smtp:{{ pillar.mail.inbound.delivery_nexthop }}
+default_transport = error:5.7.1 Delivery not authorized, message refused
+
+# How mail goes out. TODO(dseomn): Update this once the mail.storage state is
+# ready.
+smtp_tls_servername = nexthop
+smtp_tls_security_level = secure
+smtp_tls_secure_cert_match = nexthop
+smtp_tls_CAfile = {{ crypto.general_ca_file }}

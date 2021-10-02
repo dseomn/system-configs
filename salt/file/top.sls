@@ -74,6 +74,9 @@ base:
   - ssh.server
   - standard
 
+  'G@role:mail:inbound':
+  - mail.inbound
+
   'G@role:mail:outbound':
   - mail.outbound
 
