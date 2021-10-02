@@ -57,10 +57,12 @@ local_recipient_maps = fail:no_local_recipients
 local_transport = error:5.1.1 Bad destination mailbox address
 relay_domains = ${_database_dir}/relay_domains
 relay_recipient_maps = ${_database_dir}/relay_recipient
-relay_transport = {{ pillar.mail.outbound.local_relay }}
-default_transport = {{ pillar.mail.outbound.default_relay }}
+relay_transport = mail-inbound:[{{ pillar.mail.common.inbound.name }}]
+relayhost = {{ pillar.mail.outbound.default_relay }}
 
 # How mail goes out.
+smtp_tcp_port = submissions
+smtp_tls_wrappermode = yes
 smtp_tls_servername = nexthop
 smtp_tls_security_level = secure
 smtp_tls_secure_cert_match = nexthop

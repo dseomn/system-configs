@@ -14,6 +14,7 @@
 
 
 {% from 'common/map.jinja' import common %}
+{% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
@@ -46,6 +47,7 @@ include:
     warning_on_boilerplate_cert_change=(
         'Update salt/pillar/mail/common.sls with new fingerprint.'),
     certificates_out=certificates) }}
+{% set client_certificate = certificates[pillar.mail.common.outbound.name] %}
 
 
 {{ postfix_queue_dir }}/dkimpy-milter:
@@ -186,23 +188,17 @@ active dkim keys should be rotated:
       submissions inet n - y - - smtpd
         -o syslog_name={{ postfix_instance }}/${service_name}
         -o smtpd_tls_wrappermode=yes
-      {%- for transport_name, transport
-          in pillar.mail.outbound.get('transports', {}).items() %}
-      {{ transport_name }} unix - - y - - smtp
+      mail-inbound unix - - y - - smtp
         -o syslog_name={{ postfix_instance }}/${service_name}
-        {%- if 'default_port' in transport %}
-        -o smtp_tcp_port={{ transport.default_port }}
-        {%- endif %}
-        {%- if transport.get('implicit_tls', False) %}
-        -o smtp_tls_wrappermode=yes
-        {%- endif %}
-        {%- if 'certificate' in transport %}
-        {%- set certificate = certificates[transport.certificate] %}
         -o { smtp_tls_chain_files =
-          {{ certificate.key }}
-          {{ certificate.fullchain }} }
-        {%- endif %}
-      {%- endfor %}
+          {{ client_certificate.key }}
+          {{ client_certificate.fullchain }} }
+        -o smtp_tls_security_level=fingerprint
+        -o { smtp_tls_fingerprint_cert_match =
+          {%- for fingerprint in pillar.mail.common.inbound[
+              'cert_fingerprints_' + crypto.openssl.digest] %}
+          {{ fingerprint }}
+          {%- endfor %} }
   - append_if_not_found: true
   - require:
     - {{ postfix_instance }}

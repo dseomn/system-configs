@@ -36,24 +36,7 @@ dkim_selectors:
 
 # SASL usernames and passwords for use as a client.
 passwords:
-  '[my-isp.example.net]:submission': 'alice:password'
+  '[my-isp.example.net]': 'alice:password'
 
-# Additional SMTP client transports.
-transports:
-  # Transport name.
-  relay-strict:
-    # Default port to connect to. Default: see smtp(8).
-    default_port: submissions
-    # Whether to use implicit TLS (as opposed to STARTTLS). Default: false.
-    implicit_tls: true
-    # Which certificate above to use as a client certificate. Default: none.
-    certificate: mail-outbound.example.com
-
-# Required. Where to send mail for the local domain(s).
-# TODO(dseomn): Use pillar.mail.common.inbound instead of making this separately
-# configurable. Reconsider `transports` too. E.g., maybe always use
-# pillar.mail.common.outbound.name as the client cert.
-local_relay: relay-strict:[mail-inbound.example.com]:submissions
-
-# Required. Where to send all other mail.
-default_relay: smtp:[my-isp.example.net]:submission
+# Required. Where to send external mail, using the submissions port.
+default_relay: '[my-isp.example.net]'
