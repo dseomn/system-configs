@@ -37,9 +37,11 @@ smtpd_tls_security_level = may
 # Permissions.
 smtpd_relay_restrictions = reject_unauth_destination
 
-# TODO(dseomn): Verify DKIM (and maybe SPF and DMARC?). Check for spam. Maybe
-# make a header that's cleared for unauthenticated clients and set for
-# authenticated ones? Anything else?
+# TODO(dseomn): Maybe verify SPF and DMARC? Check for spam. Maybe make a header
+# that's cleared for unauthenticated clients and set for authenticated ones?
+# Anything else?
+smtpd_milters = unix:dkimpy-milter/verify
+non_smtpd_milters = unix:dkimpy-milter/verify
 
 # Mail routing.
 alias_maps =

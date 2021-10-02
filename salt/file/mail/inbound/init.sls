@@ -15,12 +15,14 @@
 
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
+{% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
 {% from 'mail/map.jinja' import mail %}
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
 {% set postfix_instance = 'postfix-inbound' %}
 {% set postfix_config_dir = mail.postfix_config_dir(postfix_instance) %}
+{% set postfix_queue_dir = mail.postfix_queue_dir(postfix_instance) %}
 
 
 include:
@@ -28,6 +30,7 @@ include:
 - crypto
 - crypto.x509
 - mail
+- mail.dkimpy_milter
 - network.firewall
 
 
@@ -40,6 +43,32 @@ include:
     warning_on_boilerplate_cert_change=(
         'Update salt/pillar/mail/common.sls with new fingerprint.'),
     certificates_out=certificates) }}
+
+
+{{ postfix_queue_dir }}/dkimpy-milter:
+  file.directory:
+  - user: {{ dkimpy_milter.user }}
+  - group: {{ dkimpy_milter.group }}
+  - dir_mode: 0750
+  - require:
+    - {{ postfix_instance }}
+
+{{ dkimpy_milter.config_file }}:
+  file.managed:
+  - contents: |
+      {{ dkimpy_milter.conf_boilerplate() | indent(6) }}
+      Socket local:{{ postfix_queue_dir }}/dkimpy-milter/verify
+      Mode v
+      Domain csl:
+      InternalHosts csl:
+      AuthservID {{ grains.id }}
+  - require:
+    - {{ dkimpy_milter.config_dir }} exists
+    - {{ postfix_queue_dir }}/dkimpy-milter
+  - require_in:
+    - {{ dkimpy_milter.config_dir }} is clean
+  - watch_in:
+    - dkimpy_milter_running
 
 
 {{ postfix_config_dir }}/mail_outbound_client_certs:
