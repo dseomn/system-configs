@@ -13,9 +13,11 @@
 # limitations under the License.
 
 
+{% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dkimpy_milter/map.jinja' import dkimpy_milter %}
+{% from 'mail/inbound/map.jinja' import mail_inbound %}
 {% from 'mail/map.jinja' import mail %}
 {% from 'network/firewall/map.jinja' import nftables %}
 
@@ -32,6 +34,11 @@ include:
 - mail
 - mail.dkimpy_milter
 - network.firewall
+
+
+mail_inbound_pkgs:
+  pkg.installed:
+  - pkgs: {{ mail_inbound.pkgs | json }}
 
 
 {{ mail.postfix_instance(postfix_instance) }}
@@ -69,6 +76,50 @@ include:
     - {{ dkimpy_milter.config_dir }} is clean
   - watch_in:
     - dkimpy_milter_running
+
+
+opendmarc_enabled:
+  service.enabled:
+  - name: {{ mail_inbound.opendmarc_service }}
+  - require:
+    - mail_inbound_pkgs
+
+opendmarc_running:
+  service.running:
+  - name: {{ mail_inbound.opendmarc_service }}
+  - require:
+    - mail_inbound_pkgs
+
+# Let postfix connect to opendmarc's unix socket.
+{{ common.user_in_group(
+    user=mail.postfix_user,
+    group=mail_inbound.opendmarc_group,
+    require=('mail_pkgs', 'mail_inbound_pkgs'),
+    watch_in=('postfix_running',),
+) }}
+
+{{ postfix_queue_dir }}/opendmarc:
+  file.directory:
+  - user: {{ mail_inbound.opendmarc_user }}
+  - group: {{ mail_inbound.opendmarc_group }}
+  - dir_mode: 0750
+  - require:
+    - {{ postfix_instance }}
+
+{{ mail_inbound.opendmarc_config_file }}.orig:
+  file.copy:
+  - source: {{ mail_inbound.opendmarc_config_file }}
+  - require:
+    - mail_inbound_pkgs
+{{ mail_inbound.opendmarc_config_file }}:
+  file.managed:
+  - source: salt://mail/inbound/opendmarc.conf.jinja
+  - template: jinja
+  - require:
+    - {{ mail_inbound.opendmarc_config_file }}.orig
+    - {{ postfix_queue_dir }}/opendmarc
+  - watch_in:
+    - opendmarc_running
 
 
 {{ postfix_config_dir }}/mail_outbound_client_certs:

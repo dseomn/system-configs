@@ -46,6 +46,7 @@ salt-ssh:
   - salt://kubernetes/runtime/map.jinja
   - salt://mail/dkimpy_milter/map.jinja
   - salt://mail/dovecot/map.jinja
+  - salt://mail/inbound/map.jinja
   - salt://mail/map.jinja
   - salt://nas/map.jinja
   - salt://network/firewall/map.jinja

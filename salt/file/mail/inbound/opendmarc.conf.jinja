@@ -1,0 +1,37 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+{%- from 'mail/inbound/map.jinja' import mail_inbound %}
+{%- from 'mail/map.jinja' import mail %}
+
+{%- set postfix_queue_dir = mail.postfix_queue_dir('postfix-inbound') %}
+{%- set original = mail_inbound.opendmarc_config_file + '.orig' %}
+
+{%- for line in salt.file.read(original).splitlines()
+    if line and line.split()[0] in (
+        'Syslog',
+        'UserID',
+        'PidFile',
+        'PublicSuffixList',
+    ) %}
+{{ line }}
+{%- endfor %}
+UMask 0007
+Socket local:{{ postfix_queue_dir }}/opendmarc/opendmarc
+IgnoreHosts /dev/null
+AuthservID {{ grains.id }}
+SPFIgnoreResults true
+SPFSelfValidate true
