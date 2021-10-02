@@ -37,8 +37,13 @@ smtpd_tls_security_level = may
 # Permissions.
 smtpd_relay_restrictions = reject_unauth_destination
 
-# TODO(dseomn): Check for spam. Maybe make a header that's cleared for
-# unauthenticated clients and set for authenticated ones? Anything else?
+# Authentication of email that never left the Administrative Management Domain
+# (ADMD).
+_admd_internal = no
+smtpd_data_restrictions =
+  check_client_access static:{ PREPEND ADMD-Internal: ${_admd_internal} }
+
+# General email authentication.
 smtpd_milters = unix:dkimpy-milter/verify unix:opendmarc/opendmarc
 non_smtpd_milters = ${smtpd_milters}
 

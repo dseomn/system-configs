@@ -143,6 +143,7 @@ opendmarc_running:
         -o smtpd_tls_ask_ccert=yes
         -o relay_clientcerts=${_database_dir}/mail_outbound_client_certs
         -o { smtpd_client_restrictions = permit_tls_clientcerts defer }
+        -o _admd_internal=yes
   - append_if_not_found: true
   - require:
     - {{ postfix_instance }}
