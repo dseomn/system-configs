@@ -16,11 +16,18 @@ mail:
 
   common:
 
-    # Required. How to connect to mail.outbound hosts.
-    outbound:
-      # Required. DNS name that points to mail.outbound host(s).
-      name: mail-outbound.example.com
+    # Required. How to connect to mail.inbound hosts.
+    inbound:
+      # Required. DNS name that points to mail.inbound host(s).
+      name: mail-inbound.example.com
       # Required. Fingerprints of the server certificates that will be used for
       # the name above.
+      cert_fingerprints_sha512:
+      - 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00
+
+    # Required. How to connect to mail.outbound hosts. Same structure as inbound
+    # above.
+    outbound:
+      name: mail-outbound.example.com
       cert_fingerprints_sha512:
       - 00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00
