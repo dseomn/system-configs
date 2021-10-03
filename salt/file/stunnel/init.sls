@@ -19,3 +19,17 @@
 stunnel_pkgs:
   pkg.installed:
   - pkgs: {{ stunnel.pkgs | json }}
+
+{{ stunnel.config_dir }} exists:
+  file.exists:
+  - name: {{ stunnel.config_dir }}
+  - require:
+    - stunnel_pkgs
+{{ stunnel.config_dir }} is clean:
+  file.directory:
+  - name: {{ stunnel.config_dir }}
+  - clean: true
+  - exclude_pat:
+    - README
+  - require:
+    - {{ stunnel.config_dir }} exists

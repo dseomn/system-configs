@@ -106,12 +106,14 @@ rsync_running:
       ciphers = {{ crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers) }}
       connect = localhost:873
   - require:
-    - stunnel_pkgs
+    - {{ stunnel.config_dir }} exists
     - nas_user
     - {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/fullchain.pem
     - {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/privkey.pem
     - rsync_enabled
     - rsync_running
+  - require_in:
+    - {{ stunnel.config_dir }} is clean
 
 {% do open_tcp_ports.append(874) %}
 
