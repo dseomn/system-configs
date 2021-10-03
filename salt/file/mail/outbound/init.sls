@@ -45,7 +45,7 @@ include:
 {{ x509.certificates(
     certificates_in=pillar.mail.outbound.certificates,
     warning_on_boilerplate_cert_change=(
-        'Update salt/pillar/mail/common.sls with new fingerprint.'),
+        'Update salt/pillar/mail/common.sls with new certificate.'),
     certificates_out=certificates) }}
 {% set client_certificate = certificates[pillar.mail.common.outbound.name] %}
 
@@ -195,9 +195,8 @@ active dkim keys should be rotated:
           {{ client_certificate.fullchain }} }
         -o smtp_tls_security_level=fingerprint
         -o { smtp_tls_fingerprint_cert_match =
-          {%- for fingerprint in pillar.mail.common.inbound[
-              'cert_fingerprints_' + crypto.openssl.digest] %}
-          {{ fingerprint }}
+          {%- for certificate in pillar.mail.common.inbound.certificates %}
+          {{ crypto.openssl.cert_fingerprint(certificate) }}
           {%- endfor %} }
   - append_if_not_found: true
   - require:

@@ -48,7 +48,7 @@ mail_inbound_pkgs:
 {{ x509.certificates(
     certificates_in=pillar.mail.inbound.certificates,
     warning_on_boilerplate_cert_change=(
-        'Update salt/pillar/mail/common.sls with new fingerprint.'),
+        'Update salt/pillar/mail/common.sls with new certificate.'),
     certificates_out=certificates) }}
 
 
@@ -122,12 +122,14 @@ opendmarc_running:
     - opendmarc_running
 
 
+{% set mail_outbound_fingerprints = [] %}
+{% for certificate in pillar.mail.common.outbound.certificates %}
+  {% do mail_outbound_fingerprints.append(
+      crypto.openssl.cert_fingerprint(certificate)) %}
+{% endfor %}
 {{ postfix_config_dir }}/mail_outbound_client_certs:
   file.managed:
-  - contents: {{
-        mail.postmap_contents(
-            pillar.mail.common.outbound[
-                'cert_fingerprints_' + crypto.openssl.digest]) | json }}
+  - contents: {{ mail.postmap_contents(mail_outbound_fingerprints) | json }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('mail_outbound_client_certs', instance=postfix_instance) }}

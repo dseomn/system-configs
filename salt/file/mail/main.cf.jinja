@@ -61,9 +61,8 @@ smtp_tls_wrappermode = yes
 smtp_tls_servername = nexthop
 smtp_tls_security_level = fingerprint
 smtp_tls_fingerprint_cert_match =
-  {%- for fingerprint in pillar.mail.common.outbound[
-      'cert_fingerprints_' + crypto.openssl.digest] %}
-  {{ fingerprint }}
+  {%- for certificate in pillar.mail.common.outbound.certificates %}
+  {{ crypto.openssl.cert_fingerprint(certificate) }}
   {%- endfor %}
 smtp_sasl_auth_enable = yes
 smtp_sasl_tls_verified_security_options = noanonymous
