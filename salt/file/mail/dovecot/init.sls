@@ -46,7 +46,7 @@ dovecot_running:
   - watch_in:
     - dovecot_running
 
-{{ dovecot.config_dir }}/10-passwd:
+{{ dovecot.config_dir }}/10-passwd.passdb:
   file.managed:
   - group: {{ dovecot.group }}
   - mode: 0640
@@ -55,6 +55,20 @@ dovecot_running:
       {%- for login_name, password in logins.items() %}
       {{ login_name }}:{{ password }}::::::user={{ account_name }}
       {%- endfor %}
+      {%- endfor %}
+  - require:
+    - {{ dovecot.config_dir }} exists
+  - require_in:
+    - {{ dovecot.config_dir }} is clean
+  - watch_in:
+    - dovecot_running
+{{ dovecot.config_dir }}/10-passwd.userdb:
+  file.managed:
+  - group: {{ dovecot.group }}
+  - mode: 0640
+  - contents: |
+      {%- for account_name in pillar.mail.accounts %}
+      {{ account_name }}:::::::
       {%- endfor %}
   - require:
     - {{ dovecot.config_dir }} exists
@@ -78,15 +92,16 @@ dovecot_running:
       }
       passdb {
         driver = passwd-file
-        args = {{ dovecot.config_dir }}/10-passwd
+        args = {{ dovecot.config_dir }}/10-passwd.passdb
       }
       userdb {
         driver = passwd-file
-        args = {{ dovecot.config_dir }}/10-passwd
+        args = {{ dovecot.config_dir }}/10-passwd.userdb
       }
   - require:
     - {{ dovecot.config_dir }} exists
-    - {{ dovecot.config_dir }}/10-passwd
+    - {{ dovecot.config_dir }}/10-passwd.passdb
+    - {{ dovecot.config_dir }}/10-passwd.userdb
   - require_in:
     - {{ dovecot.config_dir }} is clean
   - watch_in:
