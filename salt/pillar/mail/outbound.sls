@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{% set mailbox_accounts_only = False %}
 {% set include_passwords = True %}
 {% from 'mail/map.jinja' import mail with context %}
 

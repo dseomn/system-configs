@@ -15,7 +15,10 @@
  #}
 
 
-{# NOTE: Set include_passwords before importing this file. #}
+{#
+ # NOTE: Set mailbox_accounts_only and include_passwords before importing this
+ # file.
+ #}
 
 
 {% import_yaml 'mail/accounts.yaml.jinja' as _accounts with context %}
@@ -45,6 +48,13 @@
         {'dovecot_password': {'': account.dovecot_password}}) %}
   {% endif %}
 {% endfor %}
+
+{% if mailbox_accounts_only %}
+  {% for account_name, account in _accounts.items() | list
+      if not account.mailbox %}
+    {% do _accounts.pop(account_name) %}
+  {% endfor %}
+{% endif %}
 
 
 {# Derived information. #}
