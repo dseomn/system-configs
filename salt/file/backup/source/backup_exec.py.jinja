@@ -115,6 +115,7 @@ class _LvmThinSnapshotSource(_Source):
                     '--',
                     f'{self._vg}/{self._lv}',
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
             exit_stack.callback(
@@ -127,13 +128,15 @@ class _LvmThinSnapshotSource(_Source):
                     '--',
                     f'{self._vg}/{snapshot_lv}',
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
 
             subprocess.run(
                 ('fsck', '-T', f'/dev/{self._vg}/{snapshot_lv}', '--', '-p'),
-                check=True,
+                stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
+                check=True,
             )
 
             self.path.mkdir()
@@ -148,11 +151,13 @@ class _LvmThinSnapshotSource(_Source):
                     f'/dev/{self._vg}/{snapshot_lv}',
                     str(self.path),
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
             exit_stack.callback(
                 subprocess.run,
                 ('umount', '--', str(self.path)),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
 
@@ -209,6 +214,7 @@ class _VirtualMachineSshDumpSource(_Source):
                     '--',
                     self._temp_volume_vg,
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
             exit_stack.callback(
@@ -221,11 +227,13 @@ class _VirtualMachineSshDumpSource(_Source):
                     '--',
                     f'{self._temp_volume_vg}/{dump_lv}',
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
 
             subprocess.run(
                 ('mkfs.ext4', '-q', '-U', dump_uuid, dump_dev),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
 
@@ -239,6 +247,7 @@ class _VirtualMachineSshDumpSource(_Source):
                     f'--target={dump_dev_target}',
                     '--live',
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
             try:
@@ -252,6 +261,7 @@ class _VirtualMachineSshDumpSource(_Source):
                         f'--volume-uuid={dump_uuid}',
                         self._dump_source,
                     ),
+                    stdin=subprocess.DEVNULL,
                     check=True,
                 )
             finally:
@@ -264,6 +274,7 @@ class _VirtualMachineSshDumpSource(_Source):
                         f'--target={dump_dev_target}',
                         '--live',
                     ),
+                    stdin=subprocess.DEVNULL,
                     check=True,
                 )
 
@@ -279,11 +290,13 @@ class _VirtualMachineSshDumpSource(_Source):
                     dump_dev,
                     str(self.path),
                 ),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
             exit_stack.callback(
                 subprocess.run,
                 ('umount', '--', str(self.path)),
+                stdin=subprocess.DEVNULL,
                 check=True,
             )
 
