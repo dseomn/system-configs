@@ -139,3 +139,10 @@
         ),
     },
 }) %}
+{% macro _cert_fingerprint(certificate) -%}
+  {{ salt.cmd.run_stdout(
+      'openssl x509 -noout -fingerprint -' + crypto.openssl.digest,
+      stdin=certificate,
+  ).partition('=')[2] }}
+{%- endmacro %}
+{% do crypto.openssl.update({'cert_fingerprint': _cert_fingerprint}) %}
