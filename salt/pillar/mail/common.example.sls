@@ -36,3 +36,13 @@ mail:
           -----BEGIN CERTIFICATE-----
           ...
           -----END CERTIFICATE-----
+
+    # Required. How to connect to mail.storage hosts. Same structure as inbound
+    # above.
+    storage:
+      name: mail-storage.example.com
+      certificates:
+      - |
+          -----BEGIN CERTIFICATE-----
+          ...
+          -----END CERTIFICATE-----

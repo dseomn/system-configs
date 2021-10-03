@@ -1,0 +1,80 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{% from 'crypto/map.jinja' import crypto %}
+{% from 'stunnel/map.jinja' import stunnel %}
+
+mail_uid = vmail
+mail_gid = vmail
+
+mail_location = \
+  maildir:/var/local/mail/persistent/mail/%{domain}/%{username}/Maildir
+
+mail_plugins = listescape
+
+namespace inbox {
+  inbox = yes
+  separator = /
+  # https://datatracker.ietf.org/doc/html/rfc9051#section-7.3.1
+  mailbox Archive {
+    special_use = \Archive
+  }
+  mailbox Drafts {
+    special_use = \Drafts
+  }
+  mailbox Junk {
+    special_use = \Junk
+  }
+  mailbox Sent {
+    special_use = \Sent
+  }
+  mailbox Trash {
+    special_use = \Trash
+  }
+}
+
+ssl = required
+ssl_min_protocol = {{ crypto.openssl.general_protocols_min }}
+ssl_cipher_list = {{
+    crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers) }}
+ssl_key = <{{ default_certificate.key }}
+ssl_cert = <{{ default_certificate.fullchain }}
+{%- for certificate_name, certificate in certificates.items() %}
+local_name {{ certificate_name }} {
+  ssl_key = <{{ certificate.key }}
+  ssl_cert = <{{ certificate.fullchain }}
+}
+{%- endfor %}
+
+service auth {
+  unix_listener auth-userdb {
+    mode = 0660
+    group = vmail
+  }
+}
+
+service lmtp {
+  user = vmail
+  unix_listener lmtp {
+    mode = 0660
+    group = {{ stunnel.group }}
+  }
+}
+
+service imap-login {
+  inet_listener imaps {
+    port = 993
+    ssl = yes
+  }
+}

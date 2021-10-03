@@ -80,6 +80,9 @@ base:
   'G@role:mail:outbound':
   - mail.outbound
 
+  'G@role:mail:storage':
+  - mail.storage
+
   'G@role:media-center':
   - dlna.renderer
   - ssh.server
