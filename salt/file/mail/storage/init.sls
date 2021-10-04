@@ -17,6 +17,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
+{% from 'mail/storage/map.jinja' import mail_storage %}
 {% from 'network/firewall/map.jinja' import nftables %}
 {% from 'stunnel/map.jinja' import stunnel %}
 
@@ -37,13 +38,7 @@ include:
 
 mail_storage_pkgs:
   pkg.installed:
-  - pkgs: {{ salt.grains.filter_by({
-        'Debian': (
-            'dovecot-imapd',
-            'dovecot-lmtpd',
-            'dovecot-sieve',
-        ),
-    }) | json }}
+  - pkgs: {{ mail_storage.pkgs | json }}
 
 
 vmail_user:

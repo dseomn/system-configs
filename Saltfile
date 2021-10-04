@@ -48,6 +48,7 @@ salt-ssh:
   - salt://mail/dovecot/map.jinja
   - salt://mail/inbound/map.jinja
   - salt://mail/map.jinja
+  - salt://mail/storage/map.jinja
   - salt://nas/map.jinja
   - salt://network/firewall/map.jinja
   - salt://network/home_router/dns/map.jinja
