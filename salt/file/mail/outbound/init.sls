@@ -229,8 +229,8 @@ active dkim keys should be rotated:
   file.managed:
   - mode: 0600
   - contents: |
-      {%- for account_name, logins in pillar.mail.logins_by_account.items() %}
-      {{ account_name }} {{ logins | join(' ') }}
+      {%- for account_name in pillar.mail.accounts %}
+      {{ account_name }} {{ account_name }}
       {%- endfor %}
   - require:
     - {{ postfix_instance }}
@@ -240,19 +240,15 @@ active dkim keys should be rotated:
   file.managed:
   - mode: 0600
   - contents: |
-      {%- for account_name, logins in pillar.mail.logins_by_account.items() %}
-        {%- set account_recipients =
-            pillar.mail.accounts[account_name].recipients %}
-        {%- if account_recipients == 'all' %}
+      {%- for account_name, account in pillar.mail.accounts.items() %}
+        {%- if account.recipients == 'all' %}
           {%- set account_access = 'permit' %}
-        {%- elif account_recipients == 'local' %}
+        {%- elif account.recipients == 'local' %}
           {%- set account_access = 'reject_unauth_destination permit' %}
         {%- else %}
           {%- do {}['invalid "recipients" value for ' + account_name] %}
         {%- endif %}
-      {%- for login_name in logins %}
-      {{ login_name }} {{ account_access }}
-      {%- endfor %}
+      {{ account_name }} {{ account_access }}
       {%- endfor %}
   - require:
     - {{ postfix_instance }}
