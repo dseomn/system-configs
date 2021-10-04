@@ -1,0 +1,45 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+report_safe 0
+add_header all Report _REPORT_
+
+add_header all Relays-Trusted _RELAYSTRUSTED_
+add_header all Relays-Untrusted _RELAYSUNTRUSTED_
+add_header all Relays-Internal _RELAYSINTERNAL_
+add_header all Relays-External _RELAYSEXTERNAL_
+
+add_header all Hammy-Tokens _HAMMYTOKENS(5)_
+add_header all Spammy-Tokens _SPAMMYTOKENS(5)_
+
+# https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
+trusted_networks 10.0.0.0/8
+trusted_networks 169.254.0.0/16
+trusted_networks 172.16.0.0/12
+trusted_networks 192.168.0.0/16
+# https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml
+trusted_networks fc00::/7
+trusted_networks fe80::/10
+
+internal_networks {{ (
+    salt.dnsutil.A(pillar.mail.common.inbound.name) +
+    salt.dnsutil.AAAA(pillar.mail.common.inbound.name)
+) | join(' ') }}
+
+msa_networks {{ (
+    salt.dnsutil.A(pillar.mail.common.outbound.name) +
+    salt.dnsutil.AAAA(pillar.mail.common.outbound.name)
+) | join(' ') }}
+
+bayes_expiry_max_db_size {{ 1_000_000 }}

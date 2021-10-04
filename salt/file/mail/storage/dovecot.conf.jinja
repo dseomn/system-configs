@@ -14,6 +14,7 @@
 
 {% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
+{% from 'mail/dovecot/map.jinja' import dovecot %}
 {% from 'stunnel/map.jinja' import stunnel %}
 
 mail_uid = vmail
@@ -25,12 +26,20 @@ mail_location = \
 mail_plugins = listescape
 
 plugin {
+  sieve_plugins = sieve_extprograms
+  sieve_global_extensions = +vnd.dovecot.filter
+
+  sieve_filter_bin_dir = {{ dovecot.top_config_dir }}/sieve-filter-bin
+  sieve_filter_exec_timeout = 30s
+
+  sieve_user_log = \
+    /var/local/mail/persistent/mail/%{domain}/%{username}/sieve.log
+
+  sieve_before = file:{{ dovecot.top_config_dir }}/sieve-before
   sieve = \
     file:{{ common.local_etc }}/mail/%{domain}/%{username}/active.sieve
     {{- ';' -}}
     bindir=/var/cache/mail/%{domain}/%{username}/sieve
-  sieve_user_log = \
-    /var/local/mail/persistent/mail/%{domain}/%{username}/sieve.log
 }
 
 namespace inbox {

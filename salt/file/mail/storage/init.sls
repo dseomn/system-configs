@@ -65,6 +65,13 @@ vmail_user:
     - /var/local/mail/persistent is backed up
     - vmail_user
 
+/var/local/mail/spamassassin:
+  file.directory:
+  - user: vmail
+  - group: vmail
+  - dir_mode: 0700
+  - makedirs: true
+
 {{ common.local_etc }}/mail exists:
   file.directory:
   - name: {{ common.local_etc }}/mail
@@ -102,6 +109,110 @@ vmail_user:
 {% set system_certificate = certificates[pillar.mail.common.storage.name] %}
 
 
+spamd_enabled:
+  service.enabled:
+  - name: {{ mail_storage.spamd_service }}
+spamd_running:
+  service.running:
+  - name: {{ mail_storage.spamd_service }}
+
+{{ mail_storage.spamassassin_config_file }}:
+  file.managed:
+  - source: salt://mail/storage/spamassassin.cf.jinja
+  - template: jinja
+  - require:
+    - mail_storage_pkgs
+  - watch_in:
+    - spamd_running
+
+{{ mail_storage.spamassassin_default_file }}:
+  file.blockreplace:
+  - marker_start: '# START: mail.storage'
+  - marker_end: '# END: mail.storage'
+  - content: |
+      OPTIONS="\
+        --listen=/var/local/mail/spamassassin/spamd \
+        --socketowner=vmail \
+        --socketmode=0700 \
+        --username=vmail \
+        --virtual-config-dir=/var/cache/mail/%d/%l/spamassassin \
+        --nouser-config"
+      CRON=1
+  - append_if_not_found: true
+  - require:
+    - mail_storage_pkgs
+    - /var/local/mail/spamassassin
+    - vmail_user
+    - /var/cache/mail
+  - watch_in:
+    - spamd_running
+
+{{ mail_storage.spamc_config_file }}:
+  file.managed:
+  - contents: |
+      --socket=/var/local/mail/spamassassin/spamd
+  - require:
+    - mail_storage_pkgs
+    - /var/local/mail/spamassassin
+
+
+{{ dovecot.top_config_dir }}/sieve-filter-bin exists:
+  file.directory:
+  - name: {{ dovecot.top_config_dir }}/sieve-filter-bin
+  - require:
+    - dovecot_pkgs
+{{ dovecot.top_config_dir }}/sieve-filter-bin is clean:
+  file.directory:
+  - name: {{ dovecot.top_config_dir }}/sieve-filter-bin
+  - clean: true
+  - require:
+    - {{ dovecot.top_config_dir }}/sieve-filter-bin exists
+
+{{ dovecot.top_config_dir }}/sieve-filter-bin/spamassassin:
+  file.managed:
+  - mode: 0755
+  - contents: |
+      #!/bin/bash -e
+      exec spamc --username="$USER"
+  - require:
+    - {{ dovecot.top_config_dir }}/sieve-filter-bin exists
+    - {{ mail_storage.spamc_config_file }}
+  - require_in:
+    - {{ dovecot.top_config_dir }}/sieve-filter-bin is clean
+
+{{ dovecot.top_config_dir }}/sieve-before exists:
+  file.directory:
+  - name: {{ dovecot.top_config_dir }}/sieve-before
+  - require:
+    - dovecot_pkgs
+{{ dovecot.top_config_dir }}/sieve-before is clean:
+  file.directory:
+  - name: {{ dovecot.top_config_dir }}/sieve-before
+  - clean: true
+  - require:
+    - {{ dovecot.top_config_dir }}/sieve-before exists
+
+{{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve:
+  file.managed:
+  - source: salt://mail/storage/spamassassin.sieve
+  - require:
+    - {{ dovecot.top_config_dir }}/sieve-before exists
+    - {{ dovecot.top_config_dir }}/sieve-filter-bin/spamassassin
+  - require_in:
+    - {{ dovecot.top_config_dir }}/sieve-before is clean
+{{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.svbin:
+  cmd.run:
+  - name: sievec {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
+  - onchanges:
+    - {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
+  - require:
+    - mail_storage_pkgs
+  file.exists:
+  - require:
+    - cmd: {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.svbin
+  - require_in:
+    - {{ dovecot.top_config_dir }}/sieve-before is clean
+
 {{ dovecot.config_dir }}/50-mail-storage.conf:
   file.managed:
   - source: salt://mail/storage/dovecot.conf.jinja
@@ -114,6 +225,8 @@ vmail_user:
     - mail_storage_pkgs
     - vmail_user
     - /var/local/mail/persistent/mail
+    - {{ dovecot.top_config_dir }}/sieve-filter-bin is clean
+    - {{ dovecot.top_config_dir }}/sieve-before is clean
     - {{ common.local_etc }}/mail is clean
     - /var/cache/mail
     - stunnel_pkgs

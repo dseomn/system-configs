@@ -21,6 +21,11 @@
             'dovecot-imapd',
             'dovecot-lmtpd',
             'dovecot-sieve',
+            'spamassassin',
         ),
+        'spamassassin_config_file': '/etc/spamassassin/local.cf',
+        'spamassassin_default_file': '/etc/default/spamassassin',
+        'spamd_service': 'spamassassin',
+        'spamc_config_file': '/etc/spamassassin/spamc.conf',
     },
 }) %}
