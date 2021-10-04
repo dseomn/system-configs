@@ -204,6 +204,9 @@ restart postfix on changes to certificates:
       {%- endfor %}
   - require:
     - {{ instance }}
+    {% for file in tls_server_sni_files %}
+    - {{ file }}
+    {% endfor %}
 {{ _postmap(
     'tls_server_sni',
     instance=instance,
