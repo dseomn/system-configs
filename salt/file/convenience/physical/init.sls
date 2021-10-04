@@ -24,4 +24,4 @@
 
 convenience_physical_pkgs:
   pkg.installed:
-  - pkgs: {{ convenience_physical.pkgs | json }}
+  - pkgs: {{ convenience_physical.pkgs | tojson }}

@@ -27,7 +27,7 @@ include:
 
 acme_pkgs:
   pkg.installed:
-  - pkgs: {{ acme.pkgs | json }}
+  - pkgs: {{ acme.pkgs | tojson }}
   - require:
     # The acme packages don't actually require ddns, but states in the
     # acme_cert() macro does.

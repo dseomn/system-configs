@@ -34,4 +34,4 @@
 
 pkgs:
   pkg.installed:
-  - pkgs: {{ convenience.pkgs | json }}
+  - pkgs: {{ convenience.pkgs | tojson }}

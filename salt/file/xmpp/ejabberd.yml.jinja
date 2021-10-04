@@ -19,7 +19,7 @@
 {% from 'xmpp/map.jinja' import xmpp %}
 
 
-hosts: {{ pillar.xmpp.domains | list | json }}
+hosts: {{ pillar.xmpp.domains | list | tojson }}
 
 {% if not xmpp.ejabberd_rotate_logs %}
 log_rotate_size: infinity
@@ -49,12 +49,12 @@ certfiles:
 - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/fullchain.pem
 - {{ acme.certbot_config_dir }}/live/conference.{{ domain }}/privkey.pem
 {% endfor %}
-c2s_ciphers: {{ crypto.openssl.general_ciphers | json }}
+c2s_ciphers: {{ crypto.openssl.general_ciphers | tojson }}
 c2s_protocol_options:
 {% for protocol in crypto.openssl.general_protocols_disabled %}
 - no_{{ protocol.lower().replace('.', '_') }}
 {% endfor %}
-s2s_ciphers: {{ crypto.openssl.general_ciphers | json }}
+s2s_ciphers: {{ crypto.openssl.general_ciphers | tojson }}
 s2s_protocol_options:
 {% for protocol in crypto.openssl.general_protocols_disabled %}
 - no_{{ protocol.lower().replace('.', '_') }}

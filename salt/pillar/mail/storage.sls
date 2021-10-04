@@ -24,7 +24,7 @@
 {% endfor %}
 
 mail:
-  accounts: {{ mail.accounts | json }}
-  logins_by_account: {{ mail.logins_by_account | json }}
-  mailbox_domains: {{ mail.mailbox_domains | json }}
-  storage: {{ storage | json }}
+  accounts: {{ mail.accounts | tojson }}
+  logins_by_account: {{ mail.logins_by_account | tojson }}
+  mailbox_domains: {{ mail.mailbox_domains | tojson }}
+  storage: {{ storage | tojson }}

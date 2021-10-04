@@ -18,8 +18,8 @@
 {% import_yaml 'network/hosts/{}.yaml.jinja'.format(grains.id) as host %}
 
 network:
-  global: {{ global | json }}
-  sites: {{ sites | json }}
-  segments: {{ segments | json }}
+  global: {{ global | tojson }}
+  sites: {{ sites | tojson }}
+  segments: {{ segments | tojson }}
   hosts:
-    {{ grains.id }}: {{ host | json }}
+    {{ grains.id }}: {{ host | tojson }}

@@ -18,7 +18,7 @@
 
 nginx_pkgs:
   pkg.installed:
-  - pkgs: {{ nginx.pkgs | json }}
+  - pkgs: {{ nginx.pkgs | tojson }}
 
 nginx_enabled:
   service.enabled:

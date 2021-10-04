@@ -18,7 +18,7 @@
 
 stunnel_pkgs:
   pkg.installed:
-  - pkgs: {{ stunnel.pkgs | json }}
+  - pkgs: {{ stunnel.pkgs | tojson }}
 
 {{ stunnel.config_dir }} exists:
   file.exists:

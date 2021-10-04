@@ -66,7 +66,7 @@ sshd_config:
   - source: salt://ssh/server/sshd_config.jinja
   - template: jinja
   - defaults:
-      sshd: {{ sshd | json }}
+      sshd: {{ sshd | tojson }}
   - require:
     - {{ sshd.config_directory }}/ssh_host_key
 

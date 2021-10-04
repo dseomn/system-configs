@@ -14,4 +14,4 @@
 
 {% import_yaml 'ddns/hosts/{}.yaml.jinja'.format(grains.id) as host %}
 
-ddns: {{ host | json }}
+ddns: {{ host | tojson }}

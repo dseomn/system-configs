@@ -46,12 +46,12 @@
     {% do sls_include.append('backup.source') %}
   {% endif %}
 {% endfor %}
-include: {{ sls_include | unique | json }}
+include: {{ sls_include | unique | tojson }}
 
 
 virtual_machine_host_pkgs:
   pkg.installed:
-  - pkgs: {{ virtual_machine_host.pkgs | json }}
+  - pkgs: {{ virtual_machine_host.pkgs | tojson }}
   - install_recommends: false
 
 
@@ -89,9 +89,9 @@ base_system:
       curl --location --no-progress-meter
       -o '{{ _base_system_dev }}' '{{ base_system.url }}'
   - unless:
-    - {{ _base_system_hash_check | json }}
+    - {{ _base_system_hash_check | tojson }}
   - check_cmd:
-    - {{ _base_system_hash_check | json }}
+    - {{ _base_system_hash_check | tojson }}
 
 
 {% for guest_id, guest in host.guests.items() %}
@@ -180,7 +180,7 @@ base_system:
                 'vg': data_thin_pool.vg,
                 'lv': data.lv,
             },
-        } | json | json
+        } | tojson | tojson
     }}
   - require:
     - create_backup_source_sources_d
@@ -246,7 +246,7 @@ base_system:
         - [sed, -i, -e,
            's/^::1 \(ip6-localhost ip6-loopback\)$/::1 localhost \1/',
            /etc/hosts]
-        - {{ bootstrap_users | json }}
+        - {{ bootstrap_users | tojson }}
         - [touch, /etc/cloud/cloud-init.disabled]
         users: []
   - require:
@@ -298,7 +298,7 @@ warn about {{ guest_id }}_install:
                 'temp_volume_thin_pool_lv': dump_thin_pool.lv,
                 'temp_volume_size': dump.size,
             },
-        } | json | json
+        } | tojson | tojson
     }}
   - require:
     - create_backup_source_sources_d

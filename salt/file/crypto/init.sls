@@ -20,4 +20,4 @@ crypto_pkgs:
           'ca-certificates',
           'openssl',
       ],
-  }) | json }}
+  }) | tojson }}

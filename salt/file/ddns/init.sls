@@ -27,7 +27,7 @@ include:
 
 ddns_deps:
   pkg.installed:
-  - pkgs: {{ ddns.deps | json }}
+  - pkgs: {{ ddns.deps | tojson }}
 
 {{ ddns.bin }}:
   file.managed:
@@ -104,7 +104,7 @@ ddns_user:
 {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
   file.managed:
   - replace: false
-  - contents: {{ ('password=' + crypto.generate_password()) | json }}
+  - contents: {{ ('password=' + crypto.generate_password()) | tojson }}
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
   - require_in:
@@ -149,7 +149,7 @@ LOGGER_ERROR_ARGS="" {{ ddns.bin }}:
   - identifier: 75b6f087-2f4b-4028-a11b-cf5cf06f7e93
   - user: {{ ddns.user }}
   - minute: "*/10"
-  - commented: {{ (not _ddns.enable_cron) | json }}
+  - commented: {{ (not _ddns.enable_cron) | tojson }}
   - require:
     - ddns_user
     - {{ ddns.bin }}
@@ -159,7 +159,7 @@ LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
   - user: {{ ddns.user }}
   - minute: 5
   - hour: "*/4"
-  - commented: {{ (not _ddns.enable_cron) | json }}
+  - commented: {{ (not _ddns.enable_cron) | tojson }}
   - require:
     - ddns_user
     - {{ ddns.bin }}

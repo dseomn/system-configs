@@ -127,10 +127,10 @@ systemd_networkd:
   - template: jinja
   - defaults:
       interface_name: {{ interface_name }}
-      interface: {{ interface | json }}
-      segments: {{ segments | json }}
-      site: {{ site | json }}
-      global: {{ global | json }}
+      interface: {{ interface | tojson }}
+      segments: {{ segments | tojson }}
+      site: {{ site | tojson }}
+      global: {{ global | tojson }}
   - require_in:
     - file: {{ system.config_directory }}
   - onchanges_in:
@@ -158,7 +158,7 @@ systemd_networkd:
   - template: jinja
   - defaults:
       interface_name: {{ interface_name }}
-      bridge_segments: {{ interface.bridge_segments | json }}
+      bridge_segments: {{ interface.bridge_segments | tojson }}
   - require_in:
     - file: {{ system.config_directory }}
   - onchanges_in:
@@ -200,7 +200,7 @@ systemd_networkd:
 {% if access_point_interfaces %}
 access_point_pkgs:
   pkg.installed:
-  - pkgs: {{ system.access_point_pkgs | json }}
+  - pkgs: {{ system.access_point_pkgs | tojson }}
 
 {{ system.hostapd_file_settings_dir }}:
   file.directory:
@@ -255,10 +255,10 @@ access_point_pkgs:
   - template: jinja
   - defaults:
       interface_name: {{ interface_name }}
-      interface: {{ interface | json }}
-      segments: {{ segments | json }}
-      site: {{ site | json }}
-      bridge_name_by_segment: {{ bridge_name_by_segment | json }}
+      interface: {{ interface | tojson }}
+      segments: {{ segments | tojson }}
+      site: {{ site | tojson }}
+      bridge_name_by_segment: {{ bridge_name_by_segment | tojson }}
       file_settings_dir: {{ system.hostapd_file_settings_dir }}
       ctrl_interface: {{ system.hostapd_ctrl_interface }}
 
@@ -281,7 +281,7 @@ access_point_pkgs:
 {{ system.hostapd_file_settings_dir }}/{{ setting_file }}:
   file.managed:
   - mode: 0600
-  - contents: {{ contents | json }}
+  - contents: {{ contents | tojson }}
   - require_in:
     - file: {{ system.hostapd_file_settings_dir }}/{{ setting_file.rpartition('/')[0] }}
 {% endfor %}
@@ -290,7 +290,7 @@ access_point_pkgs:
 {% if wireguard_interfaces %}
 wireguard_pkgs:
   pkg.installed:
-  - pkgs: {{ system.wireguard_pkgs | json }}
+  - pkgs: {{ system.wireguard_pkgs | tojson }}
 {% endif %}
 
 {% for interface_name, interface in wireguard_interfaces.items() %}
@@ -301,10 +301,10 @@ wireguard_pkgs:
   - template: jinja
   - defaults:
       interface_name: {{ interface_name }}
-      interface: {{ interface | json }}
-      segments: {{ segments | json }}
-      site: {{ site | json }}
-      global: {{ global | json }}
+      interface: {{ interface | tojson }}
+      segments: {{ segments | tojson }}
+      site: {{ site | tojson }}
+      global: {{ global | tojson }}
   - require_in:
     - file: {{ system.config_directory }}
   - onchanges_in:

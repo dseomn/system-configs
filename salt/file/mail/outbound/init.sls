@@ -262,7 +262,7 @@ active dkim keys should be rotated:
   # upstream. This does allow probing of non-recipient authoritative domains,
   # but only by authenticated clients.
   - contents: {{
-        mail.postmap_contents(pillar.mail.authoritative_domains) | json }}
+        mail.postmap_contents(pillar.mail.authoritative_domains) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('relay_domains', instance=postfix_instance) }}
@@ -271,7 +271,7 @@ active dkim keys should be rotated:
   file.managed:
   - mode: 0600
   - contents: {{
-        mail.postmap_contents(pillar.mail.recipient_addresses) | json }}
+        mail.postmap_contents(pillar.mail.recipient_addresses) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('relay_recipient', instance=postfix_instance) }}
@@ -281,7 +281,7 @@ active dkim keys should be rotated:
   - mode: 0600
   - contents: {{
         mail.postmap_contents(pillar.mail.outbound.get('passwords', {}))
-        | json }}
+        | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('smtp_sasl_password', instance=postfix_instance) }}
@@ -291,7 +291,7 @@ active dkim keys should be rotated:
   - source: salt://mail/outbound/main.cf.jinja
   - template: jinja
   - defaults:
-      default_certificate: {{ certificates.values() | first | json }}
+      default_certificate: {{ certificates.values() | first | tojson }}
   - require:
     - {{ postfix_instance }}
     - {{ postfix_config_dir }}/tls_server_sni

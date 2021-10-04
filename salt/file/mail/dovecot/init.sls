@@ -18,7 +18,7 @@
 
 dovecot_pkgs:
   pkg.installed:
-  - pkgs: {{ dovecot.pkgs | json }}
+  - pkgs: {{ dovecot.pkgs | tojson }}
 
 dovecot_enabled:
   service.enabled:

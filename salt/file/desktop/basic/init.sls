@@ -24,4 +24,4 @@
 
 basic_desktop_pkgs:
   pkg.installed:
-  - pkgs: {{ basic_desktop.pkgs | json }}
+  - pkgs: {{ basic_desktop.pkgs | tojson }}

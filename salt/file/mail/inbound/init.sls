@@ -38,7 +38,7 @@ include:
 
 mail_inbound_pkgs:
   pkg.installed:
-  - pkgs: {{ mail_inbound.pkgs | json }}
+  - pkgs: {{ mail_inbound.pkgs | tojson }}
 
 
 {{ mail.postfix_instance(postfix_instance) }}
@@ -129,7 +129,7 @@ opendmarc_running:
 {% endfor %}
 {{ postfix_config_dir }}/mail_outbound_client_certs:
   file.managed:
-  - contents: {{ mail.postmap_contents(mail_outbound_fingerprints) | json }}
+  - contents: {{ mail.postmap_contents(mail_outbound_fingerprints) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('mail_outbound_client_certs', instance=postfix_instance) }}
@@ -158,7 +158,8 @@ opendmarc_running:
 {{ postfix_config_dir }}/virtual_mailbox_domains:
   file.managed:
   - mode: 0600
-  - contents: {{ mail.postmap_contents(pillar.mail.recipient_domains) | json }}
+  - contents: {{
+        mail.postmap_contents(pillar.mail.recipient_domains) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('virtual_mailbox_domains', instance=postfix_instance) }}
@@ -166,7 +167,8 @@ opendmarc_running:
 {{ postfix_config_dir }}/virtual_mailbox:
   file.managed:
   - mode: 0600
-  - contents: {{ mail.postmap_contents(pillar.mail.mailbox_addresses) | json }}
+  - contents: {{
+        mail.postmap_contents(pillar.mail.mailbox_addresses) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('virtual_mailbox', instance=postfix_instance) }}
@@ -174,7 +176,7 @@ opendmarc_running:
 {{ postfix_config_dir }}/virtual_alias:
   file.managed:
   - mode: 0600
-  - contents: {{ mail.postmap_contents(pillar.mail.aliases) | json }}
+  - contents: {{ mail.postmap_contents(pillar.mail.aliases) | tojson }}
   - require:
     - {{ postfix_instance }}
 {{ mail.postmap('virtual_alias', instance=postfix_instance) }}
@@ -184,7 +186,7 @@ opendmarc_running:
   - source: salt://mail/inbound/main.cf.jinja
   - template: jinja
   - defaults:
-      default_certificate: {{ certificates.values() | first | json }}
+      default_certificate: {{ certificates.values() | first | tojson }}
   - require:
     - {{ postfix_instance }}
     - {{ postfix_config_dir }}/tls_server_sni

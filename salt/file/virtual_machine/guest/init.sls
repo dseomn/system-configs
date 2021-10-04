@@ -66,7 +66,7 @@ virtual_machine_guest_volumes:
       UUID={{ passthrough.uuid }} {{ passthrough.mount }} ext4 defaults 0 2
       {% endfor %}
   - append_if_not_found: true
-  - require: {{ mountpoint_states | json }}
+  - require: {{ mountpoint_states | tojson }}
   cmd.run:
   - name: >-
       swapon --verbose --all 2>&1 &&
@@ -132,4 +132,4 @@ virtual_machine_guest_backup_dump_authorized_keys:
 {% endif %}
 
 
-include: {{ includes | json }}
+include: {{ includes | tojson }}

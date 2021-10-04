@@ -31,7 +31,7 @@ import tempfile
 # {% from 'irc/bouncer/map.jinja' import irc_bouncer %}
 _CONFIG_DIR = pathlib.Path('/etc/znc')
 _DATA_DIR = pathlib.Path('/var/lib/znc')
-_MUTABLE = json.loads('{{ irc_bouncer.znc_mutable | json }}')
+_MUTABLE = json.loads('{{ irc_bouncer.znc_mutable | tojson }}')
 
 
 def main():

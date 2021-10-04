@@ -33,7 +33,7 @@ include:
 
 xmpp_pkgs:
   pkg.installed:
-  - pkgs: {{ xmpp.pkgs | json }}
+  - pkgs: {{ xmpp.pkgs | tojson }}
 
 
 /srv/ejabberd/mod_log_chat:

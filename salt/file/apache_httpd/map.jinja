@@ -55,7 +55,7 @@
   - require:
     - apache_httpd_pkgs
     {% for requirement in require %}
-    - {{ requirement | json }}
+    - {{ requirement | tojson }}
     {% endfor %}
 {{ apache_httpd.config_dir }}/{{ type }}-enabled/{{ name }}:
   file.symlink:

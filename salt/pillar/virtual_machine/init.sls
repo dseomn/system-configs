@@ -30,5 +30,5 @@
 
 
 virtual_machine:
-  host: {{ host | json }}
-  guest: {{ guest | json }}
+  host: {{ host | tojson }}
+  guest: {{ guest | tojson }}

@@ -43,7 +43,7 @@
         esac
         exit 1
   {% for key, value in kwargs.items() %}
-  - {{ key }}: {{ value | json }}
+  - {{ key }}: {{ value | tojson }}
   {% endfor %}
 {% endmacro %}
 

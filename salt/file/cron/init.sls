@@ -16,5 +16,5 @@
 root_crontab_path:
   cron.env_present:
   - name: PATH
-  - value: {{ salt['environ.get']('PATH') | json }}
+  - value: {{ salt['environ.get']('PATH') | tojson }}
   - user: root

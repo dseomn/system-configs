@@ -32,7 +32,7 @@ include:
 
 plymouth:
   pkg.installed:
-  - pkgs: {{ plymouth.pkgs | json }}
+  - pkgs: {{ plymouth.pkgs | tojson }}
 
 {{ grub.default_grub_d }}/plymouth.cfg:
   file.managed:

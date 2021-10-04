@@ -52,7 +52,7 @@ net.ipv6.conf.all.forwarding:
   - file: /etc/apt/sources.list.d/kubernetes.list
 kubernetes_pkgs:
   pkg.installed:
-  - pkgs: {{ kubernetes.pkgs | json }}
+  - pkgs: {{ kubernetes.pkgs | tojson }}
   - version: {{ pillar.kubernetes.version }}
   - hold: true
 

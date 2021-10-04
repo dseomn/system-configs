@@ -24,4 +24,4 @@
 
 firmware:
   pkg.installed:
-  - pkgs: {{ firmware.pkgs | json }}
+  - pkgs: {{ firmware.pkgs | tojson }}

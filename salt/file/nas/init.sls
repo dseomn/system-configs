@@ -47,7 +47,7 @@ include:
 
 nas_pkgs:
   pkg.installed:
-  - pkgs: {{ nas.pkgs | json }}
+  - pkgs: {{ nas.pkgs | tojson }}
 
 nas_user:
   group.present:
@@ -78,7 +78,7 @@ nas_user:
       [{{ share_name }}]
       path = {{ share.volume.replace('%', '%%') }}
       {% endfor %}
-  - require: {{ (['nas_user'] + share_requisites) | json }}
+  - require: {{ (['nas_user'] + share_requisites) | tojson }}
 
 {% do open_tcp_ports.append(873) %}
 

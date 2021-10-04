@@ -19,8 +19,8 @@
 {% import_yaml 'mail/inbound.yaml.jinja' as inbound %}
 
 mail:
-  aliases: {{ mail.aliases | json }}
-  inbound: {{ inbound | json }}
-  mailbox_addresses: {{ mail.mailbox_addresses | json }}
-  recipient_domains: {{ mail.recipient_domains | json }}
-  system: {{ mail.system | json }}
+  aliases: {{ mail.aliases | tojson }}
+  inbound: {{ inbound | tojson }}
+  mailbox_addresses: {{ mail.mailbox_addresses | tojson }}
+  recipient_domains: {{ mail.recipient_domains | tojson }}
+  system: {{ mail.system | tojson }}

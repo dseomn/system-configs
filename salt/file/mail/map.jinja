@@ -158,7 +158,7 @@ postmap {{ flags }} -c {{ config_dir }} {{ filename }}:
   - require:
     - mail_pkgs
     - {{ config_dir }}/main.cf
-  - onchanges: {{ onchanges | json }}
+  - onchanges: {{ onchanges | tojson }}
 {% endmacro %}
 
 

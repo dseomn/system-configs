@@ -44,7 +44,7 @@ include:
 
 {{ parent_dir }}/{{ name }}:
   file.managed:
-  - contents: {{ contents | json }}
+  - contents: {{ contents | tojson }}
   - require:
     - {{ parent_dir }} exists
   - require_in:

@@ -38,7 +38,7 @@ include:
 
 mail_storage_pkgs:
   pkg.installed:
-  - pkgs: {{ mail_storage.pkgs | json }}
+  - pkgs: {{ mail_storage.pkgs | tojson }}
 
 
 vmail_user:
@@ -172,7 +172,7 @@ spamd_running:
 {% set account_user, account_domain = account_name.split('@') %}
 {% set identifier = spam_train_id_prefix + account_name %}
 {% do old_spam_train_cron_jobs.pop(identifier, None) %}
-{{ identifier | json }}:
+{{ identifier | tojson }}:
   cron.present:
   # `FOO=bar quux` would put the whole line into the process args to `sh -c`. So
   # this command uses standard input to run spam-train without leaking the
@@ -185,7 +185,7 @@ spamd_running:
       exec
       {{ common.local_lib }}/spam-train
   - user: vmail
-  - identifier: {{ identifier | json }}
+  - identifier: {{ identifier | tojson }}
   - minute: random
   - hour: random
   - require:
@@ -194,10 +194,10 @@ spamd_running:
     - /var/local/mail/persistent/mail
 {% endfor %}
 {% for identifier in old_spam_train_cron_jobs %}
-{{ identifier | json }}:
+{{ identifier | tojson }}:
   cron.absent:
   - user: vmail
-  - identifier: {{ identifier | json }}
+  - identifier: {{ identifier | tojson }}
 {% endfor %}
 
 
@@ -263,8 +263,8 @@ spamd_running:
   - source: salt://mail/storage/dovecot.conf.jinja
   - template: jinja
   - defaults:
-      certificates: {{ certificates | json }}
-      default_certificate: {{ certificates.values() | first | json }}
+      certificates: {{ certificates | tojson }}
+      default_certificate: {{ certificates.values() | first | tojson }}
   - require:
     - {{ dovecot.config_dir }} exists
     - mail_storage_pkgs
@@ -284,7 +284,8 @@ spamd_running:
 # this uses stunnel instead.
 {{ stunnel.config_dir }}/lmtp_client_certs.pem:
   file.managed:
-  - contents: {{ pillar.mail.common.inbound.certificates | join('\n') | json }}
+  - contents: {{
+        pillar.mail.common.inbound.certificates | join('\n') | tojson }}
   - require:
     - {{ stunnel.config_dir }} exists
   - require_in:
@@ -357,7 +358,7 @@ lmtp_stunnel_running:
 
 {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/active.sieve:
   file.managed:
-  - contents: {{ account.sieve | json }}
+  - contents: {{ account.sieve | tojson }}
   - require:
     - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists
   - require_in:

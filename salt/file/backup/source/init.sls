@@ -25,7 +25,7 @@ include:
 
 backup_source_pkgs:
   pkg.installed:
-  - pkgs: {{ backup_source.pkgs | json }}
+  - pkgs: {{ backup_source.pkgs | tojson }}
 
 
 {{ backup.config_dir }}/source:

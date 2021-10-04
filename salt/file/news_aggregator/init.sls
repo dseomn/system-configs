@@ -28,7 +28,7 @@ include:
 
 news_aggregator_pkgs:
   pkg.installed:
-  - pkgs: {{ news_aggregator.pkgs | json }}
+  - pkgs: {{ news_aggregator.pkgs | tojson }}
 
 
 rss2email_user:

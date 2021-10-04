@@ -47,7 +47,7 @@ boilerplate_certificate_{{ name }}:
     - {{ common.local_etc }}/x509
     - {{ common.local_bin }}/boilerplate-certificate
   test.configurable_test_state:
-  - warnings: {{ warning_on_change | json }}
+  - warnings: {{ warning_on_change | tojson }}
   - onchanges:
     - cmd: boilerplate_certificate_{{ name }}
 

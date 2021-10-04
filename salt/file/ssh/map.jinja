@@ -37,7 +37,7 @@
   - require_in:
     - file: {{ common.local_sbin }}/monitor-secret-age
   test.configurable_test_state:
-  - warnings: {{ warning_on_change | json }}
+  - warnings: {{ warning_on_change | tojson }}
   - onchanges:
     - cmd: {{ filename }}
 {% endmacro %}

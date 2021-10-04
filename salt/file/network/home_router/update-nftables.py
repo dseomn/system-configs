@@ -31,9 +31,9 @@ import ipaddress
 import json
 import subprocess
 
-_HOME_ROUTER_INTERFACES =  json.loads('{{ home_router_interfaces | json }}')
+_HOME_ROUTER_INTERFACES =  json.loads('{{ home_router_interfaces | tojson }}')
 _MASQUERADE_IPV4_INTERFACES = json.loads(
-    '{{ host.get('firewall', {}).get('masquerade_ipv4', ()) | json }}')
+    '{{ host.get('firewall', {}).get('masquerade_ipv4', ()) | tojson }}')
 
 
 def _ip(*args):

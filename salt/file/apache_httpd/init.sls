@@ -19,7 +19,7 @@
 
 apache_httpd_pkgs:
   pkg.installed:
-  - pkgs: {{ apache_httpd.pkgs | json }}
+  - pkgs: {{ apache_httpd.pkgs | tojson }}
 
 apache_httpd_enabled:
   service.enabled:

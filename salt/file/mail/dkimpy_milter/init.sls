@@ -24,7 +24,7 @@ include:
 
 dkimpy_milter_pkgs:
   pkg.installed:
-  - pkgs: {{ dkimpy_milter.pkgs | json }}
+  - pkgs: {{ dkimpy_milter.pkgs | tojson }}
 
 dkimpy_milter_enabled:
   service.enabled:

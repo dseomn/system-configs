@@ -53,7 +53,7 @@ include:
 
 irc_bouncer_pkgs:
   pkg.installed:
-  - pkgs: {{ irc_bouncer.pkgs | json }}
+  - pkgs: {{ irc_bouncer.pkgs | tojson }}
   - require:
     - /var/lib/znc is mounted
 
@@ -164,7 +164,7 @@ znc_files:
         'password': network.password,
         'require_auth': 'yes',
         'username': username,
-    }) | json }}
+    }) | tojson }}
   - require:
     - /etc/znc
   - require_in:

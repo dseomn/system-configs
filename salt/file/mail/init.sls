@@ -25,7 +25,7 @@ include:
 
 mail_pkgs:
   pkg.installed:
-  - pkgs: {{ mail.pkgs | json }}
+  - pkgs: {{ mail.pkgs | tojson }}
 
 
 postfix_enabled:
@@ -53,7 +53,7 @@ postfix_running:
   file.managed:
   - mode: 0600
   - replace: false
-  - contents: {{ crypto.generate_password() | json }}
+  - contents: {{ crypto.generate_password() | tojson }}
   - require:
     - mail_pkgs
 show dovecot_password for relay:

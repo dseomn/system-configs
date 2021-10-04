@@ -38,7 +38,7 @@ include:
 
 rygel_pkgs:
   pkg.installed:
-  - pkgs: {{ rygel.pkgs | json }}
+  - pkgs: {{ rygel.pkgs | tojson }}
 
 rygel_user:
   group.present:
@@ -47,7 +47,7 @@ rygel_user:
   user.present:
   - name: {{ rygel.user }}
   - gid: {{ rygel.user_group }}
-  - groups: {{ rygel.user_groups | json }}
+  - groups: {{ rygel.user_groups | tojson }}
   - home: {{ rygel.user_home }}
   - shell: {{ rygel.user_shell }}
   - system: True
@@ -72,7 +72,7 @@ rygel.conf:
   - source: salt://dlna/renderer/rygel.conf.jinja
   - template: jinja
   - defaults:
-      rygel: {{ rygel | json }}
+      rygel: {{ rygel | tojson }}
 
 rygel_port:
   file.managed:
@@ -80,7 +80,7 @@ rygel_port:
   - source: salt://dlna/renderer/nftables.conf.jinja
   - template: jinja
   - defaults:
-      rygel: {{ rygel | json }}
+      rygel: {{ rygel | tojson }}
   - require:
     - create_nftables_config_dir
   - require_in:

@@ -19,11 +19,11 @@
 {% import_yaml 'mail/outbound.yaml.jinja' as outbound %}
 
 mail:
-  accounts: {{ mail.accounts | json }}
-  authoritative_domains: {{ mail.authoritative_domains | json }}
-  authoritative_non_sub_domains: {{ mail.authoritative_non_sub_domains | json }}
-  logins_by_account: {{ mail.logins_by_account | json }}
-  outbound: {{ outbound | json }}
-  recipient_addresses: {{ mail.recipient_addresses | json }}
-  recipient_domains: {{ mail.recipient_domains | json }}
-  system: {{ mail.system | json }}
+  accounts: {{ mail.accounts | tojson }}
+  authoritative_domains: {{ mail.authoritative_domains | tojson }}
+  authoritative_non_sub_domains: {{ mail.authoritative_non_sub_domains | tojson }}
+  logins_by_account: {{ mail.logins_by_account | tojson }}
+  outbound: {{ outbound | tojson }}
+  recipient_addresses: {{ mail.recipient_addresses | tojson }}
+  recipient_domains: {{ mail.recipient_domains | tojson }}
+  system: {{ mail.system | tojson }}
