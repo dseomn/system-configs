@@ -155,6 +155,51 @@ spamd_running:
     - mail_storage_pkgs
     - /var/local/mail/spamassassin
 
+{{ common.local_lib }}/spam-train:
+  file.managed:
+  - source: salt://mail/storage/spam_train.py
+  - mode: 0755
+  - require:
+    - mail_storage_pkgs
+
+{% set spam_train_id_prefix = 'f1d84c3f-9ce3-46d3-88f1-90648b58d0c2.' %}
+{% set old_spam_train_cron_jobs = {} %}
+{% for cron_job in salt.cron.list_tab('vmail').crons
+    if cron_job.identifier.startswith(spam_train_id_prefix) %}
+  {% do old_spam_train_cron_jobs.update({cron_job.identifier: None}) %}
+{% endfor %}
+{% for account_name in pillar.mail.accounts %}
+{% set account_user, account_domain = account_name.split('@') %}
+{% set identifier = spam_train_id_prefix + account_name %}
+{% do old_spam_train_cron_jobs.pop(identifier, None) %}
+{{ identifier | json }}:
+  cron.present:
+  # `FOO=bar quux` would put the whole line into the process args to `sh -c`. So
+  # this command uses standard input to run spam-train without leaking the
+  # variables in the process args.
+  - name: >-
+      sh
+      {{- '%' -}}
+      USER_DIR=/var/cache/mail/{{ account_domain }}/{{ account_user }}/spamassassin
+      MAILDIR=/var/local/mail/persistent/mail/{{ account_domain }}/{{ account_user }}/Maildir
+      exec
+      {{ common.local_lib }}/spam-train
+  - user: vmail
+  - identifier: {{ identifier | json }}
+  - minute: random
+  - hour: random
+  - require:
+    - {{ common.local_lib }}/spam-train
+    - /var/cache/mail
+    - /var/local/mail/persistent/mail
+{% endfor %}
+{% for identifier in old_spam_train_cron_jobs %}
+{{ identifier | json }}:
+  cron.absent:
+  - user: vmail
+  - identifier: {{ identifier | json }}
+{% endfor %}
+
 
 {{ dovecot.top_config_dir }}/sieve-filter-bin exists:
   file.directory:
