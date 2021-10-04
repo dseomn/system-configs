@@ -41,6 +41,7 @@ mail_storage_pkgs:
         'Debian': (
             'dovecot-imapd',
             'dovecot-lmtpd',
+            'dovecot-sieve',
         ),
     }) | json }}
 
@@ -69,6 +70,33 @@ vmail_user:
     - /var/local/mail/persistent is backed up
     - vmail_user
 
+{{ common.local_etc }}/mail exists:
+  file.directory:
+  - name: {{ common.local_etc }}/mail
+  - user: root
+  - group: vmail
+  - dir_mode: 0750
+{{ common.local_etc }}/mail is clean:
+  file.directory:
+  - name: {{ common.local_etc }}/mail
+  - user: root
+  - group: vmail
+  - dir_mode: 0750
+  - file_mode: 0640
+  - recurse:
+    - user
+    - group
+    - mode
+  - clean: true
+  - require:
+    - {{ common.local_etc }}/mail exists
+
+/var/cache/mail:
+  file.directory:
+  - user: vmail
+  - group: vmail
+  - dir_mode: 0700
+
 
 {% set certificates = {} %}
 {{ x509.certificates(
@@ -91,6 +119,8 @@ vmail_user:
     - mail_storage_pkgs
     - vmail_user
     - /var/local/mail/persistent/mail
+    - {{ common.local_etc }}/mail is clean
+    - /var/cache/mail
     - stunnel_pkgs
   - require_in:
     - {{ dovecot.config_dir }} is clean
@@ -138,6 +168,48 @@ lmtp_stunnel_running:
   - watch:
     - {{ stunnel.config_dir }}/lmtp_client_certs.pem
     - {{ stunnel.config_dir }}/lmtp.conf
+
+
+{% for mailbox_domain in pillar.mail.mailbox_domains %}
+{{ common.local_etc }}/mail/{{ mailbox_domain }} exists:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ mailbox_domain }}
+  - require:
+    - {{ common.local_etc }}/mail exists
+{{ common.local_etc }}/mail/{{ mailbox_domain }} is clean:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ mailbox_domain }}
+  - clean: true
+  - require:
+    - {{ common.local_etc }}/mail/{{ mailbox_domain }} exists
+  - require_in:
+    - {{ common.local_etc }}/mail is clean
+{% endfor %}
+
+{% for account_name, account in pillar.mail.accounts.items() %}
+{% set account_user, account_domain = account_name.split('@') %}
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}
+  - require:
+    - {{ common.local_etc }}/mail/{{ account_domain }} exists
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} is clean:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}
+  - clean: true
+  - require:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists
+  - require_in:
+    - {{ common.local_etc }}/mail/{{ account_domain }} is clean
+
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/active.sieve:
+  file.managed:
+  - contents: {{ account.sieve | json }}
+  - require:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists
+  - require_in:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} is clean
+{% endfor %}
 
 
 {{ nftables.config_dir }}/50-mail-storage.conf:

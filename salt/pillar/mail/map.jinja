@@ -61,6 +61,7 @@
 {% set _logins_by_account = {} %}
 {% set _authoritative_domains = [] %}
 {% set _mailbox_addresses = [] %}
+{% set _mailbox_domains = [] %}
 {% set _recipient_addresses = [] %}
 {% set _recipient_domains = [] %}
 
@@ -81,6 +82,7 @@
   {% do _authoritative_domains.append(account_domain) %}
   {% if account.mailbox %}
     {% do _mailbox_addresses.append(account_name) %}
+    {% do _mailbox_domains.append(account_domain) %}
     {% do _recipient_addresses.append(account_name) %}
     {% do _recipient_domains.append(account_domain) %}
   {% endif %}
@@ -115,6 +117,7 @@
     'authoritative_non_sub_domains': _authoritative_non_sub_domains,
     'logins_by_account': _logins_by_account,
     'mailbox_addresses': _mailbox_addresses | sort | unique,
+    'mailbox_domains': _mailbox_domains | sort | unique,
     'recipient_addresses': _recipient_addresses | sort | unique,
     'recipient_domains': _recipient_domains | sort | unique,
     'system': _system,

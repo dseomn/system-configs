@@ -18,7 +18,13 @@
 
 {% import_yaml 'mail/storage.yaml.jinja' as storage %}
 
+{% for account_name, account in mail.accounts.items() %}
+  {% import_text 'mail/sieve/' + account_name + '.sieve' as sieve_script %}
+  {% do account.update({'sieve': sieve_script}) %}
+{% endfor %}
+
 mail:
   accounts: {{ mail.accounts | json }}
   logins_by_account: {{ mail.logins_by_account | json }}
+  mailbox_domains: {{ mail.mailbox_domains | json }}
   storage: {{ storage | json }}

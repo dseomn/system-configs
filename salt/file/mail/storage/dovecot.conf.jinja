@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{% from 'common/map.jinja' import common %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'stunnel/map.jinja' import stunnel %}
 
@@ -22,6 +23,15 @@ mail_location = \
   maildir:/var/local/mail/persistent/mail/%{domain}/%{username}/Maildir
 
 mail_plugins = listescape
+
+plugin {
+  sieve = \
+    file:{{ common.local_etc }}/mail/%{domain}/%{username}/active.sieve
+    {{- ';' -}}
+    bindir=/var/cache/mail/%{domain}/%{username}/sieve
+  sieve_user_log = \
+    /var/local/mail/persistent/mail/%{domain}/%{username}/sieve.log
+}
 
 namespace inbox {
   inbox = yes
@@ -62,6 +72,10 @@ service auth {
     mode = 0660
     group = vmail
   }
+}
+
+protocol lmtp {
+  mail_plugins = $mail_plugins sieve
 }
 
 service lmtp {
