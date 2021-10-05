@@ -12,16 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% set mailbox_accounts_only = True %}
 {% set include_passwords = True %}
+{% set include_sieve = True %}
+{% set mailbox_accounts_only = True %}
 {% from 'mail/map.jinja' import mail with context %}
 
 {% import_yaml 'mail/storage.yaml.jinja' as storage %}
-
-{% for account_name, account in mail.accounts.items() %}
-  {% import_text 'mail/sieve/' + account_name + '.sieve' as sieve_script %}
-  {% do account.update({'sieve': sieve_script}) %}
-{% endfor %}
 
 mail:
   accounts: {{ mail.accounts | tojson }}

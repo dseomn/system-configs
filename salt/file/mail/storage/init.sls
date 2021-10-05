@@ -355,14 +355,48 @@ lmtp_stunnel_running:
     - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists
   - require_in:
     - {{ common.local_etc }}/mail/{{ account_domain }} is clean
+/var/cache/mail/{{ account_domain }}/{{ account_user }}:
+  file.directory:
+  - user: vmail
+  - group: vmail
+  - dir_mode: 0700
+  - makedirs: true
+  - require:
+    - /var/cache/mail
 
-{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/active.sieve:
-  file.managed:
-  - contents: {{ account.sieve | tojson }}
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve exists:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve
   - require:
     - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} exists
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve is clean:
+  file.directory:
+  - name: {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve
+  - clean: true
+  - require:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve exists
   - require_in:
     - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }} is clean
+
+{% for sieve_name, sieve_contents in account.sieve.items() %}
+{{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve/{{ sieve_name }}:
+  file.managed:
+  - contents: {{ sieve_contents | tojson }}
+  - require:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve exists
+  - require_in:
+    - {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve is clean
+{% endfor %}
+
+# This is in the cache dir instead of the etc dir because of
+# https://dovecot.org/pipermail/dovecot/2021-October/123084.html
+/var/cache/mail/{{ account_domain }}/{{ account_user }}/active.sieve:
+  file.symlink:
+  - target: {{ common.local_etc }}/mail/{{ account_domain }}/{{ account_user }}/sieve/main.sieve
+  - user: vmail
+  - group: vmail
+  - require:
+    - /var/cache/mail/{{ account_domain }}/{{ account_user }}
 {% endfor %}
 
 

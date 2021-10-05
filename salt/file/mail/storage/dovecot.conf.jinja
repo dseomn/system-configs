@@ -43,7 +43,9 @@ plugin {
 
   sieve_before = file:{{ dovecot.top_config_dir }}/sieve-before
   sieve = \
-    file:{{ common.local_etc }}/mail/%{domain}/%{username}/active.sieve
+    file:{{ common.local_etc }}/mail/%{domain}/%{username}/sieve
+    {{- ';' -}}
+    active=/var/cache/mail/%{domain}/%{username}/active.sieve
     {{- ';' -}}
     bindir=/var/cache/mail/%{domain}/%{username}/sieve
 }

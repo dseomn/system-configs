@@ -16,8 +16,10 @@
 
 
 {#
- # NOTE: Set mailbox_accounts_only and include_passwords before importing this
- # file.
+ # NOTE: Set these variables before importing this file:
+ # include_passwords
+ # include_sieve
+ # mailbox_accounts_only
  #}
 
 
@@ -46,6 +48,17 @@
   {% elif account.dovecot_password is string %}
     {% do account.update(
         {'dovecot_password': {'': account.dovecot_password}}) %}
+  {% endif %}
+  {% if account.mailbox and include_sieve %}
+    {% set sieve = {} %}
+    {% for sieve_name in account.get('sieve', ()) %}
+      {% import_text
+          'mail/sieve/' + account_name + '/' + sieve_name as sieve_script %}
+      {% do sieve.update({sieve_name: sieve_script}) %}
+    {% endfor %}
+    {% do account.update({'sieve': sieve}) %}
+  {% else %}
+    {% do account.pop('sieve', None) %}
   {% endif %}
 {% endfor %}
 

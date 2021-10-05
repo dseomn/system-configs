@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% set mailbox_accounts_only = True %}
 {% set include_passwords = False %}
+{% set include_sieve = False %}
+{% set mailbox_accounts_only = True %}
 {% from 'mail/map.jinja' import mail with context %}
 
 {% import_yaml 'mail/inbound.yaml.jinja' as inbound %}

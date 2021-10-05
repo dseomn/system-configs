@@ -57,3 +57,11 @@ alice@example.com:
     client1: '{ARGON2ID}$argon2id$...'
     client2: '{ARGON2ID}$argon2id$...'
   {% endif %}
+
+  # Sieve scripts to load from the pillar. For alice@example.com, these are
+  # loaded from the directory mail/sieve/alice@example.com. The active script is
+  # main.sieve. Note that mail/map.jinja transforms this into a mapping from
+  # script name to script contents.
+  sieve:
+  - main.sieve
+  - something_included.sieve
