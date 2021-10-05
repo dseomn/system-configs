@@ -22,3 +22,7 @@ certificates:
 # Required. Where to deliver mail. TODO(dseomn): Use pillar.mail.common.storage
 # instead of this.
 delivery_nexthop: '[old-mail-system.example.com]:submission'
+
+# Certificate name to expect from delivery_nexthop above. TODO(dseomn): Delete
+# this along with delivery_nexthop.
+delivery_nexthop_name: old-mail-system.example.com

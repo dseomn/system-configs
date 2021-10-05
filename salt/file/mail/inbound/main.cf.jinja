@@ -61,7 +61,7 @@ default_transport = error:5.7.1 Delivery not authorized, message refused
 
 # How mail goes out. TODO(dseomn): Update this once the mail.storage state is
 # ready.
-smtp_tls_servername = nexthop
+smtp_tls_servername = {{ pillar.mail.inbound.delivery_nexthop_name }}
 smtp_tls_security_level = secure
-smtp_tls_secure_cert_match = nexthop
+smtp_tls_secure_cert_match = {{ pillar.mail.inbound.delivery_nexthop_name }}
 smtp_tls_CAfile = {{ crypto.general_ca_file }}
