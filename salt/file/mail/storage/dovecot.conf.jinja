@@ -17,6 +17,12 @@
 {% from 'mail/dovecot/map.jinja' import dovecot %}
 {% from 'stunnel/map.jinja' import stunnel %}
 
+# The local mail system isn't allowed to send email from any other domains. This
+# should be fine for internal notifications, but if this ever needs to support
+# sending mail externally, dovecot will need a way to send mail from
+# postmaster@%{domain} to non-local addresses.
+postmaster_address = postmaster@%{hostname}
+
 mail_uid = vmail
 mail_gid = vmail
 
