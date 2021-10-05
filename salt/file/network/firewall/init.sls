@@ -42,3 +42,17 @@ manage_nftables_config_dir:
     - create_nftables_config_dir
   - onchanges_in:
     - warn about firewall changes
+
+{% set custom_rules = salt['pillar.get'](
+    'network:hosts:{}:firewall:custom_nftables'.format(grains.id), None) %}
+{% if custom_rules is not none %}
+{{ nftables.config_dir }}/90-local.conf:
+  file.managed:
+  - contents: {{ custom_rules | tojson }}
+  - require:
+    - create_nftables_config_dir
+  - require_in:
+    - manage_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes
+{% endif %}

@@ -143,3 +143,7 @@ firewall:
   # Interfaces to masquerade outbound IPv4 traffic.
   masquerade_ipv4:
   - eth0
+
+  # Custom nftables rules. Mainly for temporary/one-off things.
+  custom_nftables: |
+    add rule inet filter input tcp dport 14738 accept
