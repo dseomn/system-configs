@@ -51,7 +51,7 @@ def _sa_learn(
             '--quiet',
             f'--dbpath={dbpath}',
             type_arg,
-            'cur',
+            '.',
         ),
         cwd=folder,
         check=True,
