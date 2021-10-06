@@ -48,6 +48,7 @@ smtpd_milters = unix:dkimpy-milter/verify unix:opendmarc/opendmarc
 non_smtpd_milters = ${smtpd_milters}
 
 # Mail routing.
+propagate_unmatched_extensions = canonical
 alias_maps =
 alias_database =
 local_recipient_maps = fail:no_local_recipients
