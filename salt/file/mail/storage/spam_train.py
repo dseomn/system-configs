@@ -43,8 +43,6 @@ def _sa_learn(
     temp_path: pathlib.Path,
     type_arg: str,
     folder: pathlib.Path,
-    *,
-    sync: bool = False,
 ) -> None:
     folder_safe = temp_path.joinpath('mail')
     folder_safe.symlink_to(folder)
@@ -53,7 +51,6 @@ def _sa_learn(
             'sa-learn',
             '--quiet',
             f'--dbpath={temp_path}/spamassassin/bayes',
-            *(() if sync else ('--no-sync',)),
             type_arg,
             f'{folder_safe}/cur',
         ),
@@ -73,7 +70,7 @@ def main() -> None:
             if _is_inclusive_subfolder(subdir.name, _SPAM_FOLDERS):
                 _sa_learn(temp_path, '--spam', subdir)
             elif _is_inclusive_subfolder(subdir.name, _FORGET_FOLDERS):
-                _sa_learn(temp_path, '--forget', subdir, sync=True)
+                _sa_learn(temp_path, '--forget', subdir)
             elif subdir.name.startswith('.'):
                 _sa_learn(temp_path, '--ham', subdir)
         subprocess.run(
@@ -81,7 +78,7 @@ def main() -> None:
                 'sa-learn',
                 '--quiet',
                 f'--dbpath={temp_path}/spamassassin/bayes',
-                '--sync',
+                '--force-expire',
             ),
             check=True,
         )
