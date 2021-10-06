@@ -1,0 +1,3 @@
+# From https://datatracker.ietf.org/doc/html/rfc5228#section-2.2:
+# > newlines (CRLF, never just CR or LF)
+*.sieve text eol=crlf
