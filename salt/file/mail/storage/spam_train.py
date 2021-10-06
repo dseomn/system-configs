@@ -19,6 +19,8 @@ This tries to avoid putting potentially sensitive information (e.g., email
 addresses and folder names) in command lines, since other users on the system
 can read those.
 """
+# TODO(https://bz.apache.org/SpamAssassin/show_bug.cgi?id=7308): Consider
+# passing the folders to sa-learn in a file instead of on the command line.
 
 from collections.abc import Collection
 import os
