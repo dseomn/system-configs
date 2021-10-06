@@ -36,7 +36,9 @@ plugin {
   sieve_global_extensions = +vnd.dovecot.filter
 
   sieve_filter_bin_dir = {{ dovecot.top_config_dir }}/sieve-filter-bin
-  sieve_filter_exec_timeout = 30s
+  # This should be less than lmtp_data_done_timeout in postfix and more than
+  # --connect-timeout plus --timeout in spamc.
+  sieve_filter_exec_timeout = 540s
 
   sieve_user_log = \
     /var/local/mail/persistent/mail/%{domain}/%{username}/sieve.log

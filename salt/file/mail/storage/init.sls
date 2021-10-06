@@ -151,6 +151,10 @@ spamd_running:
   file.managed:
   - contents: |
       --socket=/var/local/mail/spamassassin/spamd
+      # The sum of the timeouts should be less than sieve_filter_exec_timeout in
+      # dovecot.
+      --connect-timeout=300
+      --timeout=150
   - require:
     - mail_storage_pkgs
     - /var/local/mail/spamassassin
