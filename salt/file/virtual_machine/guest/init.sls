@@ -53,8 +53,8 @@
 virtual_machine_guest_volumes:
   file.blockreplace:
   - name: /etc/fstab
-  - marker_start: '# START: salt virtual_machine.guest'
-  - marker_end: '# END: salt virtual_machine.guest'
+  - marker_start: '# START: salt virtual_machine.guest :#'
+  - marker_end: '# END: salt virtual_machine.guest :#'
   - content: |
       {% for swap in guest.storage.get('swap', []) -%}
       UUID={{ swap.uuid }} none swap defaults 0 0

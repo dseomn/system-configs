@@ -127,8 +127,8 @@ spamd_running:
 
 {{ mail_storage.spamassassin_default_file }}:
   file.blockreplace:
-  - marker_start: '# START: mail.storage'
-  - marker_end: '# END: mail.storage'
+  - marker_start: '# START: mail.storage :#'
+  - marker_end: '# END: mail.storage :#'
   - content: |
       OPTIONS="\
         --listen=/var/local/mail/spamassassin/spamd \

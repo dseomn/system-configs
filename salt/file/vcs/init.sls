@@ -43,8 +43,8 @@ vcs_pkgs:
 
 ~{{ user }}/.bashrc:
   file.blockreplace:
-  - marker_start: '# START: salt vcs'
-  - marker_end: '# END: salt vcs'
+  - marker_start: '# START: salt vcs :#'
+  - marker_end: '# END: salt vcs :#'
   - content: |
       cd /srv/vcs
   - prepend_if_not_found: true

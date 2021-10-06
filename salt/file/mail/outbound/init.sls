@@ -182,8 +182,8 @@ active dkim keys should be rotated:
 
 {{ postfix_config_dir }}/master.cf:
   file.blockreplace:
-  - marker_start: '# START: mail.outbound'
-  - marker_end: '# END: mail.outbound'
+  - marker_start: '# START: mail.outbound :#'
+  - marker_end: '# END: mail.outbound :#'
   - content: |
       submissions inet n - y - - smtpd
         -o syslog_name={{ postfix_instance }}/${service_name}
