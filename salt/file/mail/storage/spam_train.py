@@ -40,23 +40,22 @@ def _is_inclusive_subfolder(name: str, tests: Collection[str]) -> bool:
 
 
 def _sa_learn(
-    temp_path: pathlib.Path,
     type_arg: str,
     folder: pathlib.Path,
+    *,
+    dbpath: pathlib.Path,
 ) -> None:
-    folder_safe = temp_path.joinpath('mail')
-    folder_safe.symlink_to(folder)
     subprocess.run(
         (
             'sa-learn',
             '--quiet',
-            f'--dbpath={temp_path}/spamassassin/bayes',
+            f'--dbpath={dbpath}',
             type_arg,
-            f'{folder_safe}/cur',
+            'cur',
         ),
+        cwd=folder,
         check=True,
     )
-    folder_safe.unlink()
 
 
 def main() -> None:
@@ -65,19 +64,20 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = pathlib.Path(temp_dir)
         temp_path.joinpath('spamassassin').symlink_to(user_dir)
-        _sa_learn(temp_path, '--ham', maildir)
+        dbpath = temp_path.joinpath('spamassassin').joinpath('bayes')
+        _sa_learn('--ham', maildir, dbpath=dbpath)
         for subdir in maildir.iterdir():
             if _is_inclusive_subfolder(subdir.name, _SPAM_FOLDERS):
-                _sa_learn(temp_path, '--spam', subdir)
+                _sa_learn('--spam', subdir, dbpath=dbpath)
             elif _is_inclusive_subfolder(subdir.name, _FORGET_FOLDERS):
-                _sa_learn(temp_path, '--forget', subdir)
+                _sa_learn('--forget', subdir, dbpath=dbpath)
             elif subdir.name.startswith('.'):
-                _sa_learn(temp_path, '--ham', subdir)
+                _sa_learn('--ham', subdir, dbpath=dbpath)
         subprocess.run(
             (
                 'sa-learn',
                 '--quiet',
-                f'--dbpath={temp_path}/spamassassin/bayes',
+                f'--dbpath={dbpath}',
                 '--force-expire',
             ),
             check=True,
