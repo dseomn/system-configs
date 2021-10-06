@@ -93,6 +93,9 @@ service auth {
   }
 }
 
+# Despite the name, this appears to work for lmtp too.
+lda_mailbox_autosubscribe = yes
+
 protocol lmtp {
   mail_plugins = $mail_plugins sieve
 }
