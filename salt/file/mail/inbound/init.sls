@@ -135,10 +135,11 @@ opendmarc_running:
     - {{ postfix_instance }}
 {{ mail.postmap('mail_outbound_client_certs', instance=postfix_instance) }}
 
-{{ postfix_config_dir }}/master.cf:
+{{ postfix_config_dir }}/master.cf mail.inbound:
   file.blockreplace:
-  - marker_start: '# START: mail.inbound'
-  - marker_end: '# END: mail.inbound'
+  - name: {{ postfix_config_dir }}/master.cf
+  - marker_start: '# START: mail.inbound :#'
+  - marker_end: '# END: mail.inbound :#'
   - content: |
       submissions inet n - y - - smtpd
         -o syslog_name={{ postfix_instance }}/${service_name}
@@ -148,6 +149,17 @@ opendmarc_running:
         -o { smtpd_client_restrictions = permit_tls_clientcerts defer }
         -o _admd_internal=yes
   - append_if_not_found: true
+  - require:
+    - {{ postfix_instance }}
+  - watch_in:
+    - postfix_running
+{{ postfix_config_dir }}/master.cf mail.inbound lmtp:
+  file.blockreplace:
+  - name: {{ postfix_config_dir }}/master.cf
+  - marker_start: '# START: mail.inbound lmtp :#'
+  - marker_end: '# END: mail.inbound lmtp :#'
+  - content: '  flags=DORX'
+  - insert_after_match: '^\s*lmtp\s+unix\s+(\S+\s+){5}lmtp\b'
   - require:
     - {{ postfix_instance }}
   - watch_in:

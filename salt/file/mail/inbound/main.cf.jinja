@@ -70,3 +70,4 @@ lmtp_tls_fingerprint_cert_match =
   {%- for certificate in pillar.mail.common.storage.certificates %}
   {{ crypto.openssl.cert_fingerprint(certificate) }}
   {%- endfor %}
+lmtp_destination_recipient_limit = 1
