@@ -56,12 +56,17 @@ virtual_mailbox_domains = ${_database_dir}/virtual_mailbox_domains
 virtual_mailbox_maps = ${_database_dir}/virtual_mailbox
 virtual_alias_domains =
 virtual_alias_maps = ${_database_dir}/virtual_alias
-virtual_transport = smtp:{{ pillar.mail.inbound.delivery_nexthop }}
+virtual_transport = lmtp:inet:{{ pillar.mail.common.storage.name }}
 default_transport = error:5.7.1 Delivery not authorized, message refused
 
-# How mail goes out. TODO(dseomn): Update this once the mail.storage state is
-# ready.
-smtp_tls_servername = {{ pillar.mail.inbound.delivery_nexthop_name }}
-smtp_tls_security_level = secure
-smtp_tls_secure_cert_match = {{ pillar.mail.inbound.delivery_nexthop_name }}
-smtp_tls_CAfile = {{ crypto.general_ca_file }}
+# How mail goes out.
+lmtp_tls_wrappermode = yes
+lmtp_tls_servername = nexthop
+lmtp_tls_chain_files =
+  {{ system_certificate.key }}
+  {{ system_certificate.fullchain }}
+lmtp_tls_security_level = fingerprint
+lmtp_tls_fingerprint_cert_match =
+  {%- for certificate in pillar.mail.common.storage.certificates %}
+  {{ crypto.openssl.cert_fingerprint(certificate) }}
+  {%- endfor %}

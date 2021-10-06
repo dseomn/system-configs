@@ -50,6 +50,7 @@ mail_inbound_pkgs:
     warning_on_boilerplate_cert_change=(
         'Update salt/pillar/mail/common.sls with new certificate.'),
     certificates_out=certificates) }}
+{% set system_certificate = certificates[pillar.mail.common.inbound.name] %}
 
 
 {{ postfix_queue_dir }}/dkimpy-milter:
@@ -187,12 +188,15 @@ opendmarc_running:
   - template: jinja
   - defaults:
       default_certificate: {{ certificates.values() | first | tojson }}
+      system_certificate: {{ system_certificate | tojson }}
   - require:
     - {{ postfix_instance }}
     - {{ postfix_config_dir }}/tls_server_sni
     - {{ postfix_config_dir }}/virtual_mailbox_domains
     - {{ postfix_config_dir }}/virtual_mailbox
     - {{ postfix_config_dir }}/virtual_alias
+    - {{ system_certificate.key }}
+    - {{ system_certificate.fullchain }}
     - crypto_pkgs
   - watch_in:
     - postfix_running
