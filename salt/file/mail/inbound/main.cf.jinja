@@ -33,6 +33,7 @@ smtpd_tls_chain_files =
   {{ default_certificate.fullchain }}
 tls_server_sni_maps = ${_database_dir}/tls_server_sni
 smtpd_tls_security_level = may
+smtpd_discard_ehlo_keywords = silent-discard, dsn
 
 # Permissions.
 smtpd_relay_restrictions = reject_unauth_destination
