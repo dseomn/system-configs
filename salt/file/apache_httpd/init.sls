@@ -57,6 +57,7 @@ apache_httpd_running:
   file.managed:
   - contents: |
       StrictHostCheck ON
+      Header always set X-Content-Type-Options nosniff
   - require:
     - {{ apache_httpd.config_dir }}/conf-enabled exists
   - require_in:
