@@ -17,6 +17,11 @@
 
 {% set accounts = salt.grains.filter_by({
     'Debian': {
-        'pkgs': (),
+        'pkgs': (
+            'liblemonldap-ng-portal-perl',
+        ),
+        'llng_config_dir': '/etc/lemonldap-ng',
+        'llng_share_dir': '/usr/share/lemonldap-ng',
+        'llng_var_lib_dir': '/var/lib/lemonldap-ng',
     },
 }) %}

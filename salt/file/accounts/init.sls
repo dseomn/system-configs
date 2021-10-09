@@ -19,11 +19,18 @@
 
 include:
 - acme
+- apache_httpd
+- apache_httpd.acme_hooks
 
 
 accounts_pkgs:
   pkg.installed:
   - pkgs: {{ accounts.pkgs | tojson }}
+  - require:
+    # liblemonldap-ng-portal-perl depends on one of a few options, including
+    # Apache HTTPd. Install that first so that the other options aren't
+    # installed unnecessarily.
+    - apache_httpd_pkgs
 
 
 {{ acme_cert(pillar.accounts.name) }}
