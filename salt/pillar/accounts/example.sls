@@ -20,4 +20,6 @@ accounts:
   # Required. Users.
   users:
     # Username.
-    alice: {}
+    alice:
+      # Required. Email address.
+      email: alice@example.com

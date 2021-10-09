@@ -18,6 +18,18 @@
 {% from 'apache_httpd/map.jinja' import apache_httpd %}
 
 
+{#
+ # DBD::CSV uses Text::CSV_XS. Documentation:
+ # https://metacpan.org/pod/Text::CSV_XS#SPECIFICATION
+ #}
+{% macro csv_line() -%}
+  {%- for value in varargs -%}
+    {{- '"' + value.replace('"', '""') + '"' -}}
+    {{- '' if loop.last else ',' -}}
+  {%- endfor -%}
+{%- endmacro %}
+
+
 include:
 - acme
 - apache_httpd
@@ -77,3 +89,31 @@ accounts_pkgs:
   - dir_mode: 0750
   - require:
     - apache_httpd_pkgs
+
+{{ accounts.llng_config_dir }}/db-csv exists:
+  file.directory:
+  - name: {{ accounts.llng_config_dir }}/db-csv
+  - group: {{ apache_httpd.group }}
+  - dir_mode: 0750
+  - require:
+    - accounts_pkgs
+{{ accounts.llng_config_dir }}/db-csv is clean:
+  file.directory:
+  - name: {{ accounts.llng_config_dir }}/db-csv
+  - clean: true
+  - require:
+    - {{ accounts.llng_config_dir }}/db-csv exists
+
+{{ accounts.llng_config_dir }}/db-csv/user.csv:
+  file.managed:
+  - contents: |
+      {{ csv_line('uid', 'mail') }}
+      {%- for username, user in pillar.accounts.users.items() %}
+      {{ csv_line(username, user.email) }}
+      {%- endfor %}
+  - group: {{ apache_httpd.group }}
+  - mode: 0640
+  - require:
+    - {{ accounts.llng_config_dir }}/db-csv exists
+  - require_in:
+    - {{ accounts.llng_config_dir }}/db-csv is clean
