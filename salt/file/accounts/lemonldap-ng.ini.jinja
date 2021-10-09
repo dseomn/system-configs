@@ -96,6 +96,11 @@ browsersDontStorePassword = 1
 ; Custom. Pros: Can do whatever I want. Cons: More work to implement.
 authentication = PAM
 pamService = lemonldap-ng
+available2F = U2F
+available2FSelfRegistration = U2F
+u2fActivation = 1
+u2fSelfRegistration = 1
+sfRequired = 1
 
 userDB = DBI
 ; It looks like userDB=DBI uses dbiAuthChain instead of dbiUserChain despite the
