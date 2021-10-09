@@ -117,3 +117,20 @@ accounts_pkgs:
     - {{ accounts.llng_config_dir }}/db-csv exists
   - require_in:
     - {{ accounts.llng_config_dir }}/db-csv is clean
+
+{{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig:
+  file.copy:
+  - source: {{ accounts.llng_config_dir }}/lemonldap-ng.ini
+  - require:
+    - accounts_pkgs
+{{ accounts.llng_config_dir }}/lemonldap-ng.ini:
+  file.managed:
+  - source: salt://accounts/lemonldap-ng.ini.jinja
+  - template: jinja
+  - require:
+    - {{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig
+    - /var/cache/lemonldap-ng
+    - /etc/pam.d/lemonldap-ng
+    - {{ accounts.llng_config_dir }}/db-csv is clean
+  - watch_in:
+    - apache_httpd_running

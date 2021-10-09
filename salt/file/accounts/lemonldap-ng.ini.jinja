@@ -1,0 +1,129 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{%- from 'accounts/map.jinja' import accounts %}
+
+
+{%- set original =
+    salt.ini.get_ini(accounts.llng_config_dir + '/lemonldap-ng.ini.orig') %}
+
+
+; Documentation of parameters:
+; https://lemonldap-ng.org/documentation/latest/parameterlist.html
+;
+; Code that seems to have the possible values of the options:
+; https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/v2.0/lemonldap-ng-manager/lib/Lemonldap/NG/Manager/Attributes.pm
+
+
+[all]
+
+logLevel = {{ original.all.pop('logLevel') }}
+
+; TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2638): Possibly
+; remove trailing slash.
+portal = https://{{ pillar.accounts.name }}/
+
+; TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2637): Remove
+; this.
+locationRules = {}
+
+{%- do original.all.pop('checkTime', None) %}
+{%- if not original.all %}{% do original.pop('all') %}{% endif %}
+
+
+[configuration]
+
+type = Local
+
+{%- do original.pop('configuration', None) %}
+
+
+[portal]
+
+staticPrefix = {{ original.portal.pop('staticPrefix') }}
+templateDir = {{ original.portal.pop('templateDir') }}
+languages = {{ original.portal.pop('languages') }}
+persistentStorage = Apache::Session::File
+persistentStorageOptions = { \
+    'Directory' => '{{ accounts.llng_var_lib_dir }}/psessions', \
+    'LockDirectory' => '{{ accounts.llng_var_lib_dir }}/psessions/lock', \
+}
+
+domain = {{ pillar.accounts.name }}
+trustedDomains =
+
+securedCookie = 1
+
+portalDisplayRegister = 0
+; NOTE: This is not what it sounds like: "Display login history checkbox in
+; portal"
+portalCheckLogins = 0
+browsersDontStorePassword = 1
+
+; The goal for this primary (password) authentication is to have a simple
+; (ideally text file) backend that stores passwords crypted with a modern crypt
+; algorithm. As of 2021-10-09, PAM with pam_pwdfile seems like the easiest way
+; to get that goal. Authentication backends considered:
+;
+; Apache. Pros: Simple to set up. Cons: HTTP Basic authentication means the
+; passwords are kept by browsers in memory, I think. As of Apache 2.4, the
+; available crypt algorithms don't look that great.
+;
+; Databases. Pros: Simple to set up if using DBD::CSV. Cons: It looks like it
+; uses custom crypting algorithms that are not up to modern standards.
+;
+; LDAP. Pros: OpenLDAP looks like it might have decent authentication options.
+; The LDIF backend looks like it might be simple to manage with saltstack. Cons:
+; Seems like a moderate amount of effort to set up.
+;
+; PAM. Pros: Simple to set up, using pam_pwdfile. Cons: Messing up the config
+; could (in theory) have repercussions for system login too.
+;
+; Custom. Pros: Can do whatever I want. Cons: More work to implement.
+authentication = PAM
+pamService = lemonldap-ng
+
+userDB = DBI
+; It looks like userDB=DBI uses dbiAuthChain instead of dbiUserChain despite the
+; name:
+; https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/dea7b235b10f6ae73b827419720f8faaa13d8005/lemonldap-ng-portal/lib/Lemonldap/NG/Portal/Lib/DBI.pm#L60
+dbiAuthChain = dbi:CSV:f_dir={{ accounts.llng_config_dir }}/db-csv;f_ext=.csv/r
+dbiUserTable = user
+; This is documented without a description, but it appears to be the name of the
+; username column.
+userPivot = uid
+; This doesn't seem to be documented, but it's from
+; https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/dea7b235b10f6ae73b827419720f8faaa13d8005/lemonldap-ng-portal/lib/Lemonldap/NG/Portal/Lib/DBI.pm#L43
+dbiMailCol = mail
+; Some of the code seems to expect LDAP-like field names, so use those here.
+dbiExportedVars = { \
+    'uid' => 'uid', \
+    'mail' => 'mail', \
+}
+
+passwordDB = Null
+
+loginHistoryEnabled = 1
+
+{%- if not original.portal %}{% do original.pop('portal') %}{% endif %}
+
+
+{%- do original.pop('handler', None) %}
+{%- do original.pop('manager', None) %}
+{%- if original %}
+  {{ {}['unexpected original config: ' + (original | string)] }}
+{%- endif %}
