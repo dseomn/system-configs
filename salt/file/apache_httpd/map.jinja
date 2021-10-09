@@ -22,6 +22,8 @@
     'Debian': {
         'pkgs': ('apache2',),
         'service': 'apache2',
+        'user': 'www-data',
+        'group': 'www-data',
         'config_dir': '/etc/apache2',
         'default_conf_enabled': (
             'other-vhosts-access-log.conf',
