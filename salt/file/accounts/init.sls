@@ -34,6 +34,10 @@ include:
 - acme
 - apache_httpd
 - apache_httpd.acme_hooks
+- apache_httpd.expires
+- apache_httpd.fcgid
+- apache_httpd.https
+- apache_httpd.rewrite
 
 
 accounts_pkgs:
@@ -132,5 +136,20 @@ accounts_pkgs:
     - /var/cache/lemonldap-ng
     - /etc/pam.d/lemonldap-ng
     - {{ accounts.llng_config_dir }}/db-csv is clean
+  - watch_in:
+    - apache_httpd_running
+
+{{ apache_httpd.config_dir }}/sites-enabled/{{ pillar.accounts.name }}.conf:
+  file.managed:
+  - source: salt://accounts/portal.conf.jinja
+  - template: jinja
+  - require:
+    - {{ apache_httpd.config_dir }}/sites-enabled exists
+    - accounts_pkgs
+    - {{ acme.certbot_config_dir }}/live/{{ pillar.accounts.name }}/fullchain.pem
+    - {{ acme.certbot_config_dir }}/live/{{ pillar.accounts.name }}/privkey.pem
+    - {{ accounts.llng_config_dir }}/lemonldap-ng.ini
+  - require_in:
+    - {{ apache_httpd.config_dir }}/sites-enabled is clean
   - watch_in:
     - apache_httpd_running

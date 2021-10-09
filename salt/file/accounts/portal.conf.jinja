@@ -1,0 +1,58 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{%- from 'accounts/map.jinja' import accounts %}
+{%- from 'acme/map.jinja' import acme %}
+{%- from 'apache_httpd/map.jinja' import apache_httpd %}
+
+
+{%- set default_config =
+    salt.file.read(accounts.llng_config_dir + '/portal-apache2.X.conf') %}
+
+
+{%- for line in default_config.splitlines() %}
+{%- set line_stripped = line.strip() %}
+
+{%- if line_stripped.startswith('<VirtualHost ') %}
+
+<VirtualHost *:443>
+  ServerName {{ pillar.accounts.name }}
+
+  {{ apache_httpd.port_mux_vhost_config() | indent(2) }}
+
+  {{ apache_httpd.https_vhost_config(
+      fullchain=(
+          acme.certbot_config_dir + '/live/' + pillar.accounts.name +
+          '/fullchain.pem'),
+      privkey=(
+          acme.certbot_config_dir + '/live/' + pillar.accounts.name +
+          '/privkey.pem'),
+  ) | indent(2) }}
+
+  Include {{ apache_httpd.javascript_common_conf }}
+
+{%- elif line_stripped.startswith('ServerName ') %}
+
+{#- See VirtualHost above. #}
+
+{%- elif line is not match('^\\s*(#|$)') %}
+
+{{ line }}
+
+{%- endif %}
+
+{%- endfor %}
