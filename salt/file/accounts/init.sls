@@ -15,6 +15,7 @@
 
 {% from 'accounts/map.jinja' import accounts %}
 {% from 'acme/map.jinja' import acme, acme_cert %}
+{% from 'apache_httpd/map.jinja' import apache_httpd %}
 
 
 include:
@@ -34,3 +35,33 @@ accounts_pkgs:
 
 
 {{ acme_cert(pillar.accounts.name) }}
+
+
+{{ accounts.llng_config_dir }}/auth.passwd:
+  file.managed:
+  - source: salt://accounts/auth.passwd.jinja
+  - group: {{ apache_httpd.group }}
+  - mode: 0640
+  - template: jinja
+  - require:
+    - accounts_pkgs
+  test.configurable_test_state:
+  - warnings: >-
+      Some users don't have a password set. Run `mkpasswd` to generate a crypted
+      password.
+  - require:
+    - file: {{ accounts.llng_config_dir }}/auth.passwd
+  - onlyif:
+    - grep ':!$' {{ accounts.llng_config_dir }}/auth.passwd
+
+/etc/pam.d/lemonldap-ng:
+  file.managed:
+  - contents: |
+      account required pam_permit.so
+      auth optional pam_faildelay.so delay={{ 1_000_000 }}
+      auth required pam_pwdfile.so pwdfile={{ accounts.llng_config_dir }}/auth.passwd
+      password required pam_deny.so
+      session required pam_deny.so
+  - require:
+    - accounts_pkgs
+    - {{ accounts.llng_config_dir }}/auth.passwd

@@ -15,17 +15,22 @@
  #}
 
 
-{# Note: 'whois' is in the list of packages because it provides mkpasswd. #}
-{% set accounts = salt.grains.filter_by({
-    'Debian': {
-        'pkgs': (
-            'libauthen-pam-perl',
-            'liblemonldap-ng-portal-perl',
-            'libpam-pwdfile',
-            'whois',
-        ),
-        'llng_config_dir': '/etc/lemonldap-ng',
-        'llng_share_dir': '/usr/share/lemonldap-ng',
-        'llng_var_lib_dir': '/var/lib/lemonldap-ng',
-    },
-}) %}
+{%- from 'accounts/map.jinja' import accounts %}
+
+
+{%- if salt.file.file_exists(accounts.llng_config_dir + '/auth.passwd') %}
+  {%- set old_raw = salt.file.read(accounts.llng_config_dir + '/auth.passwd') %}
+{%- else %}
+  {%- set old_raw = '' %}
+{%- endif %}
+{%- set old = {} %}
+{%- for line in old_raw.splitlines() %}
+  {%- set username, password = line.split(':') %}
+  {%- do old.update({username: password}) %}
+{%- endfor %}
+
+
+{%- for username in pillar.accounts.users -%}
+{{- '' if loop.first else '\n' -}}
+{{ username }}:{{ old[username] if username in old else '!' }}
+{%- endfor -%}

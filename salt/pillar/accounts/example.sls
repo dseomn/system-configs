@@ -16,3 +16,8 @@ accounts:
 
   # Required. DNS name of the service.
   name: accounts.example.com
+
+  # Required. Users.
+  users:
+    # Username.
+    alice: {}
