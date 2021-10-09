@@ -42,6 +42,9 @@ base:
   - ssh.server
   - standard
 
+  'G@role:accounts':
+  - accounts
+
   'G@role:desktop':
   - gdm
   - google.chrome
