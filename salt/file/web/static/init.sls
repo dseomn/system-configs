@@ -23,6 +23,7 @@ include:
 - apache_httpd
 - apache_httpd.acme_hooks
 - apache_httpd.https
+- apache_httpd.mpm_default
 
 
 {{ common.local_share }}/web-static exists:

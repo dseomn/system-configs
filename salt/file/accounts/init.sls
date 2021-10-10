@@ -37,6 +37,7 @@ include:
 - apache_httpd.expires
 - apache_httpd.fcgid
 - apache_httpd.https
+- apache_httpd.mpm_default
 - apache_httpd.rewrite
 
 
