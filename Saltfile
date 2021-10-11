@@ -55,6 +55,7 @@ salt-ssh:
   - salt://network/home_router/dns/map.jinja
   - salt://network/home_router/map.jinja
   - salt://news_aggregator/map.jinja
+  - salt://nextcloud/map.jinja
   - salt://nginx/map.jinja
   - salt://php/map.jinja
   - salt://port_mux/map.jinja

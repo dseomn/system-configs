@@ -96,6 +96,9 @@ base:
   'G@role:news-aggregator':
   - news_aggregator
 
+  'G@role:nextcloud':
+  - nextcloud
+
   'G@role:port-mux':
   - ddns
   - port_mux
