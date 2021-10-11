@@ -25,7 +25,22 @@
 
 {% set php = salt.grains.filter_by({
     'Debian': {
+        'bin': 'php' + _version,
         'mod_php_pkgs': ('libapache2-mod-php' + _version,),
         'mod_php_name': 'php' + _version,
+        'mod_php_conf': '/etc/apache2/mods-available/php' + _version + '.conf',
+        'config_dir': '/etc/php/' + _version,
     },
+}) %}
+
+
+{% macro _versioned_pkg(pkg) -%}
+  {{ salt.grains.filter_by({
+      'Debian': 'php{}-{}'.format(_version, pkg),
+  }) }}
+{%- endmacro %}
+
+
+{% do php.update({
+    'versioned_pkg': _versioned_pkg,
 }) %}
