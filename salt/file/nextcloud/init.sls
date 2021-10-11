@@ -167,6 +167,32 @@ nextcloud_usable:
   - require:
     - nextcloud_usable
 
+# https://docs.nextcloud.com/server/latest/admin_manual/maintenance/update.html#batch-mode-for-command-line-based-updater
+# https://docs.nextcloud.com/server/latest/admin_manual/maintenance/upgrade.html#long-running-migration-steps
+upgrade_nextcloud:
+  cron.present:
+  - name: >-
+      {{ php.bin }}
+      /var/local/nextcloud/webroot/updater/updater.phar
+      --no-interaction
+      --quiet
+      &&
+      {{ php.bin }}
+      {{ occ }}
+      db:add-missing-columns
+      --quiet
+      &&
+      {{ php.bin }}
+      {{ occ }}
+      db:add-missing-indices
+      --quiet
+  - user: {{ apache_httpd.user }}
+  - identifier: db4ae9a2-802e-490d-884f-5a6e86ce3db9
+  - minute: random
+  - hour: random
+  - require:
+    - nextcloud_usable
+
 
 {{ apache_httpd.config_dir }}/sites-enabled/{{ pillar.nextcloud.name }}.conf:
   file.managed:
