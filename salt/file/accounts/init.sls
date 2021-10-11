@@ -112,9 +112,9 @@ accounts_pkgs:
 {{ accounts.llng_config_dir }}/db-csv/user.csv:
   file.managed:
   - contents: |
-      {{ csv_line('uid', 'mail') }}
+      {{ csv_line('uid', 'mail', 'cn') }}
       {%- for username, user in pillar.accounts.users.items() %}
-      {{ csv_line(username, user.email) }}
+      {{ csv_line(username, user.email, user.name) }}
       {%- endfor %}
   - group: {{ apache_httpd.group }}
   - mode: 0640

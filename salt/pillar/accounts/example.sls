@@ -23,3 +23,5 @@ accounts:
     alice:
       # Required. Email address.
       email: alice@example.com
+      # Required. Name.
+      name: Alice Example
