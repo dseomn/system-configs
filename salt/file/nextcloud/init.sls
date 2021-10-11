@@ -20,6 +20,55 @@
 {% from 'php/map.jinja' import php %}
 
 
+# Something hopefully close to a list of the apps enabled by default. (I wasn't
+# sure how to find the exact list.)
+{% set apps_default = [
+    'accessibility',
+    'activity',
+    'admin_audit',
+    'cloud_federation_api',
+    'comments',
+    'contactsinteraction',
+    'dashboard',
+    'dav',
+    'encryption',
+    'federatedfilesharing',
+    'federation',
+    'files',
+    'files_external',
+    'files_sharing',
+    'files_trashbin',
+    'files_versions',
+    'firstrunwizard',
+    'lookup_server_connector',
+    'nextcloud_announcements',
+    'notifications',
+    'oauth2',
+    'password_policy',
+    'privacy',
+    'provisioning_api',
+    'recommendations',
+    'serverinfo',
+    'settings',
+    'sharebymail',
+    'support',
+    'survey_client',
+    'systemtags',
+    'text',
+    'theming',
+    'twofactor_backupcodes',
+    'updatenotification',
+    'user_ldap',
+    'user_status',
+    'viewer',
+    'weather_status',
+    'workflowengine',
+] %}
+
+# Non-default apps managed by this file.
+{% set apps_managed = [] %}
+
+
 {% if not salt.grains.has_value('role:virtual-machine:guest') %}
   {{ error_this_state_can_only_be_run_from_a_vm }}
 {% endif %}
@@ -92,6 +141,7 @@ nextcloud_installed:
     - /var/local/nextcloud/webroot
     - /var/cache/nextcloud
 
+{% do apps_managed.append('apporder') %}
 /var/local/nextcloud/webroot/config/local.config.php:
   file.managed:
   - user: root
@@ -173,6 +223,12 @@ upgrade_nextcloud:
   cron.present:
   - name: >-
       {{ php.bin }}
+      {{ occ }}
+      app:update
+      --quiet
+      --all
+      &&
+      {{ php.bin }}
       /var/local/nextcloud/webroot/updater/updater.phar
       --no-interaction
       --quiet
@@ -192,6 +248,52 @@ upgrade_nextcloud:
   - hour: random
   - require:
     - nextcloud_usable
+
+
+{% if not salt.file.file_exists(occ) %}
+
+re-run state.apply to manage Nextcloud apps:
+  test.fail_without_changes: []
+
+{% else %}
+
+{% set apps = salt.cmd.run_stdout(
+    php.bin + ' ' + occ + ' app:list --output=json',
+    runas=apache_httpd.user,
+) | load_json %}
+{% set apps_desired =
+    (apps_default + apps_managed + pillar.nextcloud.apps.enabled)
+    | reject('in', pillar.nextcloud.apps.disabled)
+    | unique
+%}
+
+{% for app in apps_desired %}
+{% if app in apps.enabled %}
+{% do apps.enabled.pop(app) %}
+{% elif app in apps.disabled %}
+{{ php.bin }} {{ occ }} app:enable {{ app }}:
+  cmd.run:
+  - runas: {{ apache_httpd.user }}
+  - require:
+    - nextcloud_usable
+{% else %}
+{{ php.bin }} {{ occ }} app:install {{ app }}:
+  cmd.run:
+  - runas: {{ apache_httpd.user }}
+  - require:
+    - nextcloud_usable
+{% endif %}
+{% endfor %}
+
+{% for app in apps.enabled %}
+{{ php.bin }} {{ occ }} app:disable {{ app }}:
+  cmd.run:
+  - runas: {{ apache_httpd.user }}
+  - require:
+    - nextcloud_usable
+{% endfor %}
+
+{% endif %}
 
 
 {{ apache_httpd.config_dir }}/sites-enabled/{{ pillar.nextcloud.name }}.conf:

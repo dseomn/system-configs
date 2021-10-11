@@ -16,3 +16,14 @@ nextcloud:
 
   # Required. DNS name of the service.
   name: nextcloud.example.com
+
+  # Required. Apps.
+  apps:
+    # Required. Extra apps (other than the ones configured in state files) to
+    # install and enable.
+    enabled:
+    - calendar
+    # Required. Apps from the state files that shouldn't be installed and
+    # enabled.
+    disabled:
+    - user_ldap
