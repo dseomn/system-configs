@@ -29,6 +29,7 @@ salt-ssh:
   state_output: changes
   state_verbose: false
   extra_filerefs:
+  - salt://accounts/client/map.jinja
   - salt://accounts/map.jinja
   - salt://acme/map.jinja
   - salt://apache_httpd/map.jinja
