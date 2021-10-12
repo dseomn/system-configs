@@ -144,36 +144,11 @@ nextcloud_installed:
 {% do apps_managed.append('apporder') %}
 /var/local/nextcloud/webroot/config/local.config.php:
   file.managed:
+  - source: salt://nextcloud/config.php.jinja
   - user: root
   - group: {{ apache_httpd.group }}
   - mode: 0640
-  - contents: |
-      <?php
-      $CONFIG = [
-          'trusted_domains' => ['{{ pillar.nextcloud.name }}'],
-          'datadirectory' => '/var/local/nextcloud/data',
-          'cache_path' => '/var/cache/nextcloud',
-          'dbtype' => 'sqlite3',
-          'sqlite.journal_mode' => 'WAL',
-
-          'defaultapp' => 'apporder',
-          'allow_user_to_change_display_name' => false,
-          'lost_password_link' => 'disabled',
-
-          'mail_domain' => '{{ grains.id }}',
-          'mail_smtpmode' => 'sendmail',
-
-          'updater.release.channel' => 'stable',
-
-          'log_type' => 'syslog',
-
-          // https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#pretty-urls
-          'overwrite.cli.url' => 'https://{{ pillar.nextcloud.name }}',
-          'htaccess.RewriteBase' => '/',
-
-          // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html#id1
-          'memcache.local' => '\OC\Memcache\APCu',
-      ];
+  - template: jinja
   - require:
     - nextcloud_installed
 

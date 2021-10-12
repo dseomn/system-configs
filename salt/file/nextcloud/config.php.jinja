@@ -1,0 +1,43 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-#}
+
+
+<?php
+$CONFIG = [
+    'trusted_domains' => ['{{ pillar.nextcloud.name }}'],
+    'datadirectory' => '/var/local/nextcloud/data',
+    'cache_path' => '/var/cache/nextcloud',
+    'dbtype' => 'sqlite3',
+    'sqlite.journal_mode' => 'WAL',
+
+    'defaultapp' => 'apporder',
+    'allow_user_to_change_display_name' => false,
+    'lost_password_link' => 'disabled',
+
+    'mail_domain' => '{{ grains.id }}',
+    'mail_smtpmode' => 'sendmail',
+
+    'updater.release.channel' => 'stable',
+
+    'log_type' => 'syslog',
+
+    // https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#pretty-urls
+    'overwrite.cli.url' => 'https://{{ pillar.nextcloud.name }}',
+    'htaccess.RewriteBase' => '/',
+
+    // https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/caching_configuration.html#id1
+    'memcache.local' => '\OC\Memcache\APCu',
+];
