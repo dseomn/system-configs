@@ -161,6 +161,23 @@ oidcRPMetaDataExportedVars = { \
     {%- endfor %}
 }
 
+applicationList = { \
+    'applications' => { \
+        'type' => 'category', \
+        'catname' => 'Applications', \
+        {%- for rp_name in pillar.accounts.oidc.rps %}
+        '{{ rp_name }}' => { \
+            'type' => 'application', \
+            'options' => { \
+                'name' => '{{ rp_name }}', \
+                'uri' => 'https://{{ rp_name }}', \
+                'display' => 'on', \
+            }, \
+        }, \
+        {%- endfor %}
+    }, \
+}
+
 {%- if not original.portal %}{% do original.pop('portal') %}{% endif %}
 
 
