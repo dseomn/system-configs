@@ -125,6 +125,42 @@ passwordDB = Null
 
 loginHistoryEnabled = 1
 
+; TODO(LemonLDAP::NG >= 2.0.12): Constrain the scopes an RP can get. See
+; https://lemonldap-ng.org/documentation/latest/idpopenidconnect.html#scope-rules
+; and oidcServiceAllowOnlyDeclaredScopes.
+issuerDBOpenIDConnectActivation = 1
+oidcServiceMetaDataIssuer = https://{{ pillar.accounts.name }}
+oidcStorage = Apache::Session::File
+oidcStorageOptions = { \
+    'Directory' => '{{ accounts.llng_var_lib_dir }}/oidcsessions', \
+    'LockDirectory' => '{{ accounts.llng_var_lib_dir }}/oidcsessions/lock', \
+}
+oidcRPMetaDataOptions = { \
+    {%- for rp_name, rp in pillar.accounts.oidc.rps.items() %}
+    '{{ rp_name }}' => { \
+        'oidcRPMetaDataOptionsClientID' => '{{ rp_name }}', \
+        'oidcRPMetaDataOptionsClientSecret' => '{{
+            salt.file.read(
+                accounts.llng_config_dir + '/oauth2-client-secrets/' + rp_name
+            ).strip()
+        }}', \
+        'oidcRPMetaDataOptionsDisplayName' => '{{ rp_name }}', \
+        'oidcRPMetaDataOptionsRedirectUris' => \
+            '{{ rp.redirection_uris | join(' ') }}', \
+        'oidcRPMetaDataOptionsIDTokenSignAlg' => 'HS512', \
+        'oidcRPMetaDataOptionsIDTokenForceClaims' => 1, \
+    }, \
+    {%- endfor %}
+}
+oidcRPMetaDataExportedVars = { \
+    {%- for rp_name in pillar.accounts.oidc.rps %}
+    '{{ rp_name }}' => { \
+        'email' => 'mail', \
+        'name' => 'cn', \
+    }, \
+    {%- endfor %}
+}
+
 {%- if not original.portal %}{% do original.pop('portal') %}{% endif %}
 
 

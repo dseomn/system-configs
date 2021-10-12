@@ -25,3 +25,12 @@ accounts:
       email: alice@example.com
       # Required. Name.
       name: Alice Example
+
+  # Required. OpenID Connect configuration.
+  oidc:
+    # Required. Relying parties.
+    rps:
+      some-client.example.com:
+        # Required. Redirection URIs.
+        redirection_uris:
+        - https://some-client.example.com

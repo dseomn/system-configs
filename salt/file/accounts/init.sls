@@ -16,6 +16,8 @@
 {% from 'accounts/map.jinja' import accounts %}
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'apache_httpd/map.jinja' import apache_httpd %}
+{% from 'common/map.jinja' import common %}
+{% from 'crypto/map.jinja' import crypto %}
 
 
 {#
@@ -39,6 +41,7 @@ include:
 - apache_httpd.https
 - apache_httpd.mpm_default
 - apache_httpd.rewrite
+- crypto.secret_rotation
 
 
 accounts_pkgs:
@@ -123,6 +126,46 @@ accounts_pkgs:
   - require_in:
     - {{ accounts.llng_config_dir }}/db-csv is clean
 
+{{ accounts.llng_var_lib_dir }}/oidcsessions:
+  file.directory:
+  - user: {{ apache_httpd.user }}
+  - group: {{ apache_httpd.group }}
+  - dir_mode: 0770
+  - require:
+    - accounts_pkgs
+{{ accounts.llng_var_lib_dir }}/oidcsessions/lock:
+  file.directory:
+  - user: {{ apache_httpd.user }}
+  - group: {{ apache_httpd.group }}
+  - dir_mode: 0770
+  - require:
+    - {{ accounts.llng_var_lib_dir }}/oidcsessions
+
+{{ accounts.llng_config_dir }}/oauth2-client-secrets:
+  file.directory:
+  - dir_mode: 0700
+  - require:
+    - accounts_pkgs
+
+{% for rp_name in pillar.accounts.oidc.rps %}
+{{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }}:
+  file.managed:
+  - mode: 0600
+  - replace: false
+  - contents: {{ crypto.generate_password() | tojson }}
+  - require:
+    - {{ accounts.llng_config_dir }}/oauth2-client-secrets
+{{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }} should be rotated:
+  file.accumulated:
+  - name: OAuth2 client secrets
+  - filename: {{ common.local_sbin }}/monitor-secret-age
+  - text: {{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }}
+  - require:
+    - {{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }}
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-secret-age
+{% endfor %}
+
 {{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig:
   file.copy:
   - source: {{ accounts.llng_config_dir }}/lemonldap-ng.ini
@@ -131,12 +174,20 @@ accounts_pkgs:
 {{ accounts.llng_config_dir }}/lemonldap-ng.ini:
   file.managed:
   - source: salt://accounts/lemonldap-ng.ini.jinja
+  - user: root
+  - group: {{ apache_httpd.group }}
+  - mode: 0640
   - template: jinja
   - require:
     - {{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig
     - /var/cache/lemonldap-ng
     - /etc/pam.d/lemonldap-ng
     - {{ accounts.llng_config_dir }}/db-csv is clean
+    - {{ accounts.llng_var_lib_dir }}/oidcsessions
+    - {{ accounts.llng_var_lib_dir }}/oidcsessions/lock
+    {% for rp_name in pillar.accounts.oidc.rps %}
+    - {{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }}
+    {% endfor %}
   - watch_in:
     - apache_httpd_running
 
