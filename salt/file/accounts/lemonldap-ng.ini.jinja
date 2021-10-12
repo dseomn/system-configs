@@ -147,7 +147,7 @@ oidcRPMetaDataOptions = { \
         'oidcRPMetaDataOptionsDisplayName' => '{{ rp_name }}', \
         'oidcRPMetaDataOptionsRedirectUris' => \
             '{{ rp.redirection_uris | join(' ') }}', \
-        'oidcRPMetaDataOptionsIDTokenSignAlg' => 'HS512', \
+        'oidcRPMetaDataOptionsIDTokenSignAlg' => 'RS256', \
         'oidcRPMetaDataOptionsIDTokenForceClaims' => 1, \
     }, \
     {%- endfor %}

@@ -17,6 +17,11 @@ administrator might want to take action:
   Alerts when the system's uptime is too high (and the system should be
   rebooted).
 
+[`salt/file/accounts/generate_lemonldap_ng_ini.py`](salt/file/accounts/generate_lemonldap_ng_ini.py)
+makes it possible to [rotate LemonLDAP::NG's OpenID Connect
+keys](https://lemonldap-ng.org/documentation/latest/openidconnectservice.html#key-rotation-script)
+with the Local configuration backend.
+
 [`salt/file/crypto/x509/boilerplate_certificate.py`](salt/file/crypto/x509/boilerplate_certificate.py)
 provides a relatively easy way to create X.509/PKIX boilerplate around a public
 key, for use with out-of-band certificate provisioning. It serves the same

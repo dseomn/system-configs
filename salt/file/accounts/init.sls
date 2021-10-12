@@ -171,7 +171,9 @@ accounts_pkgs:
   - source: {{ accounts.llng_config_dir }}/lemonldap-ng.ini
   - require:
     - accounts_pkgs
-{{ accounts.llng_config_dir }}/lemonldap-ng.ini:
+  - creates:
+    - {{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig
+{{ accounts.llng_config_dir }}/lemonldap-ng.ini.static:
   file.managed:
   - source: salt://accounts/lemonldap-ng.ini.jinja
   - user: root
@@ -188,8 +190,35 @@ accounts_pkgs:
     {% for rp_name in pillar.accounts.oidc.rps %}
     - {{ accounts.llng_config_dir }}/oauth2-client-secrets/{{ rp_name }}
     {% endfor %}
+
+{{ common.local_lib }}/generate-lemonldap-ng-ini:
+  file.managed:
+  - source: salt://accounts/generate_lemonldap_ng_ini.py
+  - mode: 755
+{{ accounts.llng_config_dir }}/lemonldap-ng.ini:
+  cmd.run:
+  - name: >-
+      {{ common.local_lib }}/generate-lemonldap-ng-ini
+      --input={{ accounts.llng_config_dir }}/lemonldap-ng.ini.static
+      --output={{ accounts.llng_config_dir }}/lemonldap-ng.ini
+  - onchanges:
+    - {{ common.local_lib }}/generate-lemonldap-ng-ini
+    - {{ accounts.llng_config_dir }}/lemonldap-ng.ini.static
   - watch_in:
     - apache_httpd_running
+  cron.present:
+  - name: >-
+      {{ common.local_lib }}/generate-lemonldap-ng-ini
+      --input={{ accounts.llng_config_dir }}/lemonldap-ng.ini.static
+      --output={{ accounts.llng_config_dir }}/lemonldap-ng.ini
+      &&
+      systemctl reload-or-restart {{ apache_httpd.service }}
+  - identifier: 0cb5cec2-5128-4694-a765-e78017aac9c8
+  - minute: random
+  - hour: random
+  - dayweek: random
+  - require:
+    - cmd: {{ accounts.llng_config_dir }}/lemonldap-ng.ini
 
 {{ apache_httpd.config_dir }}/sites-enabled/{{ pillar.accounts.name }}.conf:
   file.managed:
