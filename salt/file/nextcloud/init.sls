@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+{% from 'accounts/client/map.jinja' import accounts_client %}
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'apache_httpd/map.jinja' import apache_httpd %}
 {% from 'common/map.jinja' import common %}
@@ -75,6 +76,7 @@
 
 
 include:
+- accounts.client
 - acme
 - apache_httpd
 - apache_httpd.acme_hooks
@@ -99,6 +101,9 @@ nextcloud_pkgs:
 
 
 {{ acme_cert(pillar.nextcloud.name) }}
+
+
+{{ accounts_client.oauth2_client_secret_file(pillar.nextcloud.name) }}
 
 
 /var/local/nextcloud/data:
@@ -141,7 +146,10 @@ nextcloud_installed:
     - /var/local/nextcloud/webroot
     - /var/cache/nextcloud
 
-{% do apps_managed.append('apporder') %}
+{% do apps_managed.extend((
+    'apporder',
+    'oidc_login',
+)) %}
 /var/local/nextcloud/webroot/config/local.config.php:
   file.managed:
   - source: salt://nextcloud/config.php.jinja
@@ -151,6 +159,7 @@ nextcloud_installed:
   - template: jinja
   - require:
     - nextcloud_installed
+    - {{ accounts_client.oauth2_client_secret_filename(pillar.nextcloud.name) }} exists
 
 nextcloud_usable:
   test.nop:
