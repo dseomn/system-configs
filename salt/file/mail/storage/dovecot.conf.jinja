@@ -85,6 +85,15 @@ local_name {{ certificate_name }} {
 {%- endfor %}
 !include_try {{ dovecot.config_dir }}/mail-storage-secrets.conf.ext
 
+# See https://www.dovecot.org/list/dovecot/2018-January/110552.html and
+# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=961033#10 for advice about
+# letting all users use stats-writer.
+service stats {
+  unix_listener stats-writer {
+    mode = 0666
+  }
+}
+
 service auth {
   unix_listener auth-userdb {
     mode = 0660
