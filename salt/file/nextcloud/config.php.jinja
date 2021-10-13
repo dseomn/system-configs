@@ -38,6 +38,8 @@ $CONFIG = [
 
     'log_type' => 'syslog',
 
+    'upgrade.disable-web' => false,
+
     // https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#pretty-urls
     'overwrite.cli.url' => 'https://{{ pillar.nextcloud.name }}',
     'htaccess.RewriteBase' => '/',
