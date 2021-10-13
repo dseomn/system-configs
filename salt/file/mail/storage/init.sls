@@ -428,6 +428,21 @@ lmtp_stunnel_running:
 {% endfor %}
 
 
+{{ common.local_lib }}/mail-storage-monitor-subscriptions:
+  file.managed:
+  - source: salt://mail/storage/monitor_subscriptions.py
+  - mode: 0755
+  - require:
+    - dovecot_running
+  cron.present:
+  - user: vmail
+  - identifier: 68d9cd66-2692-4359-ac75-6fd07030453e
+  - minute: random
+  - hour: random
+  - require:
+    - file: {{ common.local_lib }}/mail-storage-monitor-subscriptions
+
+
 {{ nftables.config_dir }}/50-mail-storage.conf:
   file.managed:
   - contents: |
