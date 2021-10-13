@@ -77,14 +77,13 @@ ssl = required
 ssl_min_protocol = {{ crypto.openssl.general_protocols_min }}
 ssl_cipher_list = {{
     crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers) }}
-ssl_key = <{{ default_certificate.key }}
 ssl_cert = <{{ default_certificate.fullchain }}
 {%- for certificate_name, certificate in certificates.items() %}
 local_name {{ certificate_name }} {
-  ssl_key = <{{ certificate.key }}
   ssl_cert = <{{ certificate.fullchain }}
 }
 {%- endfor %}
+!include_try {{ dovecot.config_dir }}/mail-storage-secrets.conf.ext
 
 service auth {
   unix_listener auth-userdb {
