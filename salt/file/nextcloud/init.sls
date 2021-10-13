@@ -160,6 +160,8 @@ nextcloud_installed:
   - require:
     - nextcloud_installed
     - {{ accounts_client.oauth2_client_secret_filename(pillar.nextcloud.name) }} exists
+  - watch_in:
+    - apache_httpd_running
 
 nextcloud_usable:
   test.nop:
