@@ -21,20 +21,20 @@
   - mode: 0755
   - source: salt://disk_usage/disk_usage_at_least.py
 
-{{ disk_usage.bin }} 5:
+{{ disk_usage.bin }} --lvm-pool-threshold=0 --fs-threshold=5:
   cron.present:
   - identifier: facf3bb7-d24d-4f45-aaea-7886457b160b
   - minute: random
   - hour: random
   - daymonth: random
   - month: random
-{{ disk_usage.bin }} 80:
+{{ disk_usage.bin }} --lvm-pool-threshold=70 --fs-threshold=80:
   cron.present:
   - identifier: 019261b3-a7df-49aa-a68e-3838302df043
   - minute: random
   - hour: random
   - dayweek: random
-{{ disk_usage.bin }} 90:
+{{ disk_usage.bin }} --lvm-pool-threshold=80 --fs-threshold=90:
   cron.present:
   - identifier: 5ecec10e-0d38-4b90-82cf-46be30568fa0
   - minute: random

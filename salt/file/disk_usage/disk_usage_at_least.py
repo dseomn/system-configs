@@ -60,15 +60,22 @@ def main():
     arg_parser = argparse.ArgumentParser(
         description='Conditionally print disk usage.')
     arg_parser.add_argument(
-        'min_percent',
+        '--lvm-pool-threshold',
         type=float,
-        help='Only print disk usage at or above this percent.',
+        required=True,
+        help='Minimum usage percent to print for LVM pools.',
+    )
+    arg_parser.add_argument(
+        '--fs-threshold',
+        type=float,
+        required=True,
+        help='Minimum usage percent to print for filesystems.',
     )
     args = arg_parser.parse_args()
 
     sections = (
-        _lvm_pool_usage(min_percent=args.min_percent),
-        _filesystem_usage(min_percent=args.min_percent),
+        _lvm_pool_usage(min_percent=args.lvm_pool_threshold),
+        _filesystem_usage(min_percent=args.fs_threshold),
     )
     sys.stdout.write('\n'.join(section for section in sections if section))
 
