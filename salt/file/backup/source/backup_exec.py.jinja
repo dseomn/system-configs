@@ -19,10 +19,12 @@ import argparse
 import collections
 import contextlib
 import datetime
+import fnmatch
 import json
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 from typing import ContextManager, Optional, Sequence
 import uuid
@@ -33,6 +35,26 @@ _NOW_UTC = datetime.datetime.now(tz=datetime.timezone.utc)
 _CONFIG_DIR = pathlib.Path('{{ backup.config_dir }}')
 _SOURCES_DIR = _CONFIG_DIR.joinpath('source/sources.d')
 _SSH_CONFIG = _CONFIG_DIR.joinpath('source/ssh/config')
+
+
+def _lvcreate_quiet(args: Sequence[str]) -> None:
+    # TODO(https://github.com/lvmteam/lvm2/issues/57): Delete this function.
+    # Code that generates the warning:
+    # https://github.com/lvmteam/lvm2/blob/f70d97b91620bc7c2e5c5ccc39913c54379322c2/lib/metadata/thin_manip.c#L414-L420
+    stdout = subprocess.run(
+        args,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        check=True,
+        text=True,
+    ).stdout
+    for line in stdout.splitlines():
+        if not fnmatch.fnmatchcase(
+                line,
+                '  WARNING: Sum of all thin volume sizes (*) exceeds the size '
+                'of thin pool*'):
+            print(line, file=sys.stderr)
 
 
 class _Source(abc.ABC):
@@ -104,20 +126,16 @@ class _LvmThinSnapshotSource(_Source):
         snapshot_lv = f'backup_{_NOW_UTC.strftime("%Y%m%dT%H%M%SZ")}_{self._lv}'
 
         with contextlib.ExitStack() as exit_stack:
-            subprocess.run(
-                (
-                    'lvcreate',
-                    '--quiet',
-                    '--quiet',
-                    '--snapshot',
-                    '--setactivationskip=n',
-                    f'--name={snapshot_lv}',
-                    '--',
-                    f'{self._vg}/{self._lv}',
-                ),
-                stdin=subprocess.DEVNULL,
-                check=True,
-            )
+            _lvcreate_quiet((
+                'lvcreate',
+                '--quiet',
+                '--quiet',
+                '--snapshot',
+                '--setactivationskip=n',
+                f'--name={snapshot_lv}',
+                '--',
+                f'{self._vg}/{self._lv}',
+            ))
             exit_stack.callback(
                 subprocess.run,
                 (
@@ -203,20 +221,16 @@ class _VirtualMachineSshDumpSource(_Source):
         dump_dev_target = 'vdz'
 
         with contextlib.ExitStack() as exit_stack:
-            subprocess.run(
-                (
-                    'lvcreate',
-                    '--quiet',
-                    '--quiet',
-                    f'--virtualsize={self._temp_volume_size}',
-                    f'--name={dump_lv}',
-                    f'--thinpool={self._temp_volume_thin_pool_lv}',
-                    '--',
-                    self._temp_volume_vg,
-                ),
-                stdin=subprocess.DEVNULL,
-                check=True,
-            )
+            _lvcreate_quiet((
+                'lvcreate',
+                '--quiet',
+                '--quiet',
+                f'--virtualsize={self._temp_volume_size}',
+                f'--name={dump_lv}',
+                f'--thinpool={self._temp_volume_thin_pool_lv}',
+                '--',
+                self._temp_volume_vg,
+            ))
             exit_stack.callback(
                 subprocess.run,
                 (
