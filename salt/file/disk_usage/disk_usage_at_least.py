@@ -20,7 +20,7 @@ import subprocess
 import sys
 
 
-def _lvm_usage(*, min_percent):
+def _lvm_pool_usage(*, min_percent):
     if not shutil.which('lvs'):
         return ''
     lvs = subprocess.run(
@@ -67,7 +67,7 @@ def main():
     args = arg_parser.parse_args()
 
     sections = (
-        _lvm_usage(min_percent=args.min_percent),
+        _lvm_pool_usage(min_percent=args.min_percent),
         _filesystem_usage(min_percent=args.min_percent),
     )
     sys.stdout.write('\n'.join(section for section in sections if section))
