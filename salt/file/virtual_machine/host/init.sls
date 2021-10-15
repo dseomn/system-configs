@@ -140,7 +140,7 @@ base_system:
       &&
       blkdiscard --zeroout {{ swap_path }}
       &&
-      mkswap --uuid {{ swap.uuid }} {{ swap_path }}
+      mkswap --uuid {{ swap.uuid }} {{ swap_path }} {{ 1024 * 1024 // 1024 }}
   - creates: {{ swap_path }}
 {% endfor %}
 

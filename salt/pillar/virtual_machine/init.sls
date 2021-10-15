@@ -29,6 +29,14 @@
 {% endfor %}
 
 
+{% if guest.get('storage', {}).get('swap', ()) %}
+cryptsetup:
+  ephemeral_swap:
+    {% for swap in guest.storage.swap %}
+    {{ swap.uuid }}:
+    {% endfor %}
+{% endif %}
+
 virtual_machine:
   host: {{ host | tojson }}
   guest: {{ guest | tojson }}

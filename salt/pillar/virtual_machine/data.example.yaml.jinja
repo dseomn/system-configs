@@ -62,7 +62,9 @@ guests:
         vg: host0-vg
         # Logical volume name. If unspecified, the default is <minion-id>_swap.
         lv: host0.example.com_swap
-        # Required. Swap volume size.
+        # Required. Swap volume size. Note that the first 1M is unusable because
+        # of a placeholder as described here:
+        # https://wiki.archlinux.org/title/Dm-crypt/Swap_encryption#UUID_and_LABEL
         size: 256M
         # Required. UUID of the swap area.
         uuid: 7968818d-f46d-4db2-b74d-076fddd44c1d
