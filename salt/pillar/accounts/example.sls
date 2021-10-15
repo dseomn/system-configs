@@ -26,6 +26,12 @@ accounts:
       # Required. Name.
       name: Alice Example
 
+  # Extra configuration for lemonldap-ng.ini.
+  lemonldap_ng_ini_extra:
+    # Extra configuration for the portal section.
+    portal: |
+      timeout = {{ 24 * 60 * 60 }}
+
   # Required. OpenID Connect configuration.
   oidc:
     # Required. Relying parties.

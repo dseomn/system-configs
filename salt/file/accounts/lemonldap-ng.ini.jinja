@@ -177,6 +177,8 @@ applicationList = { \
     }, \
 }
 
+{{ pillar.accounts.get('lemonldap_ng_ini_extra', {}).get('portal', '') }}
+
 {%- if not original.portal %}{% do original.pop('portal') %}{% endif %}
 
 
