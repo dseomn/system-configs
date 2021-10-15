@@ -70,6 +70,20 @@
 }) %}
 
 {#
+ # Cryptsetup
+ #
+ # Documentation:
+ # https://gitlab.com/cryptsetup/cryptsetup/-/wikis/FrequentlyAskedQuestions
+ # cryptsetup(8)
+ #}
+{% do crypto.update({
+    'cryptsetup': {
+        'cipher': 'aes-xts-plain64',
+        'key_size': 512,
+    },
+}) %}
+
+{#
  # OpenSSH
  #
  # Documentation:

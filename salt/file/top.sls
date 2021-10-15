@@ -17,6 +17,7 @@ base:
   '*':
   - convenience
   - cron
+  - cryptsetup.ephemeral_swap
   - disk_usage
   - lost_found
   - mail
