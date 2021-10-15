@@ -38,6 +38,7 @@ salt-ssh:
   - salt://common/map.jinja
   - salt://crypto/map.jinja
   - salt://crypto/x509/map.jinja
+  - salt://cryptsetup/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
