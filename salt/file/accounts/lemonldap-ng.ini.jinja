@@ -132,6 +132,7 @@ oidcStorage = Apache::Session::File
 oidcStorageOptions = { \
     'Directory' => '{{ accounts.llng_var_lib_dir }}/oidcsessions', \
     'LockDirectory' => '{{ accounts.llng_var_lib_dir }}/oidcsessions/lock', \
+    'generateModule' => 'Lemonldap::NG::Common::Apache::Session::Generate::SHA256', \
 }
 oidcRPMetaDataOptions = { \
     {%- for rp_name, rp in pillar.accounts.oidc.rps.items() %}
