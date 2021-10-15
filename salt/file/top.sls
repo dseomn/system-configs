@@ -21,11 +21,9 @@ base:
   - disk_usage
   - lost_found
   - mail
+  - network.firewall.enable
   - trim
   - uptime
-
-  'not G@role:kubernetes':
-  - network.firewall.enable
 
   'G@os:Debian and G@debian:track:*':
   - debian
@@ -69,14 +67,6 @@ base:
 
   'G@role:irc:bouncer':
   - irc.bouncer
-
-  'G@role:kubernetes':
-  - kubernetes
-  - kubernetes.runtime
-  - network.interfaces
-  - network.local_resolver
-  - ssh.server
-  - standard
 
   'G@role:mail:inbound':
   - mail.inbound

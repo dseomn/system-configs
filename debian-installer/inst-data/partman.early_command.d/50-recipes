@@ -24,33 +24,6 @@ atomic_recipe="$(echo "$recipe_dir"/??atomic)" || exit 1
 [ -f "$atomic_recipe" ] || exit 1
 
 
-# Required partitions, not including /.
-starter_body="$(
-  sed \
-    -e '/:$/ d' \
-    -e 's/\$defaultignore{ }//' \
-    -e '/linux-swap/,/\.$/ d' \
-    -e '/\$default_filesystem/,/\.$/ d' \
-    < "$atomic_recipe"
-)" || exit 1
-
-
-# Starter, empty system partition, empty partition for ceph.
-{
-cat > "${recipe_dir}/10kubernetes_starter" <<EOF
-kubernetes_starter :
-
-${starter_body}
-
-32000 64000 64000 free
-  .
-
-64000 128000 -1 free
-  .
-EOF
-} || exit 1
-
-
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=385219): Remove the
 # delete-me LV.
 sed \
