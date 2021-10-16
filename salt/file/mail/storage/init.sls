@@ -310,46 +310,14 @@ spamd_running:
 
 # I don't see any way to configure Dovecot to require specific client certs, so
 # this uses stunnel instead.
-{{ stunnel.config_dir }}/lmtp_client_certs.pem:
-  file.managed:
-  - contents: {{
-        pillar.mail.common.inbound.certificates | join('\n') | tojson }}
-  - require:
-    - {{ stunnel.config_dir }} exists
-  - require_in:
-    - {{ stunnel.config_dir }} is clean
-{{ stunnel.config_dir }}/lmtp.conf:
-  file.managed:
-  - contents: |
-      {{ stunnel.boilerplate | indent(6) }}
-      setuid = {{ stunnel.user }}
-      setgid = {{ stunnel.group }}
-      [lmtp]
-      accept = :::24
-      sslVersionMin = {{ crypto.openssl.strict_protocols_min }}
-      ciphers = {{ crypto.openssl.ciphers_to_string(
-          crypto.openssl.strict_ciphers) }}
-      key = {{ system_certificate.key }}
-      cert = {{ system_certificate.fullchain }}
-      CAfile = {{ stunnel.config_dir }}/lmtp_client_certs.pem
-      verifyPeer = yes
-      connect = {{ dovecot.base_dir }}/lmtp
-  - require:
-    - {{ stunnel.config_dir }} exists
-    - {{ system_certificate.fullchain }}
-    - {{ system_certificate.key }}
-    - {{ stunnel.config_dir }}/lmtp_client_certs.pem
-  - require_in:
-    - {{ stunnel.config_dir }} is clean
-lmtp_stunnel_enabled:
-  service.enabled:
-  - name: {{ stunnel.service_instance('lmtp') }}
-lmtp_stunnel_running:
-  service.running:
-  - name: {{ stunnel.service_instance('lmtp') }}
-  - watch:
-    - {{ stunnel.config_dir }}/lmtp_client_certs.pem
-    - {{ stunnel.config_dir }}/lmtp.conf
+{{ stunnel.strict_server(
+    instance_name='lmtp',
+    accept=':::24',
+    key=system_certificate.key,
+    cert=system_certificate.fullchain,
+    client_certs=pillar.mail.common.inbound.certificates,
+    connect=dovecot.base_dir + '/lmtp',
+) }}
 
 
 {% for mailbox_domain in pillar.mail.mailbox_domains %}

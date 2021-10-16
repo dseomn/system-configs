@@ -15,6 +15,9 @@
  #}
 
 
+{% from 'crypto/map.jinja' import crypto %}
+
+
 {% set stunnel = salt.grains.filter_by({
     'Debian': {
         'pkgs': [
@@ -31,3 +34,61 @@
     },
 }) %}
 {% do stunnel.update({'service_instance': stunnel.service_instance.format}) %}
+
+
+{% macro _strict_server(
+    instance_name,
+    accept,
+    key,
+    cert,
+    client_certs,
+    connect) %}
+{% set service_instance = stunnel.service_instance(instance_name) %}
+
+{{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem:
+  file.managed:
+  - contents: {{ client_certs | join('\n') | tojson }}
+  - require:
+    - {{ stunnel.config_dir }} exists
+  - require_in:
+    - {{ stunnel.config_dir }} is clean
+
+{{ stunnel.config_dir }}/{{ instance_name }}.conf:
+  file.managed:
+  - contents: |
+      {{ stunnel.boilerplate | indent(6) }}
+      setuid = {{ stunnel.user }}
+      setgid = {{ stunnel.group }}
+      [{{ instance_name }}]
+      accept = {{ accept }}
+      sslVersionMin = {{ crypto.openssl.strict_protocols_min }}
+      ciphers = {{ crypto.openssl.ciphers_to_string(
+          crypto.openssl.strict_ciphers) }}
+      key = {{ key }}
+      cert = {{ cert }}
+      CAfile = {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+      verifyPeer = yes
+      connect = {{ connect }}
+  - require:
+    - {{ stunnel.config_dir }} exists
+    - {{ key }}
+    - {{ cert }}
+    - {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+  - require_in:
+    - {{ stunnel.config_dir }} is clean
+
+{{ service_instance }} is enabled:
+  service.enabled:
+  - name: {{ service_instance }}
+{{ service_instance }} is running:
+  service.running:
+  - name: {{ service_instance }}
+  - watch:
+    - {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+    - {{ stunnel.config_dir }}/{{ instance_name }}.conf
+{% endmacro %}
+
+
+{% do stunnel.update({
+    'strict_server': _strict_server,
+}) %}
