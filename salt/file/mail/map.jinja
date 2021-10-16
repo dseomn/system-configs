@@ -33,6 +33,9 @@
         '_postfix_queue_dir': '/var/spool/postfix',
     },
 }) %}
+{% do mail.update({
+    'message_size_limit_bytes': 32 * 1024 * 1024,
+}) %}
 
 
 {% macro _postfix_dir(main_dir, instance) -%}
@@ -82,7 +85,7 @@ authorized_submit_users =
 default_database_type = cdb
 _database_dir = ${default_database_type}:${config_directory}
 
-message_size_limit = {{ 32 * 1024 * 1024 }}
+message_size_limit = {{ mail.message_size_limit_bytes }}
 
 authorized_flush_users =
 authorized_mailq_users =
