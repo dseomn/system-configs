@@ -92,40 +92,28 @@ rsync_running:
   - watch:
     - {{ nas.rsync_config_file }}
 
-{{ stunnel.config_dir }}/rsync.conf:
-  file.managed:
-  - contents: |
-      {{ stunnel.boilerplate | indent(6) }}
-      setuid = nas
-      setgid = nas
-      [rsync_tls]
-      accept = :::874
-      cert = {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/fullchain.pem
-      key = {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/privkey.pem
-      sslVersionMin = {{ crypto.openssl.general_protocols_min }}
-      ciphers = {{ crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers) }}
-      connect = localhost:873
-  - require:
-    - {{ stunnel.config_dir }} exists
-    - nas_user
-    - {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/fullchain.pem
-    - {{ acme.certbot_config_dir }}/live/{{ pillar.nas.hostname }}/privkey.pem
-    - rsync_enabled
-    - rsync_running
-  - require_in:
-    - {{ stunnel.config_dir }} is clean
+{{ stunnel.instance(
+    instance_name='rsync',
+    setuid='nas',
+    setgid='nas',
+    client=False,
+    level='general',
+    accept=':::874',
+    key=(
+        acme.certbot_config_dir + '/live/' + pillar.nas.hostname +
+        '/privkey.pem'),
+    cert=(
+        acme.certbot_config_dir + '/live/' + pillar.nas.hostname +
+        '/fullchain.pem'),
+    connect='localhost:873',
+    require=(
+        'nas_user',
+        'rsync_enabled',
+        'rsync_running',
+    ),
+) }}
 
 {% do open_tcp_ports.append(874) %}
-
-rsync_stunnel_enabled:
-  service.enabled:
-  - name: {{ stunnel.service_instance('rsync') }}
-
-rsync_stunnel_running:
-  service.running:
-  - name: {{ stunnel.service_instance('rsync') }}
-  - watch:
-    - {{ stunnel.config_dir }}/rsync.conf
 
 {% do new_cert_reload_services.append(stunnel.service_instance('rsync')) %}
 

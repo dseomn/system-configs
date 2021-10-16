@@ -36,59 +36,109 @@
 {% do stunnel.update({'service_instance': stunnel.service_instance.format}) %}
 
 
-{% macro _strict_server(
+{#
+ # WARNING: Be careful about access control on the cleartext side of a tunnel.
+ #
+ # For a server, `connect` should point somewhere that does not traverse the
+ # network and that only an authorized server can listen on, i.e., a unix socket
+ # in a directory with restricted permissions, or a port under 1024 on
+ # localhost.
+ #
+ # For a server with non-None `peer_certs`, in addition to the above
+ # restrictions, only authorized clients should be able to connect to the
+ # `connect` server, so it should be a unix socket with restricted permissions
+ # on the socket itself.
+ #
+ # For a client, `accept` should not accept connections that traverse the
+ # network and it should not be possible to listen on by unauthorized local
+ # servers, i.e., it should be a unix socket in a directory with restricted
+ # permissions, or a firewalled port under 1024 on localhost.
+ #
+ # For a client with a client certificate, in addition to the above
+ # restrictions, `accept` should only accept connections from clients authorized
+ # to use that client certificate, i.e., it should be a unix socket with
+ # restricted permissions on the socket itself.
+ #}
+{% macro _instance(
     instance_name,
+    client,
+    level,
     accept,
-    key,
-    cert,
-    client_certs,
-    connect) %}
+    connect,
+    setuid=stunnel.user,
+    setgid=stunnel.group,
+    key=None,
+    cert=None,
+    peer_certs=None,
+    require=()) %}
 {% set service_instance = stunnel.service_instance(instance_name) %}
+{% set peer_name = 'server' if client else 'client' %}
 
-{{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem:
+{% if peer_certs is not none %}
+{{ stunnel.config_dir }}/{{ instance_name }}_{{ peer_name }}_certs.pem:
   file.managed:
-  - contents: {{ client_certs | join('\n') | tojson }}
+  - contents: {{ peer_certs | join('\n') | tojson }}
   - require:
     - {{ stunnel.config_dir }} exists
   - require_in:
     - {{ stunnel.config_dir }} is clean
+{% endif %}
 
 {{ stunnel.config_dir }}/{{ instance_name }}.conf:
   file.managed:
   - contents: |
       {{ stunnel.boilerplate | indent(6) }}
-      setuid = {{ stunnel.user }}
-      setgid = {{ stunnel.group }}
+      setuid = {{ setuid }}
+      setgid = {{ setgid }}
       [{{ instance_name }}]
+      client = {{ 'yes' if client else 'no' }}
       accept = {{ accept }}
-      sslVersionMin = {{ crypto.openssl.strict_protocols_min }}
+      sslVersionMin = {{ crypto.openssl[level + '_protocols_min'] }}
       ciphers = {{ crypto.openssl.ciphers_to_string(
-          crypto.openssl.strict_ciphers) }}
+          crypto.openssl[level + '_ciphers']) }}
+      {%- if key is not none and cert is not none %}
       key = {{ key }}
       cert = {{ cert }}
-      CAfile = {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+      {%- endif %}
+      {%- if client %}
+      sni = {{ connect.rpartition(':')[0] }}
+      {%- endif %}
+      {%- if peer_certs is not none %}
+      CAfile = {{ stunnel.config_dir }}/{{ instance_name }}_{{ peer_name }}_certs.pem
       verifyPeer = yes
+      {%- endif %}
       connect = {{ connect }}
   - require:
     - {{ stunnel.config_dir }} exists
+    {% if key is not none and cert is not none %}
     - {{ key }}
     - {{ cert }}
-    - {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+    {% endif %}
+    {% if peer_certs is not none %}
+    - {{ stunnel.config_dir }}/{{ instance_name }}_{{ peer_name }}_certs.pem
+    {% endif %}
+    {% for requirement in require %}
+    - {{ requirement | tojson }}
+    {% endfor %}
   - require_in:
     - {{ stunnel.config_dir }} is clean
 
 {{ service_instance }} is enabled:
   service.enabled:
   - name: {{ service_instance }}
+  - require:
+    - {{ stunnel.config_dir }}/{{ instance_name }}.conf
 {{ service_instance }} is running:
   service.running:
   - name: {{ service_instance }}
   - watch:
-    - {{ stunnel.config_dir }}/{{ instance_name }}_client_certs.pem
+    {% if peer_certs is not none %}
+    - {{ stunnel.config_dir }}/{{ instance_name }}_{{ peer_name }}_certs.pem
+    {% endif %}
     - {{ stunnel.config_dir }}/{{ instance_name }}.conf
 {% endmacro %}
 
 
 {% do stunnel.update({
-    'strict_server': _strict_server,
+    'instance': _instance,
 }) %}

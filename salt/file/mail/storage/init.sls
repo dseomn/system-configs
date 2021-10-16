@@ -310,12 +310,14 @@ spamd_running:
 
 # I don't see any way to configure Dovecot to require specific client certs, so
 # this uses stunnel instead.
-{{ stunnel.strict_server(
+{{ stunnel.instance(
     instance_name='lmtp',
+    client=False,
+    level='strict',
     accept=':::24',
     key=system_certificate.key,
     cert=system_certificate.fullchain,
-    client_certs=pillar.mail.common.inbound.certificates,
+    peer_certs=pillar.mail.common.inbound.certificates,
     connect=dovecot.base_dir + '/lmtp',
 ) }}
 
