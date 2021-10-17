@@ -77,6 +77,9 @@ base:
   'G@role:mail:storage':
   - mail.storage
 
+  'G@role:mail:web':
+  - mail.web
+
   'G@role:media-center':
   - dlna.renderer
   - ssh.server

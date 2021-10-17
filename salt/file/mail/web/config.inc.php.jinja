@@ -1,0 +1,60 @@
+{#
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-#}
+
+
+{%- from 'crypto/map.jinja' import crypto -%}
+{%- from 'mail/map.jinja' import mail -%}
+{%- from 'mail/web/map.jinja' import mail_web -%}
+
+
+<?php
+
+$config = [];
+
+$config['db_dsnw'] =
+    'sqlite:////var/local/roundcube/database/roundcube.db?mode=0600';
+
+$config['default_host'] = 'localhost';
+$config['default_port'] = 143;
+
+$config['smtp_server'] = 'localhost';
+$config['smtp_port'] = 587;
+$config['smtp_user'] = '%u';
+$config['smtp_pass'] = '%p';
+
+// TODO(roundcube >= 1.5-beta): Set $config['session_samesite'].
+
+// TODO(roundcube > 1.5-rc): Switch to a plain name instead of a regex.
+$config['trusted_host_patterns'] = [
+    "^{{ pillar.mail.web.name.replace('.', '\\\\.') }}$",
+];
+
+$config['max_message_size'] = {{ mail.message_size_limit_bytes }};
+
+// TODO(dseomn): Manage plugins.
+$config['plugins'] = [
+];
+
+$config['enable_spellcheck'] = false;
+
+$config['address_book_type'] = '';
+$config['autocomplete_addressbooks'] = [];
+
+// TODO(https://github.com/roundcube/roundcubemail/issues/5015): Remove this and
+// use user preferences instead.
+$config['default_list_mode'] = 'threads';
+
+require_once('{{ mail_web.config_dir }}/config-dynamic.inc.php');
