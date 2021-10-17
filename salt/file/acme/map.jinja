@@ -69,7 +69,9 @@ acme_cert_{{ name }}:
     - {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf
     - {{ acme.certbot_config_dir }}/live/{{ name }}/privkey.pem
     - {{ acme.certbot_config_dir }}/live/{{ name }}/fullchain.pem
-  - prereq_in:
+  - require:
+    # TODO(https://github.com/saltstack/salt/issues/51839): Add a prereq_in
+    # requisite on this too.
     - test: acme_cert_{{ name }}
 
 {{ acme.certbot_config_dir }}/renewal/{{ name }}.conf:
