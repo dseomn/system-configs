@@ -14,7 +14,6 @@
 
 
 {% from 'acme/map.jinja' import acme %}
-{% from 'nas/map.jinja' import nas %}
 {% from 'nas/rsync/map.jinja' import nas_rsync %}
 {% from 'network/firewall/map.jinja' import nftables %}
 {% from 'stunnel/map.jinja' import stunnel %}
@@ -44,7 +43,9 @@ nas_rsync_pkgs:
       [{{ share_name }}]
       path = {{ share.volume.replace('%', '%%') }}
       {% endfor %}
-  - require: {{ (['nas_user'] + nas.share_requisites) | tojson }}
+  - require:
+    - nas_user
+    - nas_share_requisites
 
 rsync_enabled:
   service.enabled:

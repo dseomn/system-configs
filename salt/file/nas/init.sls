@@ -42,3 +42,13 @@ nas_user:
     - group: nas_user
 
 {{ acme_cert(pillar.nas.hostname, group='nas') }}
+
+nas_share_requisites:
+  test.nop:
+  - require:
+    {% for share in pillar.nas.shares.values() %}
+    - {{ share.volume }} is mounted
+    {% if share.get('backup', True) %}
+    - {{ share.volume }} is backed up
+    {% endif %}
+    {% endfor %}
