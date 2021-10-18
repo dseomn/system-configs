@@ -13,12 +13,8 @@
 # limitations under the License.
 
 
-{% from 'acme/map.jinja' import acme, acme_cert %}
+{% from 'acme/map.jinja' import acme_cert %}
 {% from 'common/map.jinja' import common %}
-{% from 'crypto/map.jinja' import crypto %}
-{% from 'nas/map.jinja' import nas %}
-{% from 'network/firewall/map.jinja' import nftables %}
-{% from 'stunnel/map.jinja' import stunnel %}
 
 
 {% if not salt.grains.has_value('role:virtual-machine:guest') %}
@@ -26,28 +22,10 @@
 {% endif %}
 
 
-{% set share_requisites = [] %}
-{% for share in pillar.nas.shares.values() %}
-  {% do share_requisites.append(share.volume + ' is mounted') %}
-  {% if share.get('backup', True) %}
-    {% do share_requisites.append(share.volume + ' is backed up') %}
-  {% endif %}
-{% endfor %}
-
-{% set new_cert_reload_services = [] %}
-{% set open_tcp_ports = [] %}
-
-
 include:
 - acme
-- network.firewall
-- stunnel
 - virtual_machine.guest
 
-
-nas_pkgs:
-  pkg.installed:
-  - pkgs: {{ nas.pkgs | tojson }}
 
 nas_user:
   group.present:
@@ -64,81 +42,3 @@ nas_user:
     - group: nas_user
 
 {{ acme_cert(pillar.nas.hostname, group='nas') }}
-
-
-{{ nas.rsync_config_file }}:
-  file.managed:
-  - contents: |
-      daemon uid = nas
-      daemon gid = nas
-      use chroot = false
-      read only = true
-      ignore nonreadable = true
-      {% for share_name, share in pillar.nas.shares.items() %}
-      [{{ share_name }}]
-      path = {{ share.volume.replace('%', '%%') }}
-      {% endfor %}
-  - require: {{ (['nas_user'] + share_requisites) | tojson }}
-
-{% do open_tcp_ports.append(873) %}
-
-rsync_enabled:
-  service.enabled:
-  - name: {{ nas.rsync_service }}
-
-rsync_running:
-  service.running:
-  - name: {{ nas.rsync_service }}
-  - watch:
-    - {{ nas.rsync_config_file }}
-
-{{ stunnel.instance(
-    instance_name='rsync',
-    setuid='nas',
-    setgid='nas',
-    client=False,
-    level='general',
-    accept=':::874',
-    key=(
-        acme.certbot_config_dir + '/live/' + pillar.nas.hostname +
-        '/privkey.pem'),
-    cert=(
-        acme.certbot_config_dir + '/live/' + pillar.nas.hostname +
-        '/fullchain.pem'),
-    connect='localhost:873',
-    require=(
-        'nas_user',
-        'rsync_enabled',
-        'rsync_running',
-    ),
-) }}
-
-{% do open_tcp_ports.append(874) %}
-
-{% do new_cert_reload_services.append(stunnel.service_instance('rsync')) %}
-
-
-{{ acme.certbot_config_dir }}/renewal-hooks/post/50-nas:
-  file.managed:
-  - mode: 0755
-  - contents: |
-      #!/bin/bash
-      exec systemctl reload-or-restart \
-        {{ ' '.join(new_cert_reload_services | sort | unique) }}
-  - require:
-    - {{ acme.certbot_config_dir }}/renewal-hooks/post exists
-  - require_in:
-    - {{ acme.certbot_config_dir }}/renewal-hooks/post is clean
-
-{{ nftables.config_dir }}/50-nas.conf:
-  file.managed:
-  - contents: |
-      add rule inet filter input \
-        tcp dport { {{ open_tcp_ports | sort | map('string') | join(', ') }} } \
-        accept
-  - require:
-    - create_nftables_config_dir
-  - require_in:
-    - manage_nftables_config_dir
-  - onchanges_in:
-    - warn about firewall changes

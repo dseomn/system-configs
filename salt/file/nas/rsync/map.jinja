@@ -15,15 +15,12 @@
  #}
 
 
-{% set _share_requisites = [] %}
-{% for share in pillar.nas.shares.values() %}
-  {% do _share_requisites.append(share.volume + ' is mounted') %}
-  {% if share.get('backup', True) %}
-    {% do _share_requisites.append(share.volume + ' is backed up') %}
-  {% endif %}
-{% endfor %}
-
-
-{% set nas = {
-    'share_requisites': _share_requisites,
-} %}
+{% set nas_rsync = salt.grains.filter_by({
+    'Debian': {
+        'pkgs': (
+            'rsync',
+        ),
+        'config_file': '/etc/rsyncd.conf',
+        'service': 'rsync.service',
+    },
+}) %}
