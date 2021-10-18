@@ -21,7 +21,8 @@ nas:
   shares:
 
     # Share/module name. Ignored for protocols like NFS that don't have that
-    # concept. Can't be 'global' (reserved by rsync).
+    # concept. Can't be 'global' (reserved by rsync and samba), 'homes', or
+    # 'printers' (reserved by samba).
     stuff:
       # Required. Path to the data. Must be the mountpoint of a virtual machine
       # guest volume.

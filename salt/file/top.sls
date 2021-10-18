@@ -88,6 +88,7 @@ base:
   - nas
   - nas.nfs
   - nas.rsync
+  - nas.smb
 
   'G@role:news-aggregator':
   - news_aggregator
