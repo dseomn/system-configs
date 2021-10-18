@@ -46,6 +46,8 @@ smbd_running:
       map to guest = Bad User
       read only = yes
       guest ok = yes
+      vfs objects = catia fruit
+      fruit:encoding = native
       {% for share_name, share in pillar.nas.shares.items() %}
       [{{ share_name }}]
       path = {{ share.volume }}
