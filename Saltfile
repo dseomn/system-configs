@@ -51,6 +51,7 @@ salt-ssh:
   - salt://mail/map.jinja
   - salt://mail/storage/map.jinja
   - salt://mail/web/map.jinja
+  - salt://nas/nfs/map.jinja
   - salt://nas/rsync/map.jinja
   - salt://network/firewall/map.jinja
   - salt://network/home_router/dns/map.jinja

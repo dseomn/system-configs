@@ -86,6 +86,7 @@ base:
 
   'G@role:nas':
   - nas
+  - nas.nfs
   - nas.rsync
 
   'G@role:news-aggregator':
