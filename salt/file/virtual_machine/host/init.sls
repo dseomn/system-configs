@@ -199,6 +199,8 @@ base_system:
 
 # TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
 # other than the system one.
+# TODO(virtinst > 3.2.0): Add migratable=off to --cpu, to enable more CPU
+# features.
 {{ guest_id }}_install:
   cmd.run:
   - name: >-
@@ -207,6 +209,7 @@ base_system:
       virt-install
       --name {{ guest_id }}
       --vcpus {{ guest.vcpus }}
+      --cpu host-passthrough,cache.mode=passthrough
       --memory {{ guest.memory }}
       --events on_poweroff=destroy,on_reboot=restart,on_crash=restart
       --import
