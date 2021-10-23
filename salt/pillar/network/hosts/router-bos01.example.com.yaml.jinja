@@ -90,6 +90,9 @@ interfaces:
     # Enables home router things (DNS server, DHCP server, etc.) on this
     # interface, and configures them.
     home_router:
+      # Whether to advertise this host as the default router in DHCPv4 and
+      # Router Advertisements. Default: true.
+      default_route: true
       # Other hosts on this network segment.
       hosts:
         # Short host name, without domain name.

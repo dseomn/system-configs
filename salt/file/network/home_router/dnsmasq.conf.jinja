@@ -52,6 +52,8 @@ domain={{ subdomain }}
 
 enable-ra
 
+dhcp-option=tag:noDefaultRoute,option:router
+
 {% for interface_name, interface in host.interfaces.items()
     if 'home_router' in interface %}
 {% set segment = segments[interface.segment] %}
@@ -67,9 +69,16 @@ interface={{ interface_name }}
 interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
 interface-name={{ grains.host }},{{ interface_name }}
 
-dhcp-range={{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254
-dhcp-range={{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac
-dhcp-range=::,constructor:{{ interface_name }},slaac
+{%- if interface.home_router.get('default_route', True) %}
+{%- set set_no_default_route = '' %}
+{%- else %}
+{%- set set_no_default_route = 'set:noDefaultRoute,' %}
+ra-param={{ interface_name }},0,0
+{%- endif %}
+
+dhcp-range={{ set_no_default_route }}{{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254
+dhcp-range={{ set_no_default_route }}{{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac
+dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
@@ -78,8 +87,9 @@ dhcp-range=::,constructor:{{ interface_name }},slaac
     ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
-dhcp-host={{ '{},{},[{}],{},10m'.format(
+dhcp-host={{ '{},{}{},[{}],{},10m'.format(
     other_host.mac,
+    set_no_default_route,
     other_host_ipv4,
     other_host_ipv6_ula,
     other_host_name,
