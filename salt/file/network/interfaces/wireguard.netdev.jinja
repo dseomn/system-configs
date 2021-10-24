@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-{% set segment = segments[interface.segment] %}
-
 [NetDev]
 Name={{ interface_name }}
 Kind=wireguard
@@ -28,6 +26,8 @@ PublicKey={{ peer.public_key }}
 {% if 'preshared_key' in peer %}
 PresharedKey={{ peer.preshared_key }}
 {% endif %}
+{% if 'interface_id' in peer %}
+{% set segment = segments[interface.segment] %}
 AllowedIPs=10.{{ site.id }}.{{ segment.id }}.{{ peer.interface_id }}/32
 AllowedIPs={{
     '{}:{:02x}{:02x}::{:x}/128'.format(
@@ -37,4 +37,8 @@ AllowedIPs={{
         peer.interface_id,
     )
 }}
+{% endif %}
+{% for allowed_ip in peer.get('allowed_ips', ()) %}
+AllowedIPs={{ allowed_ip }}
+{% endfor %}
 {% endfor %}

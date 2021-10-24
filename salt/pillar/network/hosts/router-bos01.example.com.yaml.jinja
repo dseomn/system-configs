@@ -135,8 +135,13 @@ interfaces:
         public_key: ...
         # Base64-encoded pre-shared key.
         preshared_key: ...
-        # Required. See interface_id parameter in the ip section above.
+        # Adds allowed IPs for a specific interface ID. Requires segment to be
+        # set on the interface.
         interface_id: 2
+        # Allowed IPs, specified manually.
+        allowed_ips:
+        - 192.0.2.0/24
+        - 2001:db8::/32
 
 # Firewall configuration.
 firewall:
