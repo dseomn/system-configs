@@ -87,6 +87,11 @@ interfaces:
     # prefixes. For each subnet prefix, an address is assigned with the number
     # here as the interface ID (IPv6) or host number (IPv4).
     - interface_id: 1
+    # Adds static routes.
+    routes:
+    -
+      # Required. Destination prefix of the route.
+      destination: 2001:db8:1::/48
     # Enables home router things (DNS server, DHCP server, etc.) on this
     # interface, and configures them.
     home_router:

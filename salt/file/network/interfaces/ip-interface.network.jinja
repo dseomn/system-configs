@@ -72,3 +72,8 @@ UseDNS={{ ns.auto_dns }}
 
 [IPv6AcceptRA]
 UseDNS={{ ns.auto_dns }}
+
+{% for route in interface.get('routes', ()) %}
+[Route]
+Destination={{ route.destination }}
+{% endfor %}
