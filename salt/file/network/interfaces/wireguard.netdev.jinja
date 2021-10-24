@@ -29,6 +29,9 @@ PresharedKey={{ peer.preshared_key }}
 {% if 'endpoint' in peer %}
 Endpoint={{ peer.endpoint }}
 {% endif %}
+{% if 'persistent_keepalive' in peer %}
+PersistentKeepalive={{ peer.persistent_keepalive }}
+{% endif %}
 {% if 'interface_id' in peer %}
 {% set segment = segments[interface.segment] %}
 AllowedIPs=10.{{ site.id }}.{{ segment.id }}.{{ peer.interface_id }}/32

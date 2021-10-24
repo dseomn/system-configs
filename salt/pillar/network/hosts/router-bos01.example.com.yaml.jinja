@@ -137,6 +137,8 @@ interfaces:
         preshared_key: ...
         # Endpoint to connect to.
         endpoint: some-peer.example.com:54321
+        # See https://www.wireguard.com/quickstart/
+        persistent_keepalive: 25
         # Adds allowed IPs for a specific interface ID. Requires segment to be
         # set on the interface.
         interface_id: 2
