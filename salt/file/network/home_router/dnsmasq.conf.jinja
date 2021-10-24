@@ -92,9 +92,15 @@ interface-name={{ grains.host }},{{ interface_name }}
 ra-param={{ interface_name }},0,0
 {%- endif %}
 
-dhcp-range={{ set_no_default_route }}{{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254
-dhcp-range={{ set_no_default_route }}{{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac
-dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac
+{%- if 'lease_time' in interface.home_router %}
+{%- set lease_time = ',' + interface.home_router.lease_time %}
+{%- else %}
+{%- set lease_time = '' %}
+{%- endif %}
+
+dhcp-range={{ set_no_default_route }}{{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254{{ lease_time }}
+dhcp-range={{ set_no_default_route }}{{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac{{ lease_time }}
+dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac{{ lease_time }}
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
@@ -103,12 +109,13 @@ dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac
     ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
-dhcp-host={{ '{},{}{},[{}],{},10m'.format(
+dhcp-host={{ '{},{}{},[{}],{}{}'.format(
     other_host.mac,
     set_no_default_route,
     other_host_ipv4,
     other_host_ipv6_ula,
     other_host_name,
+    lease_time,
 ) }}
 {% for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
 host-record={{ '{}.{},{},{},{}'.format(
