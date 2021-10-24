@@ -90,6 +90,10 @@ base:
   - nas.rsync
   - nas.smb
 
+  'G@role:network:managed':
+  - network.interfaces
+  - network.local_resolver
+
   'G@role:news-aggregator':
   - news_aggregator
 
