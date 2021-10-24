@@ -27,6 +27,15 @@ bos01:
   # inclusive.
   id: 0
 
+  # Required. Site-specific home router configuration.
+  home_router:
+    # Required. DNS server that's authoritative for this site's subdomain.
+    dns_server:
+      # Required. Segment the DNS server's address is in.
+      segment: lan
+      # Required. Interface ID of the DNS server.
+      interface_id: 1
+
   # hostapd.conf settings for access points at this site.
   hostapd:
   - ieee80211d=1

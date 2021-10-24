@@ -44,6 +44,22 @@ local=/{{ site.id }}.10.in-addr.arpa/
   {%- do site_ula_nibbles_reversed.insert(0, nibble) -%}
 {%- endfor %}
 local=/{{ '.'.join(site_ula_nibbles_reversed) }}.ip6.arpa/
+{%- for other_site_name, other_site in sites.items()
+    if other_site_name != host.site %}
+{%- set dns_server = '{}:{:02x}{:02x}::{:x}'.format(
+    global.ula,
+    other_site.id,
+    segments[other_site.home_router.dns_server.segment].id,
+    other_site.home_router.dns_server.interface_id,
+) %}
+server=/{{ other_site_name }}.{{ global.domain }}/{{ dns_server }}
+rev-server=10.{{ other_site.id }}.0.0/16,{{ dns_server }}
+rev-server={{ '{}:{:02x}00::/56,{}'.format(
+    global.ula,
+    other_site.id,
+    dns_server,
+) }}
+{%- endfor %}
 cache-size=0
 
 no-hosts
