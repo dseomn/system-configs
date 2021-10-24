@@ -28,7 +28,11 @@ dns:
 interfaces:
 
   # Interface name
-  eth0:
+  upstream:
+    # Renames an interface to have the name above if this section is present and
+    # the interface matches it.
+    rename_match:
+      mac: 00:00:5e:00:53:00
     # The interface is facing upstream, so it shouldn't have any of our private
     # or ULA addresses behind it.
     upstream: true
@@ -152,14 +156,14 @@ firewall:
 
   # Pairs of [input interface, output interface] that allow forwarding across.
   forward:
-  - [lan, eth0]
+  - [lan, upstream]
   - [lan, wg.lan]
-  - [wg.lan, eth0]
+  - [wg.lan, upstream]
   - [wg.lan, lan]
 
   # Interfaces to masquerade outbound IPv4 traffic.
   masquerade_ipv4:
-  - eth0
+  - upstream
 
   # Custom nftables rules. Mainly for temporary/one-off things.
   custom_nftables: |

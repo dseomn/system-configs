@@ -80,6 +80,27 @@ systemd_networkd:
     - warn about network interface changes
 
 
+{% for interface_name, interface in host.interfaces.items() %}
+
+{% if 'rename_match' in interface %}
+
+{{ system.config_directory }}/10-{{ interface_name }}.link:
+  file.managed:
+  - source: salt://network/interfaces/rename-match.link.jinja
+  - template: jinja
+  - defaults:
+      interface_name: {{ interface_name }}
+      interface: {{ interface | tojson }}
+  - require_in:
+    - file: {{ system.config_directory }}
+  - onchanges_in:
+    - warn about network interface changes
+
+{% endif %}
+
+{% endfor %}
+
+
 {% set bridge_name_by_segment = {} %}
 {% set wireguard_interfaces = {} %}
 {% for interface_name, interface in host.interfaces.items() %}
