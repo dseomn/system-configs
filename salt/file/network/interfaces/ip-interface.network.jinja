@@ -76,4 +76,7 @@ UseDNS={{ ns.auto_dns }}
 {% for route in interface.get('routes', ()) %}
 [Route]
 Destination={{ route.destination }}
+{%- if 'gateway' in route %}
+Gateway={{ route.gateway }}
+{%- endif %}
 {% endfor %}
