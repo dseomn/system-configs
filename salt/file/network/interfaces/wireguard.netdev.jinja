@@ -26,6 +26,9 @@ PublicKey={{ peer.public_key }}
 {% if 'preshared_key' in peer %}
 PresharedKey={{ peer.preshared_key }}
 {% endif %}
+{% if 'endpoint' in peer %}
+Endpoint={{ peer.endpoint }}
+{% endif %}
 {% if 'interface_id' in peer %}
 {% set segment = segments[interface.segment] %}
 AllowedIPs=10.{{ site.id }}.{{ segment.id }}.{{ peer.interface_id }}/32
