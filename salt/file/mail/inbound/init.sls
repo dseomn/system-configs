@@ -29,6 +29,7 @@
 
 include:
 - acme
+- common
 - crypto
 - crypto.x509
 - mail
@@ -39,6 +40,8 @@ include:
 mail_inbound_pkgs:
   pkg.installed:
   - pkgs: {{ mail_inbound.pkgs | tojson }}
+  - require_in:
+    - users and groups are done
 
 
 {{ mail.postfix_instance(postfix_instance) }}

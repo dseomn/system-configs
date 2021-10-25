@@ -22,6 +22,7 @@
 
 
 include:
+- common
 - crypto.secret_rotation
 
 

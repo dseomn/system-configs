@@ -19,6 +19,7 @@
 
 
 include:
+- common
 - crypto
 - crypto.secret_rotation
 
@@ -26,6 +27,8 @@ include:
 mail_pkgs:
   pkg.installed:
   - pkgs: {{ mail.pkgs | tojson }}
+  - require_in:
+    - users and groups are done
 
 
 postfix_enabled:

@@ -29,6 +29,7 @@
 
 include:
 - acme
+- common
 - crypto.x509
 - mail.dovecot
 - network.firewall

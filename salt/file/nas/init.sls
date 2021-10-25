@@ -24,6 +24,7 @@
 
 include:
 - acme
+- common
 - virtual_machine.guest
 
 

@@ -16,9 +16,15 @@
 {% from 'mail/dovecot/map.jinja' import dovecot %}
 
 
+include:
+- common
+
+
 dovecot_pkgs:
   pkg.installed:
   - pkgs: {{ dovecot.pkgs | tojson }}
+  - require_in:
+    - users and groups are done
 
 dovecot_enabled:
   service.enabled:

@@ -31,6 +31,7 @@
 
 
 include:
+- common
 - network.firewall
 
 

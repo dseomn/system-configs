@@ -20,6 +20,7 @@
 
 
 {% set includes = [
+    'common',
     'ssh.server',
 ] %}
 
@@ -109,6 +110,7 @@ virtual_machine_guest_volumes:
     - cmp {{ mountpoint }}/.volume/{{ target }} {{ source }}
   - require:
     - {{ mountpoint }}/.volume
+    - users and groups are done
 {% endfor %}
 {% endfor %}
 

@@ -38,6 +38,8 @@
   group.present:
   - name: {{ name }}
   - system: true
+  - require_in:
+    - users and groups are done
   user.present:
   - name: {{ name }}
   - gid: {{ name }}
@@ -48,6 +50,8 @@
   - system: true
   - require:
     - group: {{ name }} user and group
+  - require_in:
+    - users and groups are done
 {% endmacro %}
 
 
@@ -65,6 +69,8 @@
             ;;
         esac
         exit 1
+  - require_in:
+    - users and groups are done
   {% for key, value in kwargs.items() %}
   - {{ key }}: {{ value | tojson }}
   {% endfor %}

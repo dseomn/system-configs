@@ -19,12 +19,15 @@
 
 
 include:
+- common
 - mail
 
 
 dkimpy_milter_pkgs:
   pkg.installed:
   - pkgs: {{ dkimpy_milter.pkgs | tojson }}
+  - require_in:
+    - users and groups are done
 
 dkimpy_milter_enabled:
   service.enabled:

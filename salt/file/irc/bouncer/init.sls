@@ -47,6 +47,7 @@
 
 include:
 - acme
+- common
 - network.firewall
 - virtual_machine.guest
 
@@ -56,6 +57,8 @@ irc_bouncer_pkgs:
   - pkgs: {{ irc_bouncer.pkgs | tojson }}
   - require:
     - /var/lib/znc is mounted
+  - require_in:
+    - users and groups are done
 
 
 znc_files:

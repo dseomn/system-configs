@@ -27,6 +27,7 @@
 include:
 - acme
 - backup.dump
+- common
 - network.firewall
 - virtual_machine.guest
 
@@ -34,6 +35,8 @@ include:
 xmpp_pkgs:
   pkg.installed:
   - pkgs: {{ xmpp.pkgs | tojson }}
+  - require_in:
+    - users and groups are done
 
 
 /srv/ejabberd/mod_log_chat:

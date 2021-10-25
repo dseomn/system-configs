@@ -23,6 +23,7 @@
 
 
 include:
+- common
 - virtual_machine.guest
 
 
