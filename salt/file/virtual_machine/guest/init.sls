@@ -108,7 +108,7 @@ virtual_machine_guest_volumes:
   - unless:
     - cmp {{ mountpoint }}/.volume/{{ target }} {{ source }}
   - require:
-    -  {{ mountpoint }}/.volume
+    - {{ mountpoint }}/.volume
 {% endfor %}
 {% endfor %}
 
