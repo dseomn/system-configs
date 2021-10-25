@@ -150,4 +150,6 @@ host-record={{ '{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     if 'wireguard' in interface %}
 interface={{ interface_name }}
 no-dhcp-interface={{ interface_name }}
+interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
+interface-name={{ grains.host }},{{ interface_name }}
 {% endfor %}
