@@ -41,19 +41,7 @@ mail_storage_pkgs:
   - pkgs: {{ mail_storage.pkgs | tojson }}
 
 
-vmail_user:
-  group.present:
-  - name: vmail
-  - system: true
-  user.present:
-  - name: vmail
-  - gid: vmail
-  - home: {{ common.nonexistent_path }}
-  - createhome: false
-  - shell: {{ common.nologin_shell }}
-  - system: true
-  - require:
-    - group: vmail_user
+{{ common.system_user_and_group('vmail') }}
 
 /var/local/mail/persistent/mail:
   file.directory:
@@ -63,7 +51,7 @@ vmail_user:
   - require:
     - /var/local/mail/persistent is mounted
     - /var/local/mail/persistent is backed up
-    - vmail_user
+    - vmail user and group
 
 /var/local/mail/spamassassin:
   file.directory:
@@ -142,7 +130,7 @@ spamd_running:
   - require:
     - mail_storage_pkgs
     - /var/local/mail/spamassassin
-    - vmail_user
+    - vmail user and group
     - /var/cache/mail
   - watch_in:
     - spamd_running
@@ -292,7 +280,7 @@ spamd_running:
   - require:
     - {{ dovecot.config_dir }} exists
     - mail_storage_pkgs
-    - vmail_user
+    - vmail user and group
     - /var/local/mail/persistent/mail
     - {{ dovecot.top_config_dir }}/sieve-filter-bin is clean
     - {{ dovecot.top_config_dir }}/sieve-before is clean

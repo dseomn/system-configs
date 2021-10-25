@@ -28,6 +28,29 @@
 }) %}
 
 
+{% macro _system_user_and_group(
+    name,
+    groups=(),
+    home=common.nonexistent_path,
+    createhome=False,
+    shell=common.nologin_shell) %}
+{{ name }} user and group:
+  group.present:
+  - name: {{ name }}
+  - system: true
+  user.present:
+  - name: {{ name }}
+  - gid: {{ name }}
+  - groups: {{ groups | tojson }}
+  - home: {{ home }}
+  - createhome: {{ createhome | tojson }}
+  - shell: {{ shell }}
+  - system: true
+  - require:
+    - group: {{ name }} user and group
+{% endmacro %}
+
+
 # Note that this does not use group.present, because it shouldn't create the
 # group.
 {% macro _user_in_group(user, group) %}
@@ -49,5 +72,6 @@
 
 
 {% do common.update({
+    'system_user_and_group': _system_user_and_group,
     'user_in_group': _user_in_group,
 }) %}

@@ -31,26 +31,14 @@ news_aggregator_pkgs:
   - pkgs: {{ news_aggregator.pkgs | tojson }}
 
 
-rss2email_user:
-  group.present:
-  - name: rss2email
-  - system: true
-  user.present:
-  - name: rss2email
-  - gid: rss2email
-  - home: {{ common.nonexistent_path }}
-  - createhome: false
-  - shell: {{ common.nologin_shell }}
-  - system: true
-  - require:
-    - group: rss2email_user
+{{ common.system_user_and_group('rss2email') }}
 
 /etc/rss2email.cfg:
   file.managed:
   - group: rss2email
   - mode: 0640
   - require:
-    - rss2email_user
+    - rss2email user and group
   - contents: |
       [DEFAULT]
       from = rss2email@{{ grains.id }}
@@ -75,7 +63,7 @@ rss2email_user:
   - require:
     - /srv/rss2email is mounted
     - /srv/rss2email is backed up
-    - rss2email_user
+    - rss2email user and group
 
 {{ common.local_bin }}/r2e-wrapper:
   file.managed:
@@ -94,7 +82,7 @@ rss2email_user:
   - minute: random
   - require:
     - {{ common.local_bin }}/r2e-wrapper
-    - rss2email_user
+    - rss2email user and group
 {{ common.local_bin }}/r2e-wrapper run:
   cron.present:
   - identifier: b3b923e6-4838-42be-87a9-e493b0e09eb9
@@ -103,4 +91,4 @@ rss2email_user:
   - hour: random
   - require:
     - {{ common.local_bin }}/r2e-wrapper
-    - rss2email_user
+    - rss2email user and group

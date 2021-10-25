@@ -16,11 +16,8 @@
 {% set rygel = salt.grains.filter_by({
     'Debian': {
         'pkgs': ['rygel', 'rygel-playbin', 'gstreamer1.0-alsa'],
-        'user': 'rygel',
         'user_home': '/var/lib/rygel',
-        'user_group': 'rygel',
         'user_groups': ['audio'],
-        'user_shell': '/usr/sbin/nologin',
         'service_file': '/usr/share/doc/rygel/examples/service/systemd/rygel.service',
         'systemd_directory': '/etc/systemd/system',
         'service': 'rygel',
@@ -29,6 +26,7 @@
     },
 }) %}
 
+{% from 'common/map.jinja' import common %}
 {% from 'network/firewall/map.jinja' import nftables %}
 
 
@@ -40,17 +38,12 @@ rygel_pkgs:
   pkg.installed:
   - pkgs: {{ rygel.pkgs | tojson }}
 
-rygel_user:
-  group.present:
-  - name: {{ rygel.user_group }}
-  - system: True
-  user.present:
-  - name: {{ rygel.user }}
-  - gid: {{ rygel.user_group }}
-  - groups: {{ rygel.user_groups | tojson }}
-  - home: {{ rygel.user_home }}
-  - shell: {{ rygel.user_shell }}
-  - system: True
+{{ common.system_user_and_group(
+    'rygel',
+    groups=rygel.user_groups,
+    home=rygel.user_home,
+    createhome=True,
+) }}
 
 {{ rygel.systemd_directory }}/{{ rygel.service }}.service:
   file.symlink:

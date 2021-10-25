@@ -44,7 +44,7 @@ nas_rsync_pkgs:
       path = {{ share.volume.replace('%', '%%') }}
       {% endfor %}
   - require:
-    - nas_user
+    - nas user and group
     - nas_share_requisites
 
 rsync_enabled:
@@ -72,7 +72,7 @@ rsync_running:
         '/fullchain.pem'),
     connect='localhost:873',
     require=(
-        'nas_user',
+        'nas user and group',
         'rsync_enabled',
         'rsync_running',
     ),

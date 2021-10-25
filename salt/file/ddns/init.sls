@@ -41,31 +41,21 @@ ddns_deps:
   - source: salt://ddns/ddns-txt.sh.jinja
   - template: jinja
 
-ddns_user:
-  group.present:
-  - name: {{ ddns.user_group }}
-  - system: true
-  user.present:
-  - name: {{ ddns.user }}
-  - gid: {{ ddns.user_group }}
-  - home: {{ ddns.user_home }}
-  - createhome: false
-  - shell: {{ ddns.user_shell }}
-  - system: true
+{{ common.system_user_and_group('ddns') }}
 
 {{ ddns.conf_dir }} exists:
   file.directory:
   - name: {{ ddns.conf_dir }}
   - user: root
-  - group: {{ ddns.user_group }}
+  - group: ddns
   - dir_mode: 0750
   - require:
-    - ddns_user
+    - ddns user and group
 {{ ddns.conf_dir }} is clean:
   file.directory:
   - name: {{ ddns.conf_dir }}
   - user: root
-  - group: {{ ddns.user_group }}
+  - group: ddns
   - dir_mode: 0750
   - file_mode: 0640
   - recurse:
@@ -123,7 +113,7 @@ ddns_user:
   file.symlink:
   - target: {{ record_value }}
   - user: root
-  - group: {{ ddns.user_group }}
+  - group: ddns
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
     - {{ ddns.conf_dir }}/{{ provider }}/{{ record_value }}
@@ -147,19 +137,19 @@ warn about {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
 LOGGER_ERROR_ARGS="" {{ ddns.bin }}:
   cron.present:
   - identifier: 75b6f087-2f4b-4028-a11b-cf5cf06f7e93
-  - user: {{ ddns.user }}
+  - user: ddns
   - minute: "*/10"
   - commented: {{ (not _ddns.enable_cron) | tojson }}
   - require:
-    - ddns_user
+    - ddns user and group
     - {{ ddns.bin }}
 LOGGER_ERROR_ARGS="--stderr" {{ ddns.bin }}:
   cron.present:
   - identifier: 4dd2d722-295b-4276-a886-e46f541903d6
-  - user: {{ ddns.user }}
+  - user: ddns
   - minute: 5
   - hour: "*/4"
   - commented: {{ (not _ddns.enable_cron) | tojson }}
   - require:
-    - ddns_user
+    - ddns user and group
     - {{ ddns.bin }}

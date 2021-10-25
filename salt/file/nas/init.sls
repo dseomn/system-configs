@@ -27,19 +27,7 @@ include:
 - virtual_machine.guest
 
 
-nas_user:
-  group.present:
-  - name: nas
-  - system: true
-  user.present:
-  - name: nas
-  - gid: nas
-  - home: {{ common.nonexistent_path }}
-  - createhome: false
-  - shell: {{ common.nologin_shell }}
-  - system: true
-  - require:
-    - group: nas_user
+{{ common.system_user_and_group('nas') }}
 
 {{ acme_cert(pillar.nas.hostname, group='nas') }}
 
