@@ -38,6 +38,9 @@
 {% if data.get('backup', True) %}
 {{ data.mount }} is backed up:
   test.nop: []
+{% else %}
+{{ data.mount }} is not backed up:
+  test.nop: []
 {% endif %}
 {% endfor %}
 
@@ -48,6 +51,9 @@
   file.directory:
   - name: {{ passthrough.mount }}
   - makedirs: true
+
+{{ passthrough.mount }} is not backed up:
+  test.nop: []
 {% endfor %}
 
 # See cryptsetup.ephemeral_swap for where swap volumes are managed.
