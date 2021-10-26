@@ -46,7 +46,9 @@
   - groups: {{ groups | tojson }}
   - home: {{ home }}
   - createhome: {{ createhome | tojson }}
+  {% if shell is not none %}
   - shell: {{ shell }}
+  {% endif %}
   - system: true
   - require:
     - group: {{ name }} user and group
