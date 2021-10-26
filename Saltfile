@@ -34,6 +34,7 @@ salt-ssh:
   - salt://acme/map.jinja
   - salt://apache_httpd/map.jinja
   - salt://backup/map.jinja
+  - salt://backup/repo/map.jinja
   - salt://backup/source/map.jinja
   - salt://common/map.jinja
   - salt://crypto/map.jinja

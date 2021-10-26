@@ -44,6 +44,9 @@ base:
   'G@role:accounts':
   - accounts
 
+  'G@role:backup:repo':
+  - backup.repo
+
   'G@role:desktop':
   - gdm
   - google.chrome
