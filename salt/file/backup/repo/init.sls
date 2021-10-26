@@ -116,9 +116,66 @@ backup_repo_pkgs:
     - {{ backup.data_dir }}/repo is not backed up
 
 
-# TODO(dseomn): Put data that would be useful for disaster recovery and/or data
-# recovery in {{ backup.data_dir }}/repo. Source code for borg and its
-# relevant dependencies? system-configs and dotfiles repos? Anything else?
+# Directory for things that could help with disaster or data recovery. Nothing
+# authoritative (like backups) should go here, just copies of data that's
+# currently available elsewhere. E.g., source code that could be useful for
+# parsing the backups after the software used to create them is no longer
+# available, or system configuration to get started on recovering infrastructure
+# from zero while waiting for backups to extract.
+{{ backup.data_dir }}/repo/recovery exists:
+  file.directory:
+  - name: {{ backup.data_dir }}/repo/recovery
+  - require:
+    - {{ backup.data_dir }}/repo
+{{ backup.data_dir }}/repo/recovery is clean:
+  file.directory:
+  - name: {{ backup.data_dir }}/repo/recovery
+  - clean: true
+  - require:
+    - {{ backup.data_dir }}/repo/recovery exists
+
+{% macro recovery_public_git_repo(name, url, branch) %}
+{{ backup.data_dir }}/repo/recovery/{{ name }}:
+  file.directory:
+  - user: backup-default
+  - group: backup-default
+  - require:
+    - {{ backup.data_dir }}/repo/recovery exists
+  - require_in:
+    - {{ backup.data_dir }}/repo/recovery is clean
+  git.latest:
+  - name: {{ url }}
+  - rev: {{ branch }}
+  - target: {{ backup.data_dir }}/repo/recovery/{{ name }}
+  - branch: {{ branch }}
+  - user: backup-default
+  - submodules: true
+  - require:
+    - file: {{ backup.data_dir }}/repo/recovery/{{ name }}
+    - backup_repo_pkgs
+{% endmacro %}
+
+{{ recovery_public_git_repo(
+    'borg',
+    url='https://github.com/borgbackup/borg.git',
+    branch='master',
+) }}
+
+# Spec for format used by Borg.
+{{ recovery_public_git_repo(
+    'msgpack',
+    url='https://github.com/msgpack/msgpack.git',
+    branch='master',
+) }}
+
+# Implementation of format used by Borg.
+{{ recovery_public_git_repo(
+    'msgpack-python',
+    url='https://github.com/msgpack/msgpack-python.git',
+    branch='main',
+) }}
+
+# TODO(dseomn): Add system-configs and dotfiles repos?
 
 
 {% set old_repos = {} %}
