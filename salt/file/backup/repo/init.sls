@@ -71,20 +71,6 @@ backup_repo_pkgs:
   - pkgs: {{ backup_repo.pkgs | tojson }}
 
 
-{{ backup.data_dir }}/repo:
-  file.directory:
-  - require:
-    - {{ backup.data_dir }}
-    - {{ backup.data_dir }}/repo is mounted
-    # Prevent loops.
-    - {{ backup.data_dir }}/repo is not backed up
-
-
-# TODO(dseomn): Put data that would be useful for disaster recovery and/or data
-# recovery in {{ backup.data_dir }}/repo. Source code for borg and its
-# relevant dependencies? system-configs and dotfiles repos? Anything else?
-
-
 {% set old_backup_users_and_groups = {} %}
 {% for user in salt.user.list_users() if user.startswith('backup-') %}
   {% do old_backup_users_and_groups.update({user: None}) %}
@@ -102,6 +88,21 @@ backup_repo_pkgs:
   - clean: true
   - require:
     - {{ backup.data_dir }}/users exists
+
+
+{{ backup.data_dir }}/repo:
+  file.directory:
+  - require:
+    - {{ backup.data_dir }}
+    - {{ backup.data_dir }}/repo is mounted
+    # Prevent loops.
+    - {{ backup.data_dir }}/repo is not backed up
+
+
+# TODO(dseomn): Put data that would be useful for disaster recovery and/or data
+# recovery in {{ backup.data_dir }}/repo. Source code for borg and its
+# relevant dependencies? system-configs and dotfiles repos? Anything else?
+
 
 {% set old_repos = {} %}
 {% macro scan_dir_for_old_repos(dir_name) %}
@@ -206,6 +207,18 @@ backup_repo_pkgs:
 
 {% endfor %}
 
+# This is important to ensure that everything in each backup drive is properly
+# accounted for in salt/pillar/backup/data.yaml.jinja, so that all the other
+# backup drives can be checked for completeness. It also makes it harder to
+# accidentally have inactive borg repos that don't get regular `borg check`
+# runs, and harder to accidentally leave files/directories around with incorrect
+# ownership/permissions.
+{% for repo in old_repos %}
+{{ repo }} is unaccounted for in salt/pillar/backup/data.yaml.jinja:
+  test.fail_without_changes: []
+{% endfor %}
+
+
 {% for name in old_backup_users_and_groups %}
 {{ name }} user and group:
   cmd.run:
@@ -227,15 +240,4 @@ backup_repo_pkgs:
     - user: {{ name }} user and group
   - require_in:
     - users and groups are done
-{% endfor %}
-
-# This is important to ensure that everything in each backup drive is properly
-# accounted for in salt/pillar/backup/data.yaml.jinja, so that all the other
-# backup drives can be checked for completeness. It also makes it harder to
-# accidentally have inactive borg repos that don't get regular `borg check`
-# runs, and harder to accidentally leave files/directories around with incorrect
-# ownership/permissions.
-{% for repo in old_repos %}
-{{ repo }} is unaccounted for in salt/pillar/backup/data.yaml.jinja:
-  test.fail_without_changes: []
 {% endfor %}
