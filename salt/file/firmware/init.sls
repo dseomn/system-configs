@@ -17,6 +17,7 @@
     'Debian': {
         'pkgs': [
             'firmware-linux',
+            'fwupd',
         ],
     },
 }) %}
