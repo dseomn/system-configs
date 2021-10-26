@@ -89,6 +89,23 @@ backup_repo_pkgs:
   - require:
     - {{ backup.data_dir }}/users exists
 
+{{ common.system_user_and_group(
+    'backup-default',
+    home=backup.data_dir + '/users/backup-default',
+    createhome=True,
+    shell=None,
+) }}
+{{ backup.data_dir }}/users/backup-default:
+  file.directory:
+  - user: backup-default
+  - group: backup-default
+  - dir_mode: 0700
+  - require:
+    - backup-default user and group
+  - require_in:
+    - {{ backup.data_dir }}/users is clean
+{% do old_backup_users_and_groups.pop('backup-default', None) %}
+
 
 {{ backup.data_dir }}/repo:
   file.directory:
