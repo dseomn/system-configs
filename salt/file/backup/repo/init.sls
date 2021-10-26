@@ -172,6 +172,8 @@ backup_repo_pkgs:
   - require:
     - file: {{ backup.data_dir }}/repo/recovery/{{ name }}
     - backup_repo_pkgs
+  - require_in:
+    - {{ backup.data_dir }}/repo/recovery is clean
 {% endmacro %}
 
 {{ recovery_public_git_repo(
