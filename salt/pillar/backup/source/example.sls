@@ -13,6 +13,10 @@
 # limitations under the License.
 
 
+# TODO(dseomn): Replace this with something that extracts the relevant data from
+# salt/pillar/backup/data.yaml.jinja
+
+
 backup:
 
   # Configuration for this minion as a source/creator of backups.

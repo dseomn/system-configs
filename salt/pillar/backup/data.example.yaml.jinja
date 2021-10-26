@@ -1,0 +1,54 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Required. Repositories of backed up data.
+repositories:
+
+  # Repository name. This is used as a directory name and as part of a
+  # username.
+  some-repository:
+    # Required. Minion ID of the host with the primary (actively updated)
+    # copy of this repository, or null if this is an inactive/archived
+    # repository.
+    primary: backup-repo.example.com
+    # Required. Type of repository.
+    #
+    # 'borg' is a borgbackup repo using `borg serve` over ssh.
+    #
+    # 'directory' is an unmanaged directory. primary must be null.
+    type: borg
+
+# Required. Minions that store repositories.
+repository_hosts:
+
+  # Minion ID.
+  backup-repo.example.com:
+    # Required. SSH host public key.
+    ssh_host_public_key: 'ecdsa-sha2-nistp256 ...'
+
+# Required. Minions that create backups.
+source_hosts:
+
+  # Minion ID.
+  some-host.example.com:
+    # Required. SSH client public key.
+    ssh_client_public_key: 'ecdsa-sha2-nistp256 ...'
+    # Required. Repository this minion creates backups in.
+    repository: some-repository
+    # Bandwidth limit uploading to the repository. See
+    # <https://manpages.debian.org/bullseye/pv/pv.1.en.html#DATA_TRANSFER_MODIFIERS>.
+    # Default: no limit.
+    repo_upload_limit: 1M
+    # Bandwidth limit downloading from the repository. Default: no limit.
+    repo_download_limit: 1M
