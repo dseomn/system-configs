@@ -116,6 +116,25 @@ backup_repo_pkgs:
     - {{ backup.data_dir }}/repo is not backed up
 
 
+# https://borgbackup.readthedocs.io/en/stable/quickstart.html#important-note-about-free-space
+{% set reserved_space_mb = 2 * 1024 %}
+{% set reserved_space_bytes = reserved_space_mb * 1024 * 1024 %}
+{% set reserved_space_file = backup.data_dir + '/repo/reserved-space' %}
+{% if not salt.file.file_exists(reserved_space_file) or
+    salt.file.stats(reserved_space_file).size != reserved_space_bytes %}
+{{ reserved_space_file }}:
+  cmd.run:
+  - name: >-
+      dd
+      if=/dev/urandom
+      of={{ reserved_space_file }}
+      bs=1M
+      count={{ reserved_space_mb }}
+  - require:
+    - {{ backup.data_dir }}/repo
+{% endif %}
+
+
 # Directory for things that could help with disaster or data recovery. Nothing
 # authoritative (like backups) should go here, just copies of data that's
 # currently available elsewhere. E.g., source code that could be useful for
