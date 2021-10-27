@@ -99,6 +99,7 @@ manage_backup_source_sources_d:
   - contents: |
       #!/bin/bash -e
       export BORG_REPO='{{ pillar.backup.source.borg.repo }}'
+      export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
       exec borg --rsh='ssh -F {{ backup.config_dir }}/source/ssh/config' "$@"
   - require:
     - {{ backup.config_dir }}/source/ssh/config
