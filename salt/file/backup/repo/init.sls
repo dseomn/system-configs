@@ -24,6 +24,15 @@
 {% endfor %}
 
 
+{% set cron_uuid = 'b02f0054-399c-4b80-9a9c-112d2739d5d1' %}
+{% set cron_jobs_by_user = {} %}
+{% macro cron_job_id(user, repo, job) -%}
+  {%- set job_id = '/'.join((cron_uuid, repo, job)) -%}
+  {%- do cron_jobs_by_user.setdefault(user, {}).update({job_id: None}) -%}
+  {{ job_id }}
+{%- endmacro %}
+
+
 {% macro pv(name, rate_limit) -%}
   pv --quiet --name {{ name }}
   {%- if rate_limit is not none %} --rate-limit {{ rate_limit }}{% endif -%}
@@ -351,7 +360,8 @@ monitor recency of {{ repo_path }}:
       --repository={{ repo_path }}
       --
       --lock-wait={{ backup.borg_lock_wait_noninteractive }}
-  - identifier: 9359761f-e235-47ad-bc54-38af11d37b78
+  - identifier: {{
+        cron_job_id(user=repo_username, repo=repo_name, job='recency') }}
   - user: {{ repo_username }}
   - minute: random
   - hour: random
@@ -363,7 +373,8 @@ monitor recency of {{ repo_path }}:
 check {{ repo_path }}:
   cron.present:
   - name: {{ borg_check(repo_path) | tojson }}
-  - identifier: 0f85dd71-4c65-44a6-9ec3-23c279407557
+  - identifier: {{
+        cron_job_id(user=repo_username, repo=repo_name, job='check') }}
   - user: {{ repo_username }}
   - minute: random
   - hour: random
@@ -402,6 +413,18 @@ check {{ repo_path }}:
 {% for repo in old_repos %}
 {{ repo }} is unaccounted for in salt/pillar/backup/data.yaml.jinja:
   test.fail_without_changes: []
+{% endfor %}
+
+
+{% for user in salt.user.list_users() if user.startswith('backup-') %}
+{% for cron_job in salt.cron.list_tab(user).crons
+    if cron_job.identifier.startswith(cron_uuid + '/') and
+    cron_job.identifier not in cron_jobs_by_user.get(user, {}) %}
+{{ cron_job.identifier | tojson }}:
+  cron.absent:
+  - user: {{ user }}
+  - identifier: {{ cron_job.identifier | tojson }}
+{% endfor %}
 {% endfor %}
 
 
