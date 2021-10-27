@@ -31,8 +31,8 @@
 
 logLevel = {{ original.all.pop('logLevel') }}
 
-; TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2638): Possibly
-; remove trailing slash.
+; This requires a trailing slash, see
+; https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2638
 portal = https://{{ pillar.accounts.name }}/
 
 ; TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2637): Remove
