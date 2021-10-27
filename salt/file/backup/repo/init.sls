@@ -91,7 +91,17 @@
       args:
       - {{ repo_path }}/config
 {% elif type == 'directory' %}
-{{ {}['Unsupported.'] }}
+{{ repo_path }} is initialized:
+  test.configurable_test_state:
+  - changes: false
+  - result: false
+  - comment: Copy directory from another backup drive.
+  - require:
+    - {{ repo_path }}
+  - unless:
+    - fun: file.path_exists_glob
+      args:
+      - {{ repo_path }}/*
 {% else %}
 {{ {}['Invalid repo type: ' + type] }}
 {% endif %}
@@ -120,7 +130,10 @@ check {{ repo_path }}:
     - backup_repo_pkgs
     - {{ repo_path }} is initialized
 {% elif type == 'directory' %}
-{{ {}['Unsupported.'] }}
+check {{ repo_path }}:
+  test.nop:
+  - require:
+    - {{ repo_path }} is initialized
 {% else %}
 {{ {}['Invalid repo type: ' + type] }}
 {% endif %}
