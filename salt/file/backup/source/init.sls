@@ -111,6 +111,7 @@ backup_source_borg:
       --backup-dir={{ backup.data_dir }}/source/borg
       --
       {{ backup_source.backup_source_borg }}
+      --lock-wait {{ backup.borg_lock_wait_noninteractive }}
       create
       --numeric-owner
       '::{{ pillar.backup.source.borg.archive.replace("%", "\\%") }}'

@@ -21,3 +21,8 @@
         'data_dir': '/srv/backup',
     },
 }) %}
+
+
+{% do backup.update({
+    'borg_lock_wait_noninteractive': 4 * 60 * 60,
+}) %}
