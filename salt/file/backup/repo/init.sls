@@ -55,6 +55,40 @@
 {%- endmacro %}
 
 
+{% macro repo_is_initialized(repo_path, type, repo_username) %}
+{% if type == 'borg' %}
+{{ repo_path }} is initialized:
+  test.configurable_test_state:
+  - changes: false
+  - result: false
+  # See
+  # https://borgbackup.readthedocs.io/en/stable/faq.html#can-i-copy-or-synchronize-my-repo-to-another-location
+  # for warnings about copying repos.
+  - comment: >-
+      Either initialize the repo with `sudo -u {{ repo_username }} borg init
+      --encryption none {{ repo_path }}` or copy the repo from another backup
+      drive. If copying from another drive to a primary repo, make sure to
+      change the repo ID.
+  - require:
+    - {{ repo_path }}
+  - unless:
+    - fun: file.file_exists
+      args:
+      - {{ repo_path }}/README
+    - fun: file.search
+      path: {{ repo_path }}/README
+      pattern: '^This is a Borg Backup repository\.$'
+    - fun: file.file_exists
+      args:
+      - {{ repo_path }}/config
+{% elif type == 'directory' %}
+{{ {}['Unsupported.'] }}
+{% else %}
+{{ {}['Invalid repo type: ' + type] }}
+{% endif %}
+{% endmacro %}
+
+
 {% macro borg_check(repo_path) -%}
   {{ ' '.join((
       'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
@@ -271,6 +305,12 @@ backup_repo_pkgs:
     - {{ repo_username }} user and group
 {% do old_repos.pop(repo_path, None) %}
 
+{{ repo_is_initialized(
+    repo_path,
+    type=repo.type,
+    repo_username=repo_username,
+) }}
+
 {% set source_host_name = source_host_name_by_repository[repo_name] %}
 {% set source_host = pillar.backup.source_hosts[source_host_name] %}
 {{ repo_user_home }}/.ssh:
@@ -318,7 +358,7 @@ monitor recency of {{ repo_path }}:
   - require:
     - {{ repo_username }} user and group
     - {{ common.local_lib }}/borg-require-recent-archive
-    - {{ repo_path }}
+    - {{ repo_path }} is initialized
 
 check {{ repo_path }}:
   cron.present:
@@ -331,7 +371,7 @@ check {{ repo_path }}:
   - require:
     - {{ repo_username }} user and group
     - backup_repo_pkgs
-    - {{ repo_path }}
+    - {{ repo_path }} is initialized
 
 {% elif repo.primary is not none %}
 
