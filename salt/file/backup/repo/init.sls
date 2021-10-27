@@ -295,6 +295,12 @@ backup_repo_pkgs:
     - {{ backup.data_dir }}/repo
 {% do scan_dir_for_old_repos(backup.data_dir + '/repo/primary') %}
 
+{{ backup.data_dir }}/repo/inactive:
+  file.directory:
+  - require:
+    - {{ backup.data_dir }}/repo
+{% do scan_dir_for_old_repos(backup.data_dir + '/repo/inactive') %}
+
 {% for repo_name, repo in pillar.backup.repositories.items() %}
 
 {% if repo.primary == grains.id %}
@@ -404,10 +410,30 @@ monitor recency of {{ repo_path }}:
 
 {% else %}
 
-# TODO(dseomn): Manage directory ownership and permissions, but do not create
-# the directory. (Fail if the directory does not exist.)
-# TODO(dseomn): Periodically run `borg check` if the type is 'borg'.
-{{ {}['Unsupported.'] }}
+{% set repo_path =
+    backup.data_dir + '/repo/inactive/' + repo_name + '.' + repo.type %}
+{{ repo_path }}:
+  file.directory:
+  - user: backup-default
+  - group: backup-default
+  - dir_mode: 0700
+  - require:
+    - {{ backup.data_dir }}/repo/inactive
+    - backup-default user and group
+{% do old_repos.pop(repo_path, None) %}
+
+{{ repo_is_initialized(
+    repo_path,
+    type=repo.type,
+    repo_username='backup-default',
+) }}
+
+{{ check_repo(
+    repo_path=repo_path,
+    type=repo.type,
+    repo_name=repo_name,
+    repo_username='backup-default',
+) }}
 
 {% endif %}
 
