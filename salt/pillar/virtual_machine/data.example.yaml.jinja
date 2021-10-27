@@ -31,10 +31,6 @@ hosts:
         size: 128G
     # Required. Default volume group name for guest swap volumes.
     default_swap_vg: host0-vg
-    # Required if any guests use backup_dump. SSH public key to use for backup
-    # dumps.
-    # TODO(dseomn): Use salt/pillar/backup/data.yaml.jinja instead.
-    backup_dump_ssh_public_key: ecdsa-sha2-nistp256 ...
 
 # Required. Virtual machine guests.
 guests:

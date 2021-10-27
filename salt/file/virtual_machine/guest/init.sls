@@ -21,7 +21,6 @@
 
 {% set includes = [
     'common',
-    'ssh.server',
 ] %}
 
 
@@ -117,17 +116,6 @@ virtual_machine_guest_volumes:
 
 {% if 'backup_dump' in guest %}
 {% do includes.append('backup.dump') %}
-
-virtual_machine_guest_backup_dump_authorized_keys:
-  file.accumulated:
-  - filename: /root/.ssh/authorized_keys
-  - text: >-
-      restrict,command="{{ common.local_sbin}}/backup-dump"
-      {{ guest.backup_dump_ssh_public_key }}
-  - require:
-    - {{ common.local_sbin}}/backup-dump
-  - require_in:
-    - file: /root/.ssh/authorized_keys
 
 {% for dump in guest['backup_dump'] %}
 {{ common.local_lib }}/backup/dump/sources/{{ dump.source }} is dumped:

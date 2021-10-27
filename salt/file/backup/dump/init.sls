@@ -19,6 +19,7 @@
 
 include:
 - backup
+- ssh.server
 
 
 {{ common.local_lib }}/backup/dump:
@@ -44,3 +45,17 @@ include:
   - source: salt://backup/dump/main.py.jinja
   - mode: 0755
   - template: jinja
+
+
+backup.dump authorized_keys:
+  file.accumulated:
+  - filename: /root/.ssh/authorized_keys
+  - text: >-
+      restrict,command="{{ common.local_sbin}}/backup-dump"
+      {{ pillar.backup.source_hosts[
+          pillar.virtual_machine.guest.host].ssh_client_public_key }}
+      {{ pillar.virtual_machine.guest.host }}
+  - require:
+    - {{ common.local_sbin}}/backup-dump
+  - require_in:
+    - file: /root/.ssh/authorized_keys

@@ -23,10 +23,6 @@
 {% endfor %}
 
 {% set guest = data.guests.get(grains.id, {}) %}
-{% set guest_host = data.hosts.get(guest.get('host'), {}) %}
-{% for copy_key in ('backup_dump_ssh_public_key',) if copy_key in guest_host %}
-  {% do guest.update({copy_key: guest_host[copy_key]}) %}
-{% endfor %}
 
 
 {% if guest.get('storage', {}).get('swap', ()) %}
