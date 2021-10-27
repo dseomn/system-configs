@@ -288,6 +288,9 @@ backup_repo_pkgs:
 {% elif repo.primary is not none %}
 
 # TODO(dseomn): Replicate repository from the primary, including `borg check`.
+# See
+# https://borgbackup.readthedocs.io/en/stable/faq.html#can-i-copy-or-synchronize-my-repo-to-another-location
+# for warnings.
 # TODO(dseomn): Monitor recency of backups.
 {{ {}['Unsupported.'] }}
 
