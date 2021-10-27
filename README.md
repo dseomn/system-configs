@@ -7,6 +7,9 @@ generally useful.
 Simple monitoring scripts that can be used with cron to send an email when an
 administrator might want to take action:
 
+* [`salt/file/backup/repo/borg_require_recent_archive.py`](salt/file/backup/repo/borg_require_recent_archive.py):
+  Alerts when a [Borg](https://www.borgbackup.org/) repository doesn't have a
+  recent enough backup archive.
 * [`salt/file/disk_usage/disk_usage_at_least.py`](salt/file/disk_usage/disk_usage_at_least.py):
   Alerts when disk usage is higher than the specified percent.
 * [`salt/file/lost_found/monitor.sh`](salt/file/lost_found/monitor.sh): Alerts

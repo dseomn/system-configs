@@ -120,6 +120,14 @@ backup_repo_pkgs:
 {% do old_backup_users_and_groups.pop('backup-default', None) %}
 
 
+{{ common.local_lib }}/borg-require-recent-archive:
+  file.managed:
+  - source: salt://backup/repo/borg_require_recent_archive.py
+  - mode: 0755
+  - require:
+    - backup_repo_pkgs
+
+
 {{ backup.data_dir }}/repo:
   file.directory:
   - require:
@@ -295,7 +303,22 @@ backup_repo_pkgs:
   - require:
     - {{ repo_user_home }}/.ssh
 
-# TODO(dseomn): Monitor recency of backups.
+monitor recency of {{ repo_path }}:
+  cron.present:
+  - name: >-
+      BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      {{ common.local_lib }}/borg-require-recent-archive
+      --repository={{ repo_path }}
+      --
+      --lock-wait={{ backup.borg_lock_wait_noninteractive }}
+  - identifier: 9359761f-e235-47ad-bc54-38af11d37b78
+  - user: {{ repo_username }}
+  - minute: random
+  - hour: random
+  - require:
+    - {{ repo_username }} user and group
+    - {{ common.local_lib }}/borg-require-recent-archive
+    - {{ repo_path }}
 
 check {{ repo_path }}:
   cron.present:
