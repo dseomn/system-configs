@@ -55,6 +55,19 @@
 {%- endmacro %}
 
 
+{% macro borg_check(repo_path) -%}
+  {{ ' '.join((
+      'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
+      'borg',
+      '--lock-wait',
+      backup.borg_lock_wait_noninteractive | string,
+      'check',
+      '--verify-data',
+      repo_path,
+  )) }}
+{%- endmacro %}
+
+
 {% if not salt.grains.has_value('role:virtual-machine:guest') %}
   {{ error_this_state_can_only_be_run_from_a_vm }}
 {% endif %}
@@ -283,7 +296,19 @@ backup_repo_pkgs:
     - {{ repo_user_home }}/.ssh
 
 # TODO(dseomn): Monitor recency of backups.
-# TODO(dseomn): Periodically run `borg check`.
+
+check {{ repo_path }}:
+  cron.present:
+  - name: {{ borg_check(repo_path) | tojson }}
+  - identifier: 0f85dd71-4c65-44a6-9ec3-23c279407557
+  - user: {{ repo_username }}
+  - minute: random
+  - hour: random
+  - dayweek: random
+  - require:
+    - {{ repo_username }} user and group
+    - backup_repo_pkgs
+    - {{ repo_path }}
 
 {% elif repo.primary is not none %}
 
