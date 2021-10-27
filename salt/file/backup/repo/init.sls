@@ -417,7 +417,9 @@ monitor recency of {{ repo_path }}:
 # TODO(dseomn): Replicate repository from the primary, including `borg check`.
 # See
 # https://borgbackup.readthedocs.io/en/stable/faq.html#can-i-copy-or-synchronize-my-repo-to-another-location
-# for warnings.
+# for warnings. See also https://github.com/borgbackup/borg/issues/1772 and
+# https://github.com/borgbackup/borg/issues/895 for ideas/caveats about making
+# sure deletes/corruption don't propagate to the replica.
 # TODO(dseomn): Monitor recency of backups.
 {{ {}['Unsupported.'] }}
 
