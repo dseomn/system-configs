@@ -98,17 +98,33 @@
 {% endmacro %}
 
 
-{% macro borg_check(repo_path) -%}
-  {{ ' '.join((
-      'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
-      'borg',
-      '--lock-wait',
-      backup.borg_lock_wait_noninteractive | string,
-      'check',
-      '--verify-data',
-      repo_path,
-  )) }}
-{%- endmacro %}
+{% macro check_repo(repo_path, type, repo_name, repo_username) %}
+{% if type == 'borg' %}
+check {{ repo_path }}:
+  cron.present:
+  - name: >-
+      BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      borg
+      --lock-wait {{ backup.borg_lock_wait_noninteractive }}
+      check
+      --verify-data
+      {{ repo_path }}
+  - identifier: {{
+        cron_job_id(user=repo_username, repo=repo_name, job='check') }}
+  - user: {{ repo_username }}
+  - minute: random
+  - hour: random
+  - dayweek: random
+  - require:
+    - {{ repo_username }} user and group
+    - backup_repo_pkgs
+    - {{ repo_path }} is initialized
+{% elif type == 'directory' %}
+{{ {}['Unsupported.'] }}
+{% else %}
+{{ {}['Invalid repo type: ' + type] }}
+{% endif %}
+{% endmacro %}
 
 
 {% if not salt.grains.has_value('role:virtual-machine:guest') %}
@@ -370,19 +386,12 @@ monitor recency of {{ repo_path }}:
     - {{ common.local_lib }}/borg-require-recent-archive
     - {{ repo_path }} is initialized
 
-check {{ repo_path }}:
-  cron.present:
-  - name: {{ borg_check(repo_path) | tojson }}
-  - identifier: {{
-        cron_job_id(user=repo_username, repo=repo_name, job='check') }}
-  - user: {{ repo_username }}
-  - minute: random
-  - hour: random
-  - dayweek: random
-  - require:
-    - {{ repo_username }} user and group
-    - backup_repo_pkgs
-    - {{ repo_path }} is initialized
+{{ check_repo(
+    repo_path=repo_path,
+    type=repo.type,
+    repo_name=repo_name,
+    repo_username=repo_username,
+) }}
 
 {% elif repo.primary is not none %}
 
