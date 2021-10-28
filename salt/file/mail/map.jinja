@@ -145,23 +145,28 @@ smtpd_tls_received_header = yes
 {% endmacro %}
 
 
-{% macro _postmap(database, instance=None, files=None, onchanges_extra=()) %}
+{% macro _postmap(database, instance=None, files=None) %}
 {% set config_dir = _postfix_config_dir(instance) %}
 {% set filename = config_dir | path_join(database) %}
-{% set onchanges = [filename] %}
-{% do onchanges.extend(onchanges_extra) %}
 {% if files is none %}
   {% set flags = '' %}
 {% else %}
   {% set flags = '-F' %}
-  {% do onchanges.extend(files) %}
 {% endif %}
 postmap {{ flags }} -c {{ config_dir }} {{ filename }}:
   cmd.run:
   - require:
     - mail_pkgs
     - {{ config_dir }}/main.cf
-  - onchanges: {{ onchanges | tojson }}
+    - {{ filename }}
+    {% for extra_file in (() if files is none else files) %}
+    - {{ extra_file }}
+    {% endfor %}
+  - unless:
+    - '[[ {{ filename }}.cdb -nt {{ filename }} ]]'
+    {% for extra_file in (() if files is none else files) %}
+    - '[[ {{ filename }}.cdb -nt {{ extra_file }} ]]'
+    {% endfor %}
 {% endmacro %}
 
 
@@ -171,8 +176,9 @@ postalias -c {{ _postfix_config_dir(instance) }} {{ filename }}:
   - require:
     - mail_pkgs
     - {{ _postfix_config_dir(instance) }}/main.cf
-  - onchanges:
     - {{ filename }}
+  - unless:
+    - '[[ {{ filename }}.cdb -nt {{ filename }} ]]'
 {% endmacro %}
 
 
@@ -191,7 +197,6 @@ restart postfix on changes to certificates:
     - postfix_running
 
 {% set tls_server_sni_files = [] %}
-{% set tls_server_sni_onchanges_extra = [] %}
 {{ postfix_config_dir }}/tls_server_sni:
   file.managed:
   # Even though the contents of this file aren't sensitive, it looks like
@@ -202,7 +207,6 @@ restart postfix on changes to certificates:
       {%- for certificate_name, certificate in certificates.items() %}
       {%- do tls_server_sni_files.extend(
           (certificate.key, certificate.fullchain)) %}
-      {%- do tls_server_sni_onchanges_extra.extend(certificate.onchanges) %}
       {{ certificate_name }} {{ certificate.key }} {{ certificate.fullchain }}
       {%- endfor %}
   - require:
@@ -210,12 +214,7 @@ restart postfix on changes to certificates:
     {% for file in tls_server_sni_files %}
     - {{ file }}
     {% endfor %}
-{{ _postmap(
-    'tls_server_sni',
-    instance=instance,
-    files=tls_server_sni_files,
-    onchanges_extra=tls_server_sni_onchanges_extra,
-) }}
+{{ _postmap('tls_server_sni', instance=instance, files=tls_server_sni_files) }}
 
 {{ acme.certbot_config_dir }}/renewal-hooks/post/50-mail:
   file.managed:
