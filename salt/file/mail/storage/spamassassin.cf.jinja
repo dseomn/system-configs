@@ -33,13 +33,13 @@ trusted_networks fc00::/7
 trusted_networks fe80::/10
 
 internal_networks {{ (
-    salt.dnsutil.A(pillar.mail.common.inbound.name) +
-    salt.dnsutil.AAAA(pillar.mail.common.inbound.name)
+    (salt.dnsutil.A(pillar.mail.common.inbound.name) | sort) +
+    (salt.dnsutil.AAAA(pillar.mail.common.inbound.name) | sort)
 ) | join(' ') }}
 
 msa_networks {{ (
-    salt.dnsutil.A(pillar.mail.common.outbound.name) +
-    salt.dnsutil.AAAA(pillar.mail.common.outbound.name)
+    (salt.dnsutil.A(pillar.mail.common.outbound.name) | sort) +
+    (salt.dnsutil.AAAA(pillar.mail.common.outbound.name) | sort)
 ) | join(' ') }}
 
 bayes_expiry_max_db_size {{ 1_000_000 }}
