@@ -464,6 +464,20 @@ monitor recency of {{ repo_path }}:
 {{ repo }} is unaccounted for in salt/pillar/backup/data.yaml.jinja:
   test.fail_without_changes: []
 {% endfor %}
+{% for filename in salt.file.readdir(backup.data_dir + '/repo')
+    if filename not in (
+        '.',
+        '..',
+        '.volume',
+        'inactive',
+        'lost+found',
+        'primary',
+        'recovery',
+        'reserved-space',
+    ) %}
+{{ backup.data_dir }}/repo/{{ filename }} is unaccounted for:
+  test.fail_without_changes: []
+{% endfor %}
 
 
 {% for user in salt.user.list_users() if user.startswith('backup-') %}
