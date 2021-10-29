@@ -25,12 +25,15 @@ ula: fdXX:XXXX:XXXX
 home_router:
   # Additional global names that should point at specific hosts.
   aliases:
-    # Host name, under the domain above.
-    smtp:
-    -
-      # Site of the target host.
-      site: bos01
-      # Segment of the target host.
-      segment: lan
-      # Interface ID of the target host.
-      interface_id: 2
+    # Subdomain of the domain above.
+    alias-subdomain:
+      # Host name, under the subdomain above. In this case, the full name would
+      # be smtp.alias-subdomain.example.com.
+      smtp:
+      -
+        # Site of the target host.
+        site: bos01
+        # Segment of the target host.
+        segment: lan
+        # Interface ID of the target host.
+        interface_id: 2

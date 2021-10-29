@@ -60,6 +60,9 @@ rev-server={{ '{}:{:02x}00::/56,{}'.format(
     dns_server,
 ) }}
 {%- endfor %}
+{%- for alias_subdomain in global.get('home_router', {}).get('aliases', {}) %}
+local=/{{ alias_subdomain }}.{{ global.domain }}/
+{%- endfor %}
 cache-size=0
 
 no-hosts
@@ -129,11 +132,13 @@ host-record={{ '{}.{},{},{},{}'.format(
 {% endfor %}
 {% endfor %}
 
-{% for alias_name, targets
+{% for alias_subdomain, aliases
     in global.get('home_router', {}).get('aliases', {}).items() %}
+{% for alias_name, targets in aliases.items() %}
 {% for target in targets %}
-host-record={{ '{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
+host-record={{ '{}.{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     alias_name,
+    alias_subdomain,
     global.domain,
     sites[target.site].id,
     segments[target.segment].id,
@@ -143,6 +148,7 @@ host-record={{ '{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     segments[target.segment].id,
     target.interface_id,
 ) }}
+{% endfor %}
 {% endfor %}
 {% endfor %}
 
