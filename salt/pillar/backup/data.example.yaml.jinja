@@ -52,3 +52,14 @@ source_hosts:
     repo_upload_limit: 1M
     # Bandwidth limit downloading from the repository. Default: no limit.
     repo_download_limit: 1M
+
+# Virtual machine minions that dump data onto temporary volumes for their hosts
+# to backup.
+dump_hosts:
+
+  # Minion ID.
+  some-vm.example.com:
+    # Required. SSH host public key.
+    ssh_host_public_key: 'ecdsa-sha2-nistp256 ...'
+    # Required. Source host that can initiate dumps.
+    source: some-host.example.com

@@ -53,8 +53,8 @@ backup.dump authorized_keys:
   - text: >-
       restrict,command="{{ common.local_sbin}}/backup-dump"
       {{ pillar.backup.source_hosts[
-          pillar.virtual_machine.guest.host].ssh_client_public_key }}
-      {{ pillar.virtual_machine.guest.host }}
+          pillar.backup.dump_hosts[grains.id].source].ssh_client_public_key }}
+      {{ pillar.backup.dump_hosts[grains.id].source }}
   - require:
     - {{ common.local_sbin}}/backup-dump
   - require_in:

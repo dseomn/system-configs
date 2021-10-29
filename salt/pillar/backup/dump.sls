@@ -13,10 +13,11 @@
 # limitations under the License.
 
 {% import_yaml 'backup/data.yaml.jinja' as data %}
-{% import_yaml 'virtual_machine/data.yaml.jinja' as virtual_machine_data %}
 
-{% set host_id = virtual_machine_data.guests[grains.id].host %}
+{% set dump_host = data.dump_hosts[grains.id] %}
 
 backup:
   source_hosts:
-    {{ host_id }}: {{ data.source_hosts[host_id] | tojson }}
+    {{ dump_host.source }}: {{ data.source_hosts[dump_host.source] | tojson }}
+  dump_hosts:
+    {{ grains.id }}: {{ dump_host | tojson }}
