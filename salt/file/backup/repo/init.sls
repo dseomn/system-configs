@@ -86,7 +86,7 @@
       - {{ repo_path }}/README
     - fun: file.search
       path: {{ repo_path }}/README
-      pattern: '^This is a Borg Backup repository\.$'
+      pattern: '^This is a Borg( Backup)? repository\.?$'
     - fun: file.file_exists
       args:
       - {{ repo_path }}/config
