@@ -47,6 +47,9 @@ base:
   'G@role:backup:repo':
   - backup.repo
 
+  'G@role:ddns':
+  - ddns
+
   'G@role:desktop':
   - gdm
   - google.chrome
