@@ -17,6 +17,20 @@
 {% from 'backup/source/map.jinja' import backup_source %}
 {% from 'ssh/map.jinja' import ssh %}
 
+{% set source_host = pillar.backup.source_hosts[grains.id] %}
+{% set repository = pillar.backup.repositories[source_host.repository] %}
+{% set repository_host = pillar.backup.repository_hosts[repository.primary] %}
+
+{% if repository.type == 'borg' %}
+  {% set borg_repo = 'backup-{}@{}:{}.borg'.format(
+      source_host.repository,
+      repository.primary,
+      source_host.repository,
+  ) %}
+{% else %}
+  {{ {}['Unsupported repo type: ' + repository.type] }}
+{% endif %}
+
 
 include:
 - backup
@@ -61,7 +75,12 @@ manage_backup_source_sources_d:
 
 {{ backup.config_dir }}/source/ssh/known_hosts:
   file.managed:
-  - contents_pillar: backup:source:ssh:known_hosts
+  - contents: |
+      {{ repository.primary }} {{ repository_host.ssh_host_public_key }}
+      {%- for dump_host_name, dump_host in pillar.backup.dump_hosts.items()
+          if dump_host.source == grains.id %}
+      {{ dump_host_name }} {{ dump_host.ssh_host_public_key }}
+      {%- endfor %}
   - require:
     - {{ backup.config_dir }}/source/ssh
 
@@ -97,7 +116,7 @@ manage_backup_source_sources_d:
   - mode: 0755
   - contents: |
       #!/bin/bash -e
-      export BORG_REPO='{{ pillar.backup.source.borg.repo }}'
+      export BORG_REPO='{{ borg_repo }}'
       export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
       exec borg --rsh='ssh -F {{ backup.config_dir }}/source/ssh/config' "$@"
   - require:
@@ -114,7 +133,7 @@ backup_source_borg:
       --lock-wait {{ backup.borg_lock_wait_noninteractive }}
       create
       --numeric-owner
-      '::{{ pillar.backup.source.borg.archive.replace("%", "\\%") }}'
+      '::auto-{{ source_host.repository }}-{utcnow:\%Y\%m\%dT\%H\%M\%SZ}'
       .
   - identifier: 9fb0268b-97eb-4c67-a4cb-f186e445eac9
   - minute: random
