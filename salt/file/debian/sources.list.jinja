@@ -25,6 +25,7 @@
 {{ source(debian.mirror['debian'], debian.distribution, debian.components) }}
 
 {% if debian.track != 'unstable' %}
+  {#- TODO(Debian >= 11): Remove the conditional. #}
   {{ source(
       debian.mirror['debian-security'],
       debian.distribution +
