@@ -29,7 +29,9 @@
   {{ source(
       debian.mirror['debian-security'],
       debian.distribution +
-          ('-security' if grains.osmajorrelease >= 11 else '/updates'),
+          ('-security'
+           if 'osmajorrelease' not in grains or grains.osmajorrelease >= 11
+           else '/updates'),
       debian.components) }}
 {% endif %}
 
