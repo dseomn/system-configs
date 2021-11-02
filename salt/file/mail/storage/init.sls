@@ -241,10 +241,16 @@ spamd_running:
 {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.svbin:
   cmd.run:
   - name: sievec {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
-  - onchanges:
-    - {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
   - require:
     - mail_storage_pkgs
+    - {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
+  - unless:
+    - >-
+        [[
+        {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.svbin
+        -nt
+        {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
+        ]]
   file.exists:
   - require:
     - cmd: {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.svbin
