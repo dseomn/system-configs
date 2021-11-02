@@ -71,6 +71,7 @@ manage_backup_source_sources_d:
     backup.config_dir + '/source/ssh/id',
     warning_on_change=(
         'Update salt/pillar/backup/data.yaml.jinja with new SSH public key.'),
+    require=(backup.config_dir + '/source/ssh',),
 ) }}
 
 {{ backup.config_dir }}/source/ssh/known_hosts:

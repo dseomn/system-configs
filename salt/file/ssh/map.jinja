@@ -19,7 +19,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% macro _key(filename, warning_on_change) %}
+{% macro _key(filename, warning_on_change, require=()) %}
 {{ filename }}:
   cmd.run:
   - name: >-
@@ -28,6 +28,7 @@
   - creates:
     - {{ filename }}
     - {{ filename }}.pub
+  - require: {{ require | tojson }}
   file.accumulated:
   - name: SSH keys
   - filename: {{ common.local_sbin }}/monitor-secret-age
