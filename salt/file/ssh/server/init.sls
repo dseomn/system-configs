@@ -55,8 +55,7 @@ sshd_running:
     sshd.config_directory + '/ssh_host_key',
     warning_on_change=(
         'Update ~/.ssh/known_hosts with new SSH host public key. Possibly also '
-        'update salt/pillar/backup/source/init.sls and '
-        'salt/pillar/backup/data.yaml.jinja'),
+        'update salt/pillar/backup/data.yaml.jinja'),
 ) }}
 
 sshd_config:
