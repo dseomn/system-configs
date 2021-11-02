@@ -142,6 +142,8 @@ def main() -> None:
     with _ejabberd_tempfile(nsenter=nsenter,
                             copy_to='ejabberd.dump') as dump_filename:
         subprocess.run(('ejabberdctl', 'dump', dump_filename), check=True)
+    # NOTE: This doesn't actually generate useful data, see
+    # https://github.com/processone/ejabberd/issues/3705
     with _ejabberd_tempdir(nsenter=nsenter,
                            copy_to='ejabberd.piefxis') as dump_dirname:
         subprocess.run(('ejabberdctl', 'export_piefxis', dump_dirname),
