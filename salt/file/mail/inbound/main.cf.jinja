@@ -69,7 +69,8 @@ lmtp_tls_chain_files =
   {{ system_certificate.fullchain }}
 lmtp_tls_security_level = fingerprint
 lmtp_tls_fingerprint_cert_match =
-  {%- for certificate in pillar.mail.common.storage.certificates %}
+  {%- for certificate
+      in pillar.mail.common.storage.certificate_by_minion.values() %}
   {{ crypto.openssl.cert_fingerprint(certificate) }}
   {%- endfor %}
 lmtp_destination_recipient_limit = 1

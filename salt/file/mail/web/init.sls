@@ -61,7 +61,7 @@ mail_web_pkgs:
     client=True,
     level='strict',
     accept='localhost:143',
-    peer_certs=pillar.mail.common.storage.certificates,
+    peer_certs=pillar.mail.common.storage.certificate_by_minion.values(),
     connect=pillar.mail.common.storage.name + ':993',
 ) }}
 {{ stunnel.instance(
