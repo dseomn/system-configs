@@ -92,9 +92,9 @@ modules:
   mod_disco: {}
   mod_last: {}
   mod_log_chat:
-    # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=994027): Uncomment
-    # the next line.
-    #path: /srv/ejabberd/mod_log_chat
+    # NOTE: The double quotes are important for now:
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=994027
+    path: "/srv/ejabberd/mod_log_chat"
     format: html
   mod_mam:
     clear_archive_on_room_destroy: false
