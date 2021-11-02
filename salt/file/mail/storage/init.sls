@@ -244,6 +244,9 @@ spamd_running:
   - require:
     - mail_storage_pkgs
     - {{ dovecot.top_config_dir }}/sieve-before/20-spamassassin.sieve
+    # Compilation fails unless vnd.dovecot.filter is configured and sieve_before
+    # is set to indicate that this is a global script being compiled.
+    - {{ dovecot.config_dir }}/50-mail-storage.conf
   - unless:
     - >-
         [[
@@ -290,7 +293,7 @@ spamd_running:
     - vmail user and group
     - /var/local/mail/persistent/mail
     - {{ dovecot.top_config_dir }}/sieve-filter-bin is clean
-    - {{ dovecot.top_config_dir }}/sieve-before is clean
+    - {{ dovecot.top_config_dir }}/sieve-before exists
     - {{ common.local_etc }}/mail is clean
     - /var/cache/mail
     {% for certificate in certificates.values() %}
