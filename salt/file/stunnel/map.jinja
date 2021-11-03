@@ -64,7 +64,8 @@
     client,
     level,
     accept,
-    connect,
+    connect=None,
+    exec=None,
     setuid=stunnel.user,
     setgid=stunnel.group,
     key=None,
@@ -110,7 +111,13 @@
       CAfile = {{ stunnel.config_dir }}/{{ instance_name }}_{{ peer_name }}_certs.pem
       verifyPeer = yes
       {%- endif %}
+      {%- if connect is not none %}
       connect = {{ connect }}
+      {%- endif %}
+      {%- if exec is not none %}
+      exec = {{ exec[0] }}
+      execArgs = {{ ' '.join(exec) }}
+      {%- endif %}
   - require:
     - {{ stunnel.config_dir }} exists
     {% if key is not none and cert is not none %}
