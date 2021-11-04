@@ -118,13 +118,16 @@ smtpd_tls_received_header = yes
 {% endmacro %}
 
 
-{% macro _postfix_instance(instance) %}
+{% macro _postfix_instance(instance, require=()) %}
 {{ instance }}:
   cmd.run:
   - name: postmulti -e init && postmulti -e create -I {{ instance }}
   - creates: {{ _postfix_config_dir(instance) }}
   - require:
     - mail_pkgs
+    {% for requirement in require %}
+    - {{ requirement | tojson }}
+    {% endfor %}
   file.accumulated:
   - filename: {{ _postfix_config_dir() }}/main.cf
   - text: ''

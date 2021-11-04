@@ -27,6 +27,11 @@
 {% set postfix_queue_dir = mail.postfix_queue_dir(postfix_instance) %}
 
 
+{% if not salt.grains.has_value('role:virtual-machine:guest') %}
+  {{ error_this_state_can_only_be_run_from_a_vm }}
+{% endif %}
+
+
 include:
 - acme
 - common
@@ -35,6 +40,7 @@ include:
 - mail
 - mail.dkimpy_milter
 - network.firewall
+- virtual_machine.guest
 
 
 mail_inbound_pkgs:
@@ -44,7 +50,13 @@ mail_inbound_pkgs:
     - users and groups are done
 
 
-{{ mail.postfix_instance(postfix_instance) }}
+{{ mail.postfix_instance(
+    postfix_instance,
+    require=(
+        postfix_queue_dir + ' is mounted',
+        postfix_queue_dir + ' is backed up',
+    ),
+) }}
 
 
 {% set certificates = {} %}
