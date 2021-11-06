@@ -124,6 +124,9 @@ base:
   - standard
   - virtual_machine.host
 
+  'G@role:watchdog':
+  - watchdog
+
   'G@role:web:static':
   - web.static
 
