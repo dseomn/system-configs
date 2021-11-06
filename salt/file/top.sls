@@ -113,6 +113,8 @@ base:
   - vcs
 
   'G@role:virtual-machine:guest':
+  - network.interfaces
+  - network.local_resolver
   - ssh.server
   - standard
   - virtual_machine.guest
