@@ -87,7 +87,6 @@ base:
   - mail.web
 
   'G@role:media-center':
-  - dlna.renderer
   - ssh.server
 
   'G@role:nas':
