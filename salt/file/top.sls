@@ -86,9 +86,6 @@ base:
   'G@role:mail:web':
   - mail.web
 
-  'G@role:media-center':
-  - ssh.server
-
   'G@role:nas':
   - nas
   - nas.nfs
