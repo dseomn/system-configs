@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 {% from 'gdm/map.jinja' import gdm %}
 
 
-gdm:
-  pkg.installed:
-  - pkgs: {{ gdm.pkgs }}
-  # Enable the service, but don't start it, in case starting the display manager
-  # could interrupt the current session.
-  service.enabled:
-  - name: {{ gdm.service }}
+include:
+- gdm
+
+
+{{ gdm.config_dir }}/{{ gdm.custom_conf }}:
+  file.managed:
+  - source: salt://gdm/custom.conf.jinja
+  - template: jinja
+  - require:
+    - gdm

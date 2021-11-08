@@ -1,0 +1,44 @@
+{#-
+ # Copyright 2021 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-#}
+
+<advancedsettings version="1.0">
+  <audiooutput>
+    <channels>{{ pillar.kodi.channels }}</channels>
+    <config>3</config>  <!-- best match -->
+    <maintainoriginalvolume>false</maintainoriginalvolume>
+    <processquality>50</processquality>  <!-- high -->
+    <streamnoise>false</streamnoise>
+  </audiooutput>
+  <filelists>
+    <showhidden>true</showhidden>
+  </filelists>
+  <musiclibrary>
+    <albumsscraper>metadata.local</albumsscraper>
+    <artistsscraper>metadata.local</artistsscraper>
+    <cleanonupdate>true</cleanonupdate>
+    <musicthumbs>folder.png</musicthumbs>
+    <useartistsortname>true</useartistsortname>
+    <useisodates>true</useisodates>
+  </musiclibrary>
+  <musicplayer>
+    <replaygainavoidclipping>true</replaygainavoidclipping>
+  </musicplayer>
+  <services>
+    <webserver>true</webserver>
+    <webserverauthentication>false</webserverauthentication>
+    <webserverport>24450</webserverport>
+  </services>
+</advancedsettings>

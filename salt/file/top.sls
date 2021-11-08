@@ -87,6 +87,8 @@ base:
   - mail.web
 
   'G@role:media-center':
+  - kodi
+  - plymouth
   - ssh.server
 
   'G@role:nas':
