@@ -267,7 +267,6 @@ warn about {{ guest_id }}_install:
     - {{ guest_id }}_install
 
 # TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
-# TODO(salt >= 3003): Manage console.
 # TODO(https://github.com/saltstack/salt/issues/60700): Manage autostart.
 # TODO(https://github.com/saltstack/salt/pull/60297): Manage disks.
 {{ guest_id }}:
