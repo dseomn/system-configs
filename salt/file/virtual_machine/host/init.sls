@@ -197,8 +197,6 @@ base_system:
   file.exists: []
 {% endfor %}
 
-# TODO(https://github.com/saltstack/salt/pull/60297): Don't setup any disks here
-# other than the system one.
 # TODO(virtinst > 3.2.0): Add migratable=off to --cpu, to enable more CPU
 # features.
 {{ guest_id }}_install:
@@ -268,7 +266,11 @@ warn about {{ guest_id }}_install:
 
 # TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
 # TODO(https://github.com/saltstack/salt/issues/60700): Manage autostart.
-# TODO(https://github.com/saltstack/salt/pull/60297): Manage disks.
+#
+# Disks are not managed here, because virt-install seems to provide better
+# defaults (e.g., type="block" instead of type="file" for block device sources)
+# and more options (e.g., salt doesn't seem to have a way to specify the type,
+# or to configure unmap/discard).
 {{ guest_id }}:
   virt.running:
   - cpu: {{ guest.vcpus }}
