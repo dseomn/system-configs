@@ -17,6 +17,7 @@
     'Debian': {
         'pkgs': [
             'lm-sensors',
+            'nvme-cli',
         ],
     },
 }) %}
