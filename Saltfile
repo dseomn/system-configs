@@ -44,7 +44,6 @@ salt-ssh:
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
   - salt://grub/map.jinja
-  - salt://gvisor/map.jinja
   - salt://irc/bouncer/map.jinja
   - salt://mail/dkimpy_milter/map.jinja
   - salt://mail/dovecot/map.jinja
