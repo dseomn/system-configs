@@ -205,6 +205,8 @@ nextcloud_usable:
 
 # https://docs.nextcloud.com/server/latest/admin_manual/maintenance/update.html#batch-mode-for-command-line-based-updater
 # https://docs.nextcloud.com/server/latest/admin_manual/maintenance/upgrade.html#long-running-migration-steps
+# TODO(https://github.com/nextcloud/server/issues/30080): Update the server
+# automatically instead of just checking if an update is available.
 upgrade_nextcloud:
   cron.present:
   - name: >-
@@ -214,10 +216,7 @@ upgrade_nextcloud:
       --quiet
       --all
       &&
-      {{ php.bin }}
-      /var/local/nextcloud/webroot/updater/updater.phar
-      --no-interaction
-      --quiet
+      {{ php.bin }} {{ occ }} update:check | grep -v '^Everything up to date$'
       &&
       {{ php.bin }}
       {{ occ }}
