@@ -18,5 +18,5 @@
   - makedirs: true
   - contents: |
       [Manager]
-      RuntimeWatchdogSec=10m
+      RuntimeWatchdogSec=1m
       ShutdownWatchdogSec=10m
