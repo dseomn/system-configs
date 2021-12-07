@@ -36,13 +36,3 @@ include:
   - file: /etc/apt/sources.list.d/gvisor.list
 runsc:
   pkg.installed: []
-
-# TODO(https://github.com/google/gvisor/issues/3481): Delete this.
-{{ grub.default_grub_d }}/systemd-cgroup-hybrid.cfg:
-  file.managed:
-  - onchanges_in:
-    - update-grub
-  - contents: >
-      GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX}
-      systemd.unified_cgroup_hierarchy=0
-      systemd.legacy_systemd_cgroup_controller=0"
