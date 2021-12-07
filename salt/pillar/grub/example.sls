@@ -12,24 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+grub:
 
-{% from 'grub/map.jinja' import grub %}
-
-
-# This is meant to be referenced by other states with onchanges_in.
-update-grub:
-  cmd.run: []
-
-
-{% if pillar.get('grub', {}).get('local_cfg') is not none %}
-{{ grub.default_grub_d }}/local.cfg:
-  file.managed:
-  - onchanges_in:
-    - update-grub
-  - contents_pillar: grub:local_cfg
-{% else %}
-{{ grub.default_grub_d }}/local.cfg:
-  file.absent:
-  - onchanges_in:
-    - update-grub
-{% endif %}
+  # Local /etc/default/grub style configuration.
+  local_cfg: |
+    GRUB_CMDLINE_LINUX=...

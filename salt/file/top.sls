@@ -19,6 +19,7 @@ base:
   - cron
   - cryptsetup.ephemeral_swap
   - disk_usage
+  - grub
   - lost_found
   - mail
   - network.firewall.enable
