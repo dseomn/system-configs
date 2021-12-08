@@ -139,7 +139,7 @@ spamd_running:
 {{ mail_storage.spamc_config_file }}:
   file.managed:
   - contents: |
-      --max-size={{ 1024 * 1024 }}
+      --max-size={{ 4 * 1024 * 1024 }}
       --socket=/var/local/mail/spamassassin/spamd
       # The sum of the timeouts should be less than sieve_filter_exec_timeout in
       # dovecot.
