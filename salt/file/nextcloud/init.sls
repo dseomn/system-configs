@@ -307,6 +307,9 @@ re-run state.apply to manage Nextcloud apps:
 
         Include {{ php.mod_php_conf }}
 
+        # https://github.com/nextcloud/server/blob/0447b53bda9fe95ea0cbed765aa332584605d652/lib/private/MemoryInfo.php#L33
+        php_value memory_limit "512M"
+
         # https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#apache-web-server-configuration
         DocumentRoot /var/local/nextcloud/webroot
         <Directory /var/local/nextcloud/webroot>
