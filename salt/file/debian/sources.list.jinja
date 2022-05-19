@@ -25,13 +25,9 @@
 {{ source(debian.mirror['debian'], debian.distribution, debian.components) }}
 
 {% if debian.track != 'unstable' %}
-  {#- TODO(Debian >= 11): Remove the conditional. #}
   {{ source(
       debian.mirror['debian-security'],
-      debian.distribution +
-          ('-security'
-           if 'osmajorrelease' not in grains or grains.osmajorrelease >= 11
-           else '/updates'),
+      debian.distribution + '-security',
       debian.components) }}
 {% endif %}
 
