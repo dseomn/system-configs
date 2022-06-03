@@ -20,7 +20,7 @@ include:
 chrome:
   pkgrepo.managed:
   - name: |
-      deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+      deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main
   - file: /etc/apt/sources.list.d/google-chrome.list
   - require:
     - sls: google.repo_key
