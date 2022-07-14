@@ -43,6 +43,7 @@ salt-ssh:
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
+  - salt://gdm/map.jinja
   - salt://grub/map.jinja
   - salt://irc/bouncer/map.jinja
   - salt://mail/dkimpy_milter/map.jinja
