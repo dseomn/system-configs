@@ -87,6 +87,11 @@ base:
   'G@role:mail:web':
   - mail.web
 
+  'G@role:media-center':
+  - media_center
+  - plymouth
+  - ssh.server
+
   'G@role:nas':
   - nas
   - nas.nfs
