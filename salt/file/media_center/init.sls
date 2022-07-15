@@ -73,7 +73,8 @@ media-center autologin:
         sleep-inactive-ac-type "'nothing'"
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-battery-type "'nothing'"
-      gsettings set org.gnome.shell favorite-apps "[]"
+      gsettings set org.gnome.shell favorite-apps \
+        "[{{ media_center.favorite_apps | join(', ') }}]"
   - require:
     - media-center user and group
     - media_center_pkgs

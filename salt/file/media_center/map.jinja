@@ -18,7 +18,9 @@
 {% set media_center = salt.grains.filter_by({
     'Debian': {
         'pkgs': (
+            'firefox-esr',
             'gnome-core',
+            'webext-ublock-origin-firefox',
         ),
         'user_groups': (
             'audio',
@@ -30,6 +32,9 @@
             'NetworkManager-dispatcher.service',
             'NetworkManager-wait-online.service',
             'NetworkManager.service',
+        ),
+        'favorite_apps': (
+            "'firefox-esr.desktop'",
         ),
     },
 }) %}
