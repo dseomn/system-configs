@@ -1,0 +1,55 @@
+{#
+ # Copyright 2022 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% set flatpak = salt.grains.filter_by({
+    'Debian': {
+        'pkgs': (
+            'flatpak',
+        ),
+    },
+}) %}
+
+
+{% macro _remote(name, url) %}
+flatpak remote {{ name }}:
+  cmd.run:
+  - name: flatpak remote-add '{{ name }}' '{{ url }}'
+  - unless:
+    - |
+        flatpak remotes --columns=name |
+          grep -q --fixed-strings --line-regexp '{{ name }}'
+  - require:
+    - flatpak_pkgs
+{% endmacro %}
+
+
+{% macro _app(remote, app) %}
+flatpak app {{ app }}:
+  cmd.run:
+  - name: flatpak install --noninteractive '{{ remote }}' '{{ app }}'
+  - unless:
+    - flatpak info '{{ app }}' > /dev/null
+  - require:
+    - flatpak_pkgs
+    - flatpak remote {{ remote }}
+{% endmacro %}
+
+
+{% do flatpak.update({
+    'remote': _remote,
+    'app': _app,
+}) %}
