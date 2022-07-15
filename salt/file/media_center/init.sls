@@ -14,6 +14,7 @@
 
 
 {% from 'common/map.jinja' import common %}
+{% from 'flatpak/map.jinja' import flatpak %}
 {% from 'gdm/map.jinja' import gdm %}
 {% from 'media_center/map.jinja' import media_center %}
 
@@ -22,11 +23,23 @@ include:
 - common
 - gdm
 - gdm.custom_conf
+{% if media_center.flatpak_apps %}
+- flatpak
+{% endif %}
 
+
+{% for app in media_center.flatpak_apps %}
+{{ flatpak.app('flathub', app) }}
+{% endfor %}
 
 media_center_pkgs:
   pkg.installed:
   - pkgs: {{ media_center.pkgs | tojson }}
+  test.nop:
+  - require:
+    {% for app in media_center.flatpak_apps %}
+    - flatpak app {{ app }}
+    {% endfor %}
 
 {% for service in media_center.masked_services %}
 {{ service }} is masked:

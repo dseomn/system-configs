@@ -15,12 +15,19 @@
  #}
 
 
+{#
+ # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=200715): Use system
+ # package for stepmania.
+ #}
 {% set media_center = salt.grains.filter_by({
     'Debian': {
         'pkgs': (
             'firefox-esr',
             'gnome-core',
             'webext-ublock-origin-firefox',
+        ),
+        'flatpak_apps': (
+            'com.stepmania.StepMania',
         ),
         'user_groups': (
             'audio',
@@ -35,6 +42,7 @@
         ),
         'favorite_apps': (
             "'firefox-esr.desktop'",
+            "'com.stepmania.StepMania.desktop'",
         ),
     },
 }) %}
