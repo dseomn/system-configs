@@ -73,6 +73,18 @@ media-center autologin:
     - file: {{ gdm.config_dir }}/{{ gdm.custom_conf }}
 
 
+{% for name, target
+    in salt['pillar.get']('media_center:home_symlinks', {}).items() %}
+/var/local/media-center/{{ name }}:
+  file.symlink:
+  - target: {{ target }}
+  - force: true
+  - makedirs: true
+  - user: media-center
+  - group: media-center
+{% endfor %}
+
+
 /var/local/media-center/.local/bin/autostart:
   file.managed:
   - user: media-center
