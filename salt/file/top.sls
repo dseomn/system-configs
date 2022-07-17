@@ -22,6 +22,7 @@ base:
   - grub
   - lost_found
   - mail
+  - mount
   - network.firewall.enable
   - trim
   - uptime
