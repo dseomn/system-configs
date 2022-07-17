@@ -85,6 +85,15 @@ media-center autologin:
 {% endfor %}
 
 
+/var/local/media-center/.config/pulse/daemon.conf:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      remixing-use-all-sink-channels = no
+
+
 /var/local/media-center/.local/bin/autostart:
   file.managed:
   - user: media-center
