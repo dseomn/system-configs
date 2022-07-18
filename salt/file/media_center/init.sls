@@ -73,6 +73,18 @@ media-center autologin:
     - file: {{ gdm.config_dir }}/{{ gdm.custom_conf }}
 
 
+{% set background_image =
+    '/var/local/media-center/.local/share/backgrounds/default.' +
+    pillar.media_center.background.extension %}
+{{ background_image }}:
+  file.managed:
+  - source: {{ pillar.media_center.background.url }}
+  - source_hash: {{ pillar.media_center.background.hash }}
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+
+
 {% for name, target
     in salt['pillar.get']('media_center:home_symlinks', {}).items() %}
 /var/local/media-center/{{ name }}:
@@ -102,6 +114,8 @@ media-center autologin:
   - makedirs: true
   - contents: |
       #!/bin/bash -e
+      gsettings set org.gnome.desktop.background picture-uri \
+        "'file://{{ background_image }}'"
       gsettings set org.gnome.desktop.screensaver lock-enabled false
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-ac-type "'nothing'"
