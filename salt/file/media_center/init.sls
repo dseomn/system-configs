@@ -134,6 +134,19 @@ media-center autologin:
       Terminal=true
 
 
+/var/local/media-center/.local/share/applications/fix-audio.desktop:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      [Desktop Entry]
+      Type=Application
+      Name=Fix Audio
+      Icon=audio-speakers-symbolic
+      Exec=pulseaudio --kill
+
+
 /var/local/media-center/.local/bin/autostart:
   file.managed:
   - user: media-center
