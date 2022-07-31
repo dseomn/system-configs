@@ -162,6 +162,8 @@ media-center autologin:
         sleep-inactive-ac-type "'nothing'"
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-battery-type "'nothing'"
+      gsettings set org.gnome.shell enabled-extensions \
+        "['caffeine@patapon.info']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
   - require:
