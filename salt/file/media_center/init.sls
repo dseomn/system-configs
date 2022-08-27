@@ -147,6 +147,23 @@ media-center autologin:
       Exec=pulseaudio --kill
 
 
+# https://github.com/stepmania/stepmania/issues/1487 prevents the keyboard from
+# working in fullscreen, and gnome-shell also doesn't seem to recognize
+# stepmania as a window that can be closed from the shell. This desktop file
+# makes it easier to close stepmania if there are any issues with the dance pad
+# or if it's unplugged.
+/var/local/media-center/.local/share/applications/exit-stepmania.desktop:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      [Desktop Entry]
+      Type=Application
+      Name=Exit StepMania
+      Exec=killall stepmania
+
+
 /var/local/media-center/.local/bin/autostart:
   file.managed:
   - user: media-center
