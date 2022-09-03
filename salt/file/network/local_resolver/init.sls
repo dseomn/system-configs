@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+# TODO(Debian > 11): Figure out upgrade path from Debian 11 to 12:
+# https://salsa.debian.org/systemd-team/systemd/-/blob/274ec5c99af05ba22f65c2ad101868b8f67649b1/debian/NEWS#L1-8
 {% set system = salt.grains.filter_by({
     'Debian': {
         'service': 'systemd-resolved',
