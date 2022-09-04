@@ -103,7 +103,7 @@ ra-param={{ interface_name }},0,0
 
 dhcp-range={{ set_no_default_route }}{{ ipv4_prefix }}.129,{{ ipv4_prefix }}.254{{ lease_time }}
 dhcp-range={{ set_no_default_route }}{{ ipv6_ula_prefix }}::100,{{ ipv6_ula_prefix }}::1ff,slaac{{ lease_time }}
-dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac{{ lease_time }}
+dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},static,slaac{{ lease_time }}
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
@@ -112,11 +112,16 @@ dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},slaac{{
     ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
+{% set other_host_ipv6_dhcp =
+    '::{:x}'.format(other_host.interface_id)
+    if other_host.get('services', ())
+    else other_host_ipv6_ula
+%}
 dhcp-host={{ '{},{}{},[{}],{}{}'.format(
     other_host.mac,
     set_no_default_route,
     other_host_ipv4,
-    other_host_ipv6_ula,
+    other_host_ipv6_dhcp,
     other_host_name,
     lease_time,
 ) }}

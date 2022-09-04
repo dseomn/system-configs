@@ -113,6 +113,10 @@ interfaces:
           # Required. MAC address.
           mac: 00:00:5e:00:53:00
           # Required. See interface_id parameter in the ip section above.
+          # Normally, this is only used to provide addresses in private (IPv4
+          # private or IPv6 ULA) prefixes. However, if services are specified
+          # below, this is also used to provide addresses in public prefixes, so
+          # that the firewall can allow connections to those services.
           interface_id: 2
           # Additional short host names that should point at this host. The same
           # name can be listed for multiple hosts.
