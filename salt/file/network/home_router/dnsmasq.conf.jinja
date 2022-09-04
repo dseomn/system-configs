@@ -73,6 +73,25 @@ enable-ra
 
 dhcp-option=tag:noDefaultRoute,option:router
 
+{%- for interface in host.interfaces.values() if 'ip' in interface %}
+{%- for interface_ip_config
+    in interface.ip
+    if 'interface_id' in interface_ip_config %}
+host-record={{ '{}.{},{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
+    grains.host,
+    subdomain,
+    grains.host,
+    site.id,
+    segments[interface.segment].id,
+    interface_ip_config.interface_id,
+    global.ula,
+    site.id,
+    segments[interface.segment].id,
+    interface_ip_config.interface_id,
+) }}
+{%- endfor %}
+{%- endfor %}
+
 {% for interface_name, interface in host.interfaces.items()
     if 'home_router' in interface %}
 {% set segment = segments[interface.segment] %}
@@ -84,9 +103,6 @@ dhcp-option=tag:noDefaultRoute,option:router
 ) %}
 
 interface={{ interface_name }}
-
-interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
-interface-name={{ grains.host }},{{ interface_name }}
 
 {%- if interface.home_router.get('default_route', True) %}
 {%- set set_no_default_route = '' %}
@@ -161,6 +177,4 @@ host-record={{ '{}.{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     if 'wireguard' in interface %}
 interface={{ interface_name }}
 no-dhcp-interface={{ interface_name }}
-interface-name={{ grains.host }}.{{ subdomain }},{{ interface_name }}
-interface-name={{ grains.host }},{{ interface_name }}
 {% endfor %}
