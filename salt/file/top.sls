@@ -95,6 +95,7 @@ base:
 
   'G@role:nas':
   - nas
+  - nas.http
   - nas.nfs
   - nas.rsync
   - nas.smb
