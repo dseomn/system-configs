@@ -24,3 +24,17 @@
         'config_dir': '/etc/nginx',
     },
 }) %}
+
+
+{% macro _https_server_config(fullchain, privkey) %}
+listen 443 ssl http2;
+ssl_certificate {{ fullchain }};
+ssl_certificate_key {{ privkey }};
+add_header X-Content-Type-Options nosniff always;
+add_header Strict-Transport-Security "max-age={{ 365 * 24 * 60 * 60 }}" always;
+{%- endmacro %}
+
+
+{% do nginx.update({
+    'https_server_config': _https_server_config,
+}) %}
