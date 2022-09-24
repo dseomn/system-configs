@@ -22,9 +22,11 @@
 {% set media_center = salt.grains.filter_by({
     'Debian': {
         'pkgs': (
+            'extremetuxracer',
             'firefox-esr',
             'gnome-core',
             'gnome-shell-extension-caffeine',
+            'supertux',
             'supertuxkart',
             'webext-ublock-origin-firefox',
         ),
