@@ -46,7 +46,7 @@ todo_pkgs:
   file.managed:
   - group: todo
   - mode: 640
-  - contents: {{ pillar.todo | tojson(indent=2) | tojson }}
+  - contents: {{ pillar.todo | tojson(indent=2, sort_keys=True) | tojson }}
   - require:
     - todo user and group
 
