@@ -301,22 +301,6 @@ class TodoTest(parameterized.TestCase):
             """),
         ),
         dict(
-            testcase_name='one_after_start',
-            start='19991231T235959',
-            last_sent=None,
-            expected_subject='apple',
-            expected_extra_info=textwrap.dedent("""\
-                Occurrences included in this email:
-                1999-12-31 23:59:59-05:00
-
-                Next occurrences:
-                2000-01-01 23:59:59-05:00
-                2000-01-02 23:59:59-05:00
-                2000-01-03 23:59:59-05:00
-                ...
-            """),
-        ),
-        dict(
             testcase_name='one_after_last_sent',
             start='19990101T000000',
             last_sent='19991231T120000Z',
