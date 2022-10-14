@@ -31,6 +31,13 @@ key, for use with out-of-band certificate provisioning. It serves the same
 purpose as self-signed certificates, but uses a separate CA and EE certificate
 to avoid some issues with self-signed certificates.
 
+[`salt/file/todo/todo.py`](salt/file/todo/todo.py) sends scheduled TODO emails.
+I used to use recurring calendar tasks for this purpose, but I had trouble
+finding CalDAV clients that supported recurring tasks well. Thunderbird was the
+best I found, but between https://bugzilla.mozilla.org/show_bug.cgi?id=1686466
+and https://bugzilla.mozilla.org/show_bug.cgi?id=1786656 it wasn't reliable
+enough.
+
 [`salt/file/xmpp/ejabberd_authentication.py`](salt/file/xmpp/ejabberd_authentication.py)
 is an [ejabberd external authentication
 script](https://docs.ejabberd.im/admin/configuration/authentication/#external-script)
