@@ -19,6 +19,9 @@ import argparse
 import collections
 from collections.abc import Mapping, Sequence
 import dataclasses
+import datetime
+import email.message
+import itertools
 import json
 import os
 import pathlib
@@ -26,6 +29,11 @@ import subprocess
 import sys
 import tempfile
 from typing import Optional
+
+import dateutil.parser
+import dateutil.rrule
+import dateutil.tz
+import dateutil.utils
 
 
 @dataclasses.dataclass(frozen=True)
@@ -134,6 +142,39 @@ def _save_state(
     os.replace(state_file_new.name, state_filename)
 
 
+def _send_email(
+    *,
+    todo_id: str,
+    config: _TodoConfig,
+    comment: Optional[str],
+    extra: Sequence[Sequence[str]],
+    subprocess_run: ...,
+) -> None:
+    message = email.message.EmailMessage()
+    message['To'] = config.email_to
+    message['Subject'] = config.summary + ('' if comment is None else
+                                           f' ({comment})')
+    message['Todo-Id'] = todo_id
+    message['Todo-Summary'] = config.summary
+    message['Todo-Timezone'] = config.timezone
+    message['Todo-Start'] = config.start
+    if config.recurrence_rule is not None:
+        message['Todo-Recurrence-Rule'] = config.recurrence_rule
+    if config.description is not None:
+        message.add_attachment(config.description, disposition='inline')
+    if extra:
+        message.add_attachment(
+            '\n\n'.join('\n'.join(section) for section in extra),
+            disposition='inline',
+            filename='extra-information',
+        )
+    subprocess_run(
+        ('/usr/sbin/sendmail', '-i', '-t'),
+        check=True,
+        input=bytes(message),
+    )
+
+
 def _handle_todo(
     *,
     todo_id: str,
@@ -142,7 +183,64 @@ def _handle_todo(
     max_occurrences: int,
     subprocess_run: ...,
 ) -> None:
-    pass  # TODO: implement this
+    start = dateutil.utils.default_tzinfo(
+        dateutil.parser.isoparse(config.start),
+        dateutil.tz.gettz(config.timezone))
+    last_sent = (None if state.last_sent is None else dateutil.parser.isoparse(
+        state.last_sent))
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    extra = []  # List of sections, which are lists of lines.
+    if now < start:
+        return  # Not ready to send yet.
+    if config.recurrence_rule is None:
+        if last_sent is not None and last_sent >= start:
+            return  # Already sent.
+        comment = None
+    else:
+        recurrence = dateutil.rrule.rrulestr(config.recurrence_rule,
+                                             dtstart=start)
+        # This does not use recurrence.between() because of
+        # https://github.com/dateutil/dateutil/issues/1190
+        included_occurrences = tuple(
+            itertools.takewhile(
+                lambda occurrence: occurrence <= now,
+                recurrence.xafter(
+                    (start if last_sent is None else last_sent),
+                    count=max_occurrences + 1,
+                    inc=(last_sent is None),
+                )))
+        if not included_occurrences:
+            return
+        elif len(included_occurrences) == 1:
+            comment = None
+        elif len(included_occurrences) > max_occurrences:
+            comment = f'x{max_occurrences}+'
+        else:
+            comment = f'x{len(included_occurrences)}'
+        extra.append([
+            'Occurrences included in this email:',
+            *(str(occurrence) if i < max_occurrences else '...'
+              for i, occurrence in enumerate(included_occurrences)),
+        ])
+        next_occurrences = tuple(
+            recurrence.xafter(
+                now,
+                count=max_occurrences + 1,
+                inc=False,
+            ))
+        extra.append([
+            'Next occurrences:',
+            *(str(occurrence) if i < max_occurrences else '...'
+              for i, occurrence in enumerate(next_occurrences)),
+        ])
+    _send_email(
+        todo_id=todo_id,
+        config=config,
+        comment=comment,
+        extra=extra,
+        subprocess_run=subprocess_run,
+    )
+    state.last_sent = now.strftime('%Y%m%dT%H%M%SZ')
 
 
 def main(

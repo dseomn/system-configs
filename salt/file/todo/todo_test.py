@@ -12,14 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Mapping, Sequence
+import dataclasses
+import email.parser
+import email.policy
 import json
 import subprocess
+import textwrap
+from typing import Optional
 from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
+import freezegun
 
 import todo
+
+
+@dataclasses.dataclass(frozen=True)
+class _MessagePart:
+    filename: Optional[str]
+    content: str
+
+
+@dataclasses.dataclass(frozen=True)
+class _Message:
+    headers: Mapping[str, Sequence[str]]
+    parts: Sequence[_MessagePart]
 
 
 class TodoTest(parameterized.TestCase):
@@ -28,6 +47,8 @@ class TodoTest(parameterized.TestCase):
         super().setUp()
         self._subprocess_run = mock.create_autospec(subprocess.run,
                                                     spec_set=True)
+        self._email_parser = email.parser.BytesParser(
+            policy=email.policy.default)
 
     def _main(
         self,
@@ -52,6 +73,46 @@ class TodoTest(parameterized.TestCase):
         with open(f'{tempdir.full_path}/state', mode='rb') as state_file:
             return json.load(state_file)
 
+    def _assert_messages_sent(self, *expected_messages: _Message):
+        self.assertLen(self._subprocess_run.mock_calls, len(expected_messages))
+        for run_call, expected_message in zip(self._subprocess_run.mock_calls,
+                                              expected_messages):
+            self.assertEqual(
+                mock.call(('/usr/sbin/sendmail', '-i', '-t'),
+                          check=True,
+                          input=mock.ANY),
+                run_call,
+            )
+            actual_message = self._email_parser.parsebytes(
+                run_call.kwargs['input'])
+            self.assertEqual(
+                {
+                    header: tuple(values)
+                    for header, values in expected_message.headers.items()
+                },
+                {
+                    header: tuple(actual_message.get_all(header, ()))
+                    for header in expected_message.headers
+                },
+            )
+            if expected_message.parts:
+                self.assertEqual('multipart/mixed',
+                                 actual_message.get_content_type())
+                actual_parts = tuple(actual_message.iter_parts())
+                self.assertLen(actual_parts, len(expected_message.parts))
+                for actual_part, expected_part in zip(actual_parts,
+                                                      expected_message.parts):
+                    self.assertEqual('text/plain',
+                                     actual_part.get_content_type())
+                    self.assertEqual('inline',
+                                     actual_part.get_content_disposition())
+                    self.assertEqual(expected_part.filename,
+                                     actual_part.get_filename())
+                    self.assertEqual(expected_part.content,
+                                     actual_part.get_content())
+            else:
+                self.assertEmpty(actual_message.get_content())
+
     def test_config_missing(self):
         with self.assertRaises(FileNotFoundError):
             self._main(config=None)
@@ -73,9 +134,282 @@ class TodoTest(parameterized.TestCase):
                 kumquat='',
             )))))
 
+    @parameterized.named_parameters(
+        dict(
+            testcase_name='uses_default',
+            group_extra=dict(defaults=dict(email_to='alice@example.com')),
+            todo_extra={},
+        ),
+        dict(
+            testcase_name='overrides_default',
+            group_extra=dict(defaults=dict(email_to='bob@example.com')),
+            todo_extra=dict(email_to='alice@example.com'),
+        ),
+    )
+    @freezegun.freeze_time('2000-01-01')
+    def test_config_defaults(self, group_extra: ..., todo_extra: ...):
+        self._main(config=dict(some_group=dict(
+            **group_extra,
+            todos=dict(some_todo=dict(
+                **todo_extra,
+                summary='apple',
+                start='20000101T000000Z',
+            )),
+        )))
+
+        self._assert_messages_sent(
+            _Message(headers={'To': ('alice@example.com',)}, parts=()))
+
     def test_state_unexpected_key(self):
         with self.assertRaisesRegex(TypeError, 'kumquat'):
             self._main(config={}, state=dict(some_todo=dict(kumquat='')))
+
+    @parameterized.named_parameters(
+        dict(
+            testcase_name='empty_config_no_state',
+            initial_state=None,
+            config={},
+        ),
+        dict(
+            testcase_name='irrelevant_state',
+            initial_state={'unknown-todo': dict(last_sent='20010203T010203Z')},
+            config={},
+        ),
+        dict(
+            testcase_name='start_in_future',
+            initial_state={'some_group.some_todo': dict(last_sent=None)},
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='20010101T000000Z',
+            )))),
+        ),
+        dict(
+            testcase_name='start_in_future_but_previously_sent',
+            initial_state={
+                'some_group.some_todo': dict(last_sent='19990101T000000Z'),
+            },
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='20010101T000000Z',
+            )))),
+        ),
+        dict(
+            testcase_name='one_time_todo_already_sent',
+            initial_state={
+                'some_group.some_todo': dict(last_sent='19990101T000000Z'),
+            },
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='19990101T000000Z',
+            )))),
+        ),
+        dict(
+            testcase_name='between_occurrences',
+            initial_state={
+                'some_group.some_todo': dict(last_sent='19991231T120000Z'),
+            },
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='apple',
+                start='19990101T120000Z',
+                recurrence_rule='FREQ=DAILY',
+            )))),
+        ))
+    @freezegun.freeze_time('2000-01-01')
+    def test_nothing_to_send(
+        self,
+        initial_state: ...,
+        config: ...,
+    ):
+        new_state = self._main(config=config, state=initial_state)
+
+        self._subprocess_run.assert_not_called()
+        self.assertEqual({} if initial_state is None else initial_state,
+                         new_state)
+
+    @parameterized.product(
+        (
+            dict(description=None, expected_parts=()),
+            dict(
+                description='orange',
+                expected_parts=(_MessagePart(filename=None,
+                                             content='orange\n'),),
+            ),
+        ),
+        (
+            dict(timezone='UTC', start='20000101T000000Z'),
+            dict(timezone='America/New_York', start='19991231T000000'),
+        ),
+        last_sent=(None, '19990101T000000Z'),
+    )
+    @freezegun.freeze_time('2000-01-01')
+    def test_sends_one_time_todo(
+        self,
+        last_sent: Optional[str],
+        timezone: str,
+        start: str,
+        description: Optional[str],
+        expected_parts: Sequence[_MessagePart],
+    ):
+        new_state = self._main(
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='apple',
+                description=description,
+                timezone=timezone,
+                start=start,
+            )))),
+            state={'some_group.some_todo': dict(last_sent=last_sent)},
+        )
+
+        self._assert_messages_sent(
+            _Message(
+                headers={
+                    'To': ('alice@example.com',),
+                    'Subject': ('apple',),
+                    'Todo-Id': ('some_group.some_todo',),
+                    'Todo-Summary': ('apple',),
+                    'Todo-Timezone': (timezone,),
+                    'Todo-Start': (start,),
+                    'Todo-Recurrence-Rule': (),
+                },
+                parts=expected_parts,
+            ))
+        self.assertEqual(
+            {'some_group.some_todo': dict(last_sent='20000101T000000Z')},
+            new_state,
+        )
+
+    @parameterized.named_parameters(
+        dict(
+            testcase_name='one_at_start',
+            start='20000101T000000',
+            last_sent=None,
+            expected_subject='apple',
+            expected_extra_info=textwrap.dedent("""\
+                Occurrences included in this email:
+                2000-01-01 00:00:00-05:00
+
+                Next occurrences:
+                2000-01-02 00:00:00-05:00
+                2000-01-03 00:00:00-05:00
+                2000-01-04 00:00:00-05:00
+                ...
+            """),
+        ),
+        dict(
+            testcase_name='one_after_start',
+            start='19991231T235959',
+            last_sent=None,
+            expected_subject='apple',
+            expected_extra_info=textwrap.dedent("""\
+                Occurrences included in this email:
+                1999-12-31 23:59:59-05:00
+
+                Next occurrences:
+                2000-01-01 23:59:59-05:00
+                2000-01-02 23:59:59-05:00
+                2000-01-03 23:59:59-05:00
+                ...
+            """),
+        ),
+        dict(
+            testcase_name='one_after_last_sent',
+            start='19990101T000000',
+            last_sent='19991231T120000Z',
+            expected_subject='apple',
+            expected_extra_info=textwrap.dedent("""\
+                Occurrences included in this email:
+                2000-01-01 00:00:00-05:00
+
+                Next occurrences:
+                2000-01-02 00:00:00-05:00
+                2000-01-03 00:00:00-05:00
+                2000-01-04 00:00:00-05:00
+                ...
+            """),
+        ),
+        dict(
+            testcase_name='more_than_max',
+            start='19990101T000000',
+            last_sent=None,
+            expected_subject='apple (x3+)',
+            expected_extra_info=textwrap.dedent("""\
+                Occurrences included in this email:
+                1999-01-01 00:00:00-05:00
+                1999-01-02 00:00:00-05:00
+                1999-01-03 00:00:00-05:00
+                ...
+
+                Next occurrences:
+                2000-01-02 00:00:00-05:00
+                2000-01-03 00:00:00-05:00
+                2000-01-04 00:00:00-05:00
+                ...
+            """),
+        ),
+        dict(
+            testcase_name='max',
+            start='19991230T000000',
+            last_sent=None,
+            expected_subject='apple (x3)',
+            expected_extra_info=textwrap.dedent("""\
+                Occurrences included in this email:
+                1999-12-30 00:00:00-05:00
+                1999-12-31 00:00:00-05:00
+                2000-01-01 00:00:00-05:00
+
+                Next occurrences:
+                2000-01-02 00:00:00-05:00
+                2000-01-03 00:00:00-05:00
+                2000-01-04 00:00:00-05:00
+                ...
+            """),
+        ),
+    )
+    @freezegun.freeze_time('2000-01-01 12:00:00')
+    def test_sends_recurring_todo(
+        self,
+        start: str,
+        last_sent: Optional[str],
+        expected_subject: str,
+        expected_extra_info: str,
+    ):
+        new_state = self._main(
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='apple',
+                timezone='America/New_York',
+                start=start,
+                recurrence_rule='FREQ=DAILY',
+            )))),
+            state={'some_group.some_todo': dict(last_sent=last_sent)},
+            max_occurrences=3,
+        )
+
+        self._assert_messages_sent(
+            _Message(
+                headers={
+                    'To': ('alice@example.com',),
+                    'Subject': (expected_subject,),
+                    'Todo-Id': ('some_group.some_todo',),
+                    'Todo-Summary': ('apple',),
+                    'Todo-Timezone': ('America/New_York',),
+                    'Todo-Start': (start,),
+                    'Todo-Recurrence-Rule': ('FREQ=DAILY',),
+                },
+                parts=(_MessagePart(
+                    filename='extra-information',
+                    content=expected_extra_info,
+                ),),
+            ))
+        self.assertEqual(
+            {'some_group.some_todo': dict(last_sent='20000101T120000Z')},
+            new_state,
+        )
 
 
 if __name__ == '__main__':
