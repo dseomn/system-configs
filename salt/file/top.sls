@@ -114,6 +114,9 @@ base:
   - ddns
   - port_mux
 
+  'G@role:todo':
+  - todo
+
   'G@role:vcs':
   - vcs
 

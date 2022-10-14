@@ -66,6 +66,7 @@ salt-ssh:
   - salt://php/map.jinja
   - salt://port_mux/map.jinja
   - salt://stunnel/map.jinja
+  - salt://todo/map.jinja
   - salt://uptime/map.jinja
   - salt://vcs/map.jinja
   - salt://virtual_machine/host/map.jinja
