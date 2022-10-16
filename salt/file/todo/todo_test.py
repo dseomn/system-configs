@@ -142,6 +142,38 @@ class TodoTest(parameterized.TestCase):
             error_regex='kumquat',
         ),
         dict(
+            testcase_name='config_invalid_timezone',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                timezone='invalid timezone',
+                start='20010101T000000Z',
+            )))),
+            error_class=ValueError,
+            error_regex='Invalid timezone',
+        ),
+        dict(
+            testcase_name='config_invalid_start',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='invalid datetime',
+            )))),
+            error_class=ValueError,
+            error_regex='Invalid start',
+        ),
+        dict(
+            testcase_name='config_invalid_recurrence_rule',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='20010101T000000Z',
+                recurrence_rule='invalid recurrence rule'
+            )))),
+            error_class=ValueError,
+            error_regex='Invalid recurrence_rule',
+        ),
+        dict(
             testcase_name='state_unexpected_key',
             config={},
             state=dict(some_todo=dict(kumquat='')),

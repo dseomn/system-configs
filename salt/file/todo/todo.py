@@ -36,7 +36,7 @@ import dateutil.tz
 import dateutil.utils
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class _TodoConfig:
     """Config for a single TODO.
 
@@ -45,18 +45,46 @@ class _TodoConfig:
         summary: See
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.12
         start: See https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
+        start_parsed: See above.
         description: See
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.5
         timezone: Time zone for any datetimes that don't specify one.
+        timezone_parsed: See above.
         recurrence_rule: See
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5.3
+        recurrence_rule_parsed: See above.
     """
     email_to: str
     summary: str
     start: str
+    start_parsed: datetime.datetime = dataclasses.field(init=False)
     description: Optional[str] = None
     timezone: str = 'UTC'
+    timezone_parsed: datetime.tzinfo = dataclasses.field(init=False)
     recurrence_rule: Optional[str] = None
+    recurrence_rule_parsed: Optional[dateutil.rrule.rrule] = dataclasses.field(
+        init=False)
+
+    def __post_init__(self):
+        timezone_parsed = dateutil.tz.gettz(self.timezone)
+        if timezone_parsed is None:
+            # See https://github.com/dateutil/dateutil/issues/1237 for why this
+            # is an `is None` check instead of try/except.
+            raise ValueError(f'Invalid timezone {self.timezone!r}')
+        self.timezone_parsed = timezone_parsed
+        try:
+            self.start_parsed = dateutil.utils.default_tzinfo(
+                dateutil.parser.isoparse(self.start), self.timezone_parsed)
+        except ValueError as e:
+            raise ValueError(f'Invalid start {self.start!r}') from e
+        try:
+            self.recurrence_rule_parsed = (  #
+                None if self.recurrence_rule is None else
+                dateutil.rrule.rrulestr(self.recurrence_rule,
+                                        dtstart=self.start_parsed))
+        except ValueError as e:
+            raise ValueError(
+                f'Invalid recurrence_rule {self.recurrence_rule!r}') from e
 
 
 @dataclasses.dataclass
@@ -183,9 +211,6 @@ def _handle_todo(
     max_occurrences: int,
     subprocess_run: ...,
 ) -> None:
-    start = dateutil.utils.default_tzinfo(
-        dateutil.parser.isoparse(config.start),
-        dateutil.tz.gettz(config.timezone))
     last_sent = (None if state.last_sent is None else dateutil.parser.isoparse(
         state.last_sent))
     now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -194,22 +219,20 @@ def _handle_todo(
         raise RuntimeError(
             f'TODO {todo_id!r} was last sent {last_sent} which is in the '
             f'future (after {now}).')
-    if now < start:
+    if now < config.start_parsed:
         return  # Not ready to send yet.
-    if config.recurrence_rule is None:
-        if last_sent is not None and last_sent >= start:
+    if config.recurrence_rule_parsed is None:
+        if last_sent is not None and last_sent >= config.start_parsed:
             return  # Already sent.
         comment = None
     else:
-        recurrence = dateutil.rrule.rrulestr(config.recurrence_rule,
-                                             dtstart=start)
-        # This does not use recurrence.between() because of
+        # This does not use config.recurrence_rule_parsed.between() because of
         # https://github.com/dateutil/dateutil/issues/1190
         included_occurrences = tuple(
             itertools.takewhile(
                 lambda occurrence: occurrence <= now,
-                recurrence.xafter(
-                    (start if last_sent is None else last_sent),
+                config.recurrence_rule_parsed.xafter(
+                    (config.start_parsed if last_sent is None else last_sent),
                     count=max_occurrences + 1,
                     inc=(last_sent is None),
                 )))
@@ -227,7 +250,7 @@ def _handle_todo(
               for i, occurrence in enumerate(included_occurrences)),
         ])
         next_occurrences = tuple(
-            recurrence.xafter(
+            config.recurrence_rule_parsed.xafter(
                 now,
                 count=max_occurrences + 1,
                 inc=False,
