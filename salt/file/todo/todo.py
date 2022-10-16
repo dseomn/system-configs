@@ -190,6 +190,10 @@ def _handle_todo(
         state.last_sent))
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     extra = []  # List of sections, which are lists of lines.
+    if last_sent is not None and last_sent > now:
+        raise RuntimeError(
+            f'TODO {todo_id!r} was last sent {last_sent} which is in the '
+            f'future (after {now}).')
     if now < start:
         return  # Not ready to send yet.
     if config.recurrence_rule is None:

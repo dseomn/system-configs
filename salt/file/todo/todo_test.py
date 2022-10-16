@@ -148,6 +148,17 @@ class TodoTest(parameterized.TestCase):
             error_class=TypeError,
             error_regex='kumquat',
         ),
+        dict(
+            testcase_name='time_has_gone_backwards',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_to='alice@example.com',
+                summary='foo',
+                start='20000101T000000Z',
+            )))),
+            state={'some_group.some_todo': dict(last_sent='20010101T000000Z')},
+            error_class=RuntimeError,
+            error_regex='in the future',
+        ),
     )
     @freezegun.freeze_time('2000-01-01')
     def test_error(
