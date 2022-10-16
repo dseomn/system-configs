@@ -19,7 +19,7 @@ import email.policy
 import json
 import subprocess
 import textwrap
-from typing import Optional
+from typing import Optional, Type
 from unittest import mock
 
 from absl.testing import absltest
@@ -113,26 +113,53 @@ class TodoTest(parameterized.TestCase):
             else:
                 self.assertEmpty(actual_message.get_content())
 
-    def test_config_missing(self):
-        with self.assertRaises(FileNotFoundError):
-            self._main(config=None)
-
-    def test_config_unexpected_group_key(self):
-        with self.assertRaisesRegex(ValueError,
-                                    'Unexpected group config keys:.*kumquat'):
-            self._main(config=dict(some_group=dict(todos={}, kumquat={})))
-
-    def test_config_missing_required_fields(self):
-        with self.assertRaisesRegex(TypeError, 'summary'):
-            self._main(config=dict(some_group=dict(todos=dict(some_todo={}))))
-
-    def test_config_unexpected_key(self):
-        with self.assertRaisesRegex(TypeError, 'kumquat'):
-            self._main(config=dict(some_group=dict(todos=dict(some_todo=dict(
+    @parameterized.named_parameters(
+        dict(
+            testcase_name='config_missing',
+            config=None,
+            error_class=FileNotFoundError,
+        ),
+        dict(
+            testcase_name='config_unexpected_group_key',
+            config=dict(some_group=dict(todos={}, kumquat={})),
+            error_class=ValueError,
+            error_regex='Unexpected group config keys:.*kumquat',
+        ),
+        dict(
+            testcase_name='config_missing_required_fields',
+            config=dict(some_group=dict(todos=dict(some_todo={}))),
+            error_class=TypeError,
+            error_regex='summary',
+        ),
+        dict(
+            testcase_name='config_unexpected_key',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
                 email_to='bar@example.com',
                 summary='foo',
                 kumquat='',
-            )))))
+            )))),
+            error_class=TypeError,
+            error_regex='kumquat',
+        ),
+        dict(
+            testcase_name='state_unexpected_key',
+            config={},
+            state=dict(some_todo=dict(kumquat='')),
+            error_class=TypeError,
+            error_regex='kumquat',
+        ),
+    )
+    @freezegun.freeze_time('2000-01-01')
+    def test_error(
+        self,
+        *,
+        config: ...,
+        state: ... = None,
+        error_class: Type[Exception],
+        error_regex: str = '',
+    ):
+        with self.assertRaisesRegex(error_class, error_regex):
+            self._main(config=config, state=state)
 
     @parameterized.named_parameters(
         dict(
@@ -159,10 +186,6 @@ class TodoTest(parameterized.TestCase):
 
         self._assert_messages_sent(
             _Message(headers={'To': ('alice@example.com',)}, parts=()))
-
-    def test_state_unexpected_key(self):
-        with self.assertRaisesRegex(TypeError, 'kumquat'):
-            self._main(config={}, state=dict(some_todo=dict(kumquat='')))
 
     @parameterized.named_parameters(
         dict(
