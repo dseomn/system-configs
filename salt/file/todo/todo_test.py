@@ -168,7 +168,7 @@ class TodoTest(parameterized.TestCase):
                 email_to='alice@example.com',
                 summary='foo',
                 start='20010101T000000Z',
-                recurrence_rule='invalid recurrence rule'
+                recurrence_rule='invalid recurrence rule',
             )))),
             error_class=ValueError,
             error_regex='Invalid recurrence_rule',
