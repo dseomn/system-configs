@@ -93,8 +93,29 @@ class _TodoState:
 
     Attributes:
         last_sent: When an email was last successfully sent for this TODO.
+        last_sent_parsed: See above.
     """
+    now: dataclasses.InitVar[datetime.datetime]
     last_sent: Optional[str] = None
+    last_sent_parsed: Optional[datetime.datetime] = dataclasses.field(
+        init=False)
+
+    def __post_init__(self, now: datetime.datetime):
+        try:
+            self.last_sent_parsed = (None if self.last_sent is None else
+                                     dateutil.parser.isoparse(self.last_sent))
+        except ValueError as e:
+            raise ValueError(f'Invalid last_sent {self.last_sent!r}') from e
+        if self.last_sent_parsed is not None and self.last_sent_parsed > now:
+            raise RuntimeError(
+                f'last_sent {self.last_sent_parsed} is in the future (after '
+                f'{now}).')
+
+    def set_last_sent(self, value: datetime.datetime) -> None:
+        if value.tzinfo is not datetime.timezone.utc:
+            raise ValueError('last_sent must be UTC')
+        self.last_sent = value.strftime('%Y%m%dT%H%M%SZ')
+        self.last_sent_parsed = value
 
 
 def _parse_args(args: Sequence[str]) -> argparse.Namespace:
@@ -137,7 +158,9 @@ def _parse_config(config_filename: pathlib.Path) -> Mapping[str, _TodoConfig]:
 
 
 def _parse_state(
-        state_filename: pathlib.Path
+    state_filename: pathlib.Path,
+    *,
+    now: datetime.datetime,
 ) -> collections.defaultdict[str, _TodoState]:
     try:
         with open(state_filename, mode='rb') as state_file:
@@ -145,8 +168,8 @@ def _parse_state(
     except FileNotFoundError:
         raw_state = {}
     return collections.defaultdict(
-        _TodoState,
-        ((todo_id, _TodoState(**todo_state))
+        lambda: _TodoState(now=now),
+        ((todo_id, _TodoState(**todo_state, now=now))
          for todo_id, todo_state in raw_state.items()),
     )
 
@@ -155,18 +178,19 @@ def _save_state(
     state_filename: pathlib.Path,
     state: Mapping[str, _TodoState],
 ) -> None:
+    raw_state = {}
+    for todo_id, todo_state in state.items():
+        raw_state[todo_id] = {
+            field.name: getattr(todo_state, field.name)
+            for field in dataclasses.fields(todo_state)
+            if field.init
+        }
     with tempfile.NamedTemporaryFile(
             mode='wt',
             dir=state_filename.parent,
             delete=False,
     ) as state_file_new:
-        json.dump(
-            {
-                todo_id: dataclasses.asdict(todo_state)
-                for todo_id, todo_state in state.items()
-            },
-            state_file_new,
-        )
+        json.dump(raw_state, state_file_new)
     os.replace(state_file_new.name, state_filename)
 
 
@@ -209,20 +233,15 @@ def _handle_todo(
     config: _TodoConfig,
     state: _TodoState,
     max_occurrences: int,
+    now: datetime.datetime,
     subprocess_run: ...,
 ) -> None:
-    last_sent = (None if state.last_sent is None else dateutil.parser.isoparse(
-        state.last_sent))
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
     extra = []  # List of sections, which are lists of lines.
-    if last_sent is not None and last_sent > now:
-        raise RuntimeError(
-            f'TODO {todo_id!r} was last sent {last_sent} which is in the '
-            f'future (after {now}).')
     if now < config.start_parsed:
         return  # Not ready to send yet.
     if config.recurrence_rule_parsed is None:
-        if last_sent is not None and last_sent >= config.start_parsed:
+        if (state.last_sent_parsed is not None and
+                state.last_sent_parsed >= config.start_parsed):
             return  # Already sent.
         comment = None
     else:
@@ -232,9 +251,10 @@ def _handle_todo(
             itertools.takewhile(
                 lambda occurrence: occurrence <= now,
                 config.recurrence_rule_parsed.xafter(
-                    (config.start_parsed if last_sent is None else last_sent),
+                    (config.start_parsed if state.last_sent_parsed is None else
+                     state.last_sent_parsed),
                     count=max_occurrences + 1,
-                    inc=(last_sent is None),
+                    inc=(state.last_sent_parsed is None),
                 )))
         if not included_occurrences:
             return
@@ -267,7 +287,7 @@ def _handle_todo(
         extra=extra,
         subprocess_run=subprocess_run,
     )
-    state.last_sent = now.strftime('%Y%m%dT%H%M%SZ')
+    state.set_last_sent(now)
 
 
 def main(
@@ -275,15 +295,17 @@ def main(
     *,
     subprocess_run: ... = subprocess.run,
 ) -> None:
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     args_parsed = _parse_args(args)
     config = _parse_config(args_parsed.config)
-    state = _parse_state(args_parsed.state)
+    state = _parse_state(args_parsed.state, now=now)
     for todo_id, todo_config in config.items():
         _handle_todo(
             todo_id=todo_id,
             config=todo_config,
             state=state[todo_id],
             max_occurrences=args_parsed.max_occurrences,
+            now=now,
             subprocess_run=subprocess_run,
         )
     _save_state(args_parsed.state, state)

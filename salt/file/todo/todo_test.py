@@ -181,12 +181,15 @@ class TodoTest(parameterized.TestCase):
             error_regex='kumquat',
         ),
         dict(
-            testcase_name='time_has_gone_backwards',
-            config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
-                summary='foo',
-                start='20000101T000000Z',
-            )))),
+            testcase_name='state_invalid_last_sent',
+            config={},
+            state={'some_group.some_todo': dict(last_sent='invalid datetime')},
+            error_class=ValueError,
+            error_regex='Invalid last_sent',
+        ),
+        dict(
+            testcase_name='state_last_sent_in_future',
+            config={},
             state={'some_group.some_todo': dict(last_sent='20010101T000000Z')},
             error_class=RuntimeError,
             error_regex='in the future',
@@ -238,7 +241,7 @@ class TodoTest(parameterized.TestCase):
         ),
         dict(
             testcase_name='irrelevant_state',
-            initial_state={'unknown-todo': dict(last_sent='20010203T010203Z')},
+            initial_state={'unknown-todo': dict(last_sent='19990203T010203Z')},
             config={},
         ),
         dict(
