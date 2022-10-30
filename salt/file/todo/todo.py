@@ -41,7 +41,8 @@ class _TodoConfig:
     """Config for a single TODO.
 
     Attributes:
-        email_to: Email address to send to.
+        email_headers: Headers to add to the email. This should include
+            To/Cc/etc. header(s) which determine where the message is sent.
         summary: See
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.1.12
         start: See https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.2.4
@@ -54,7 +55,7 @@ class _TodoConfig:
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5.3
         recurrence_rule_parsed: See above.
     """
-    email_to: str
+    email_headers: Mapping[str, str]
     summary: str
     start: str
     start_parsed: datetime.datetime = dataclasses.field(init=False)
@@ -203,7 +204,8 @@ def _send_email(
     subprocess_run: ...,
 ) -> None:
     message = email.message.EmailMessage()
-    message['To'] = config.email_to
+    for header, value in config.email_headers.items():
+        message[header] = value
     message['Subject'] = config.summary + ('' if comment is None else
                                            f' ({comment})')
     message['Todo-Id'] = todo_id

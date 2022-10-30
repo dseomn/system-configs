@@ -134,7 +134,7 @@ class TodoTest(parameterized.TestCase):
         dict(
             testcase_name='config_unexpected_key',
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='bar@example.com',
+                email_headers={},
                 summary='foo',
                 kumquat='',
             )))),
@@ -144,7 +144,7 @@ class TodoTest(parameterized.TestCase):
         dict(
             testcase_name='config_invalid_timezone',
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 timezone='invalid timezone',
                 start='20010101T000000Z',
@@ -155,7 +155,7 @@ class TodoTest(parameterized.TestCase):
         dict(
             testcase_name='config_invalid_start',
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 start='invalid datetime',
             )))),
@@ -165,7 +165,7 @@ class TodoTest(parameterized.TestCase):
         dict(
             testcase_name='config_invalid_recurrence_rule',
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 start='20010101T000000Z',
                 recurrence_rule='invalid recurrence rule',
@@ -210,13 +210,15 @@ class TodoTest(parameterized.TestCase):
     @parameterized.named_parameters(
         dict(
             testcase_name='uses_default',
-            group_extra=dict(defaults=dict(email_to='alice@example.com')),
+            group_extra=dict(defaults=dict(email_headers=dict(
+                To='alice@example.com'))),
             todo_extra={},
         ),
         dict(
             testcase_name='overrides_default',
-            group_extra=dict(defaults=dict(email_to='bob@example.com')),
-            todo_extra=dict(email_to='alice@example.com'),
+            group_extra=dict(defaults=dict(email_headers=dict(
+                To='bob@example.com'))),
+            todo_extra=dict(email_headers=dict(To='alice@example.com')),
         ),
     )
     @freezegun.freeze_time('2000-01-01')
@@ -248,7 +250,7 @@ class TodoTest(parameterized.TestCase):
             testcase_name='start_in_future',
             initial_state={'some_group.some_todo': dict(last_sent=None)},
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 start='20010101T000000Z',
             )))),
@@ -259,7 +261,7 @@ class TodoTest(parameterized.TestCase):
                 'some_group.some_todo': dict(last_sent='19990101T000000Z'),
             },
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 start='20010101T000000Z',
             )))),
@@ -270,7 +272,7 @@ class TodoTest(parameterized.TestCase):
                 'some_group.some_todo': dict(last_sent='19990101T000000Z'),
             },
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='foo',
                 start='19990101T000000Z',
             )))),
@@ -281,7 +283,7 @@ class TodoTest(parameterized.TestCase):
                 'some_group.some_todo': dict(last_sent='19991231T120000Z'),
             },
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers={},
                 summary='apple',
                 start='19990101T120000Z',
                 recurrence_rule='FREQ=DAILY',
@@ -325,7 +327,7 @@ class TodoTest(parameterized.TestCase):
     ):
         new_state = self._main(
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers=dict(To='alice@example.com'),
                 summary='apple',
                 description=description,
                 timezone=timezone,
@@ -433,7 +435,7 @@ class TodoTest(parameterized.TestCase):
     ):
         new_state = self._main(
             config=dict(some_group=dict(todos=dict(some_todo=dict(
-                email_to='alice@example.com',
+                email_headers=dict(To='alice@example.com'),
                 summary='apple',
                 timezone='America/New_York',
                 start=start,
