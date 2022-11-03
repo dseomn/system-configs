@@ -220,6 +220,11 @@ upgrade_nextcloud:
       &&
       {{ php.bin }}
       {{ occ }}
+      db:convert-filecache-bigint
+      --quiet
+      &&
+      {{ php.bin }}
+      {{ occ }}
       db:add-missing-columns
       --quiet
       &&
