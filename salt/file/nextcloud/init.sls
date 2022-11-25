@@ -21,34 +21,35 @@
 {% from 'php/map.jinja' import php %}
 
 
-# Something hopefully close to a list of the apps enabled by default. (I wasn't
-# sure how to find the exact list.)
+# https://github.com/nextcloud/server/blob/master/core/shipped.json
 {% set apps_default = [
-    'accessibility',
     'activity',
-    'admin_audit',
+    'circles',
     'cloud_federation_api',
     'comments',
     'contactsinteraction',
     'dashboard',
     'dav',
-    'encryption',
     'federatedfilesharing',
     'federation',
     'files',
-    'files_external',
+    'files_pdfviewer',
+    'files_rightclick',
     'files_sharing',
     'files_trashbin',
     'files_versions',
     'firstrunwizard',
+    'logreader',
     'lookup_server_connector',
     'nextcloud_announcements',
     'notifications',
     'oauth2',
     'password_policy',
+    'photos',
     'privacy',
     'provisioning_api',
     'recommendations',
+    'related_resources',
     'serverinfo',
     'settings',
     'sharebymail',
@@ -59,7 +60,6 @@
     'theming',
     'twofactor_backupcodes',
     'updatenotification',
-    'user_ldap',
     'user_status',
     'viewer',
     'weather_status',
@@ -147,7 +147,6 @@ nextcloud_installed:
     - /var/cache/nextcloud
 
 {% do apps_managed.extend((
-    'apporder',
     'oidc_login',
 )) %}
 /var/local/nextcloud/webroot/config/local.config.php:
