@@ -180,6 +180,17 @@ media-center autologin:
         "['caffeine@patapon.info']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
+      gsettings set org.gnome.Lollypop artist-artwork false
+      gsettings set org.gnome.Lollypop auto-update false
+      gsettings set org.gnome.Lollypop network-access-acl \
+        {{ 0b00000000001000000000 }}
+      gsettings set org.gnome.Lollypop notification-flag {{ 0b11 }}
+      gsettings set org.gnome.Lollypop notifications "'mpris'"
+      gsettings set org.gnome.Lollypop replay-gain "'album'"
+      gsettings set org.gnome.Lollypop show-tag-tracknumber true
+      gsettings set org.gnome.Lollypop shown-album-lists \
+        "[-4, -13, -15, -99, -101, -103]"
+      gsettings set org.gnome.Lollypop transitions false
   - require:
     - media-center user and group
     - media_center_pkgs
