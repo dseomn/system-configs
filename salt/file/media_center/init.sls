@@ -97,13 +97,33 @@ media-center autologin:
 {% endfor %}
 
 
-/var/local/media-center/.config/pulse/daemon.conf:
+/var/local/media-center/.config/pipewire/client-rt.conf.d/local.conf:
   file.managed:
   - user: media-center
   - group: media-center
   - makedirs: true
   - contents: |
-      remixing-use-all-sink-channels = no
+      stream.properties {
+        channelmix.upmix = false
+      }
+/var/local/media-center/.config/pipewire/client.conf.d/local.conf:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      stream.properties {
+        channelmix.upmix = false
+      }
+/var/local/media-center/.config/pipewire/pipewire-pulse.conf.d/local.conf:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      stream.properties {
+        channelmix.upmix = false
+      }
 
 
 /var/local/media-center/.local/bin/leave-a-note:
@@ -144,7 +164,13 @@ media-center autologin:
       Type=Application
       Name=Fix Audio
       Icon=audio-speakers-symbolic
-      Exec=pulseaudio --kill
+      Exec=systemctl --user restart {{ ' '.join((
+          'pipewire-pulse.service',
+          'pipewire-pulse.socket',
+          'pipewire.service',
+          'pipewire.socket',
+          'wireplumber.service',
+      )) }}
 
 
 {{ media_center.stepmania_user_data_folder }}/Save/Preferences.ini:
