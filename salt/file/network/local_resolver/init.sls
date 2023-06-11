@@ -13,10 +13,13 @@
 # limitations under the License.
 
 
-# TODO(Debian > 11): Figure out upgrade path from Debian 11 to 12:
-# https://salsa.debian.org/systemd-team/systemd/-/blob/274ec5c99af05ba22f65c2ad101868b8f67649b1/debian/NEWS#L1-8
+# TODO(Debian >= 12): Remove conditional below that supports Debian 11.
 {% set system = salt.grains.filter_by({
     'Debian': {
+        'pkgs': (
+            ('systemd-resolved',)
+            if 'osmajorrelease' not in grains or grains.osmajorrelease >= 12
+            else ()),
         'service': 'systemd-resolved',
         'config_file': '/etc/systemd/resolved.conf',
         'resolv_conf': '/etc/resolv.conf',
@@ -25,23 +28,35 @@
 }) %}
 
 
+local_resolver_pkgs:
+  pkg.installed:
+  - pkgs: {{ system.pkgs | tojson }}
+
 {{ system.config_file }}:
   file.managed:
   - source: salt://network/local_resolver/resolved.conf.jinja
   - template: jinja
+  - require:
+    - local_resolver_pkgs
 
 {{ system.resolv_conf }}:
   file.symlink:
   - target: {{ system.resolv_conf_target }}
   - backupname: {{ system.resolv_conf }}.bak
+  - require:
+    - local_resolver_pkgs
 
 systemd_resolved_enabled:
   service.enabled:
   - name: {{ system.service }}
+  - require:
+    - local_resolver_pkgs
 
 systemd_resolved_running:
   service.running:
   - name: {{ system.service }}
+  - require:
+    - local_resolver_pkgs
   - watch:
     - file: {{ system.config_file }}
     - file: {{ system.resolv_conf }}
