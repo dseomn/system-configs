@@ -17,8 +17,8 @@
 
 
 {% macro source(mirror, distribution, components) %}
-  deb {{ mirror }} {{ distribution }} {{ components }}
-  deb-src {{ mirror }} {{ distribution }} {{ components }}
+deb {{ mirror }} {{ distribution }} {{ components }}
+deb-src {{ mirror }} {{ distribution }} {{ components }}
 {% endmacro %}
 
 
