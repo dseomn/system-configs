@@ -28,7 +28,10 @@
         else grains.debian.track),
     'additional_distributions': grains.debian.get(
         'additional_distributions', defaults.additional_distributions),
-    'components': 'main contrib non-free',
+    'components': (
+        'main contrib non-free-firmware non-free'
+        if 'osmajorrelease' not in grains or grains.osmajorrelease >= 12
+        else 'main contrib non-free'),
     'mirror': {
         'debian': 'https://deb.debian.org/debian',
         'debian-security': 'https://deb.debian.org/debian-security',
