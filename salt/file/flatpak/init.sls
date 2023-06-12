@@ -24,7 +24,7 @@ flatpak_pkgs:
 {{ flatpak.remote('flathub', 'https://flathub.org/repo/flathub.flatpakrepo') }}
 
 
-flatpak update --noninteractive | grep -v '^Nothing to do\.$' || true:
+flatpak update --noninteractive | grep -v '^\(Nothing to do\.\)\?$' || true:
   cron.present:
   - identifier: 76a97d76-760f-4cfd-b32d-7727a88ca033
   - minute: random
