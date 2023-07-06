@@ -25,12 +25,12 @@
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=992119): Consider using
 # genericcloud instead of generic.
 # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=980744): Change name to
-# debian11.
+# the appropriate stable release name instead of debiantesting.
 {% set base_system = {
     'name': 'debiantesting',
-    'url': 'https://cloud.debian.org/images/cloud/bullseye/20210814-734/debian-11-generic-amd64-20210814-734.raw',
+    'url': 'https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-generic-amd64-20230612-1409.raw',
     'hash_type': 'sha512',
-    'hash': '9bcca16c653b2c701ca0acc63e5b5824f88a299be8fef1e200583db7cba7e9c677f3ca7741758ec0f7adaa852bdacea54976cfa6049459a4faf1fd97a2a8fabc',
+    'hash': '549cc42c95dcb193a19e53cfd742bffb46280d1dbeae7aac4569297e10266afb4c8300c448e0a1c32cd1c05d164d1b9f9ddc3fe7ac50d7ad1f45acb025c7ec4c',
     'size': '2G',
 } %}
 
