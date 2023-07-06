@@ -210,7 +210,6 @@ base_system:
       --events on_poweroff=destroy,on_reboot=restart,on_crash=restart
       --import
       --cloud-init meta-data=<(printf "%s" "$CLOUD_INIT_META_DATA"),user-data=<(printf "%s" "$CLOUD_INIT_USER_DATA")
-      --boot uefi
       --os-variant name={{ base_system.name }}
       --disk {{ guest_system_lv_path }},boot.order=1,driver.discard=unmap
       {% for extra_disk_path in extra_disk_paths -%}
