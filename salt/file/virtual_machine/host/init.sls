@@ -55,6 +55,17 @@ virtual_machine_host_pkgs:
   - install_recommends: false
 
 
+{{ virtual_machine_host.libvirt_guests_config }}:
+  file.blockreplace:
+  - marker_start: '# START: salt virtual_machine.host :#'
+  - marker_end: '# END: salt virtual_machine.host :#'
+  - content: |
+      PARALLEL_SHUTDOWN=1000
+  - append_if_not_found: true
+  - require:
+    - virtual_machine_host_pkgs
+
+
 {% for pool_id, pool in host.thin_pools.items() %}
 thin_pool_{{ pool_id }}:
   lvm.lv_present:
