@@ -197,8 +197,6 @@ base_system:
   file.exists: []
 {% endfor %}
 
-# TODO(virtinst > 3.2.0): Add migratable=off to --cpu, to enable more CPU
-# features.
 {{ guest_id }}_install:
   cmd.run:
   - name: >-
@@ -207,7 +205,7 @@ base_system:
       virt-install
       --name {{ guest_id }}
       --vcpus {{ guest.vcpus }}
-      --cpu host-passthrough,cache.mode=passthrough
+      --cpu host-passthrough,cache.mode=passthrough,migratable=off
       --memory {{ guest.memory }}
       --events on_poweroff=destroy,on_reboot=restart,on_crash=restart
       --import
