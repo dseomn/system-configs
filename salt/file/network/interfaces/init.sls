@@ -129,6 +129,7 @@ systemd_networkd:
   - template: jinja
   - defaults:
       bridge_name: {{ bridge_name }}
+      interface: {{ host.interfaces[bridge_name] | tojson }}
   - require_in:
     - file: {{ system.config_directory }}
   - onchanges_in:

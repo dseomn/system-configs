@@ -85,6 +85,8 @@ interfaces:
   lan:
     # Creates the name above as a virtual interface on the specified segment.
     segment: lan
+    # Required. Sets the MAC address of the interface.
+    mac: 00:00:5e:00:53:00
     ip:
     # Assigns IP addresses based on the segment above. See
     # network/sites.yaml.jinja and network/segments.yaml.jinja for the subnet
