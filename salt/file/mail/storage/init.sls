@@ -119,6 +119,16 @@ spamd_running:
   - marker_start: '# START: mail.storage :#'
   - marker_end: '# END: mail.storage :#'
   - content: |
+      CRON=1
+  - append_if_not_found: true
+  - require:
+    - mail_storage_pkgs
+
+{{ mail_storage.spamd_default_file }}:
+  file.blockreplace:
+  - marker_start: '# START: mail.storage :#'
+  - marker_end: '# END: mail.storage :#'
+  - content: |
       OPTIONS="\
         --listen=/var/local/mail/spamassassin/spamd \
         --socketowner=vmail \
@@ -126,7 +136,6 @@ spamd_running:
         --username=vmail \
         --virtual-config-dir=/var/cache/mail/%d/%l/spamassassin \
         --nouser-config"
-      CRON=1
   - append_if_not_found: true
   - require:
     - mail_storage_pkgs
