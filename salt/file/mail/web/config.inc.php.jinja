@@ -27,19 +27,16 @@ $config = [];
 $config['db_dsnw'] =
     'sqlite:////var/local/roundcube/database/roundcube.db?mode=0600';
 
-$config['default_host'] = 'localhost';
-$config['default_port'] = 143;
+$config['imap_host'] = 'localhost:143';
 
-$config['smtp_server'] = 'localhost';
-$config['smtp_port'] = 587;
+$config['smtp_host'] = 'localhost:587';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
-// TODO(roundcube >= 1.5-beta): Set $config['session_samesite'].
+$config['session_samesite'] = 'Strict';
 
-// TODO(roundcube > 1.5-rc): Switch to a plain name instead of a regex.
 $config['trusted_host_patterns'] = [
-    "^{{ pillar.mail.web.name.replace('.', '\\\\.') }}$",
+    "{{ pillar.mail.web.name }}",
 ];
 
 $config['max_message_size'] = {{ mail.message_size_limit_bytes }};

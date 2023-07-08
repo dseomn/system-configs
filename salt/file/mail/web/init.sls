@@ -84,18 +84,6 @@ mail_web_pkgs:
     - /var/local/roundcube is backed up
     - apache_httpd_pkgs
 
-{% if grains.os_family == 'Debian' %}
-# TODO(https://salsa.debian.org/roundcube-team/roundcube/-/commit/64ce69d08a95705e5d6cb363b64c6c70dee22ebd):
-# Remove this.
-/var/lib/roundcube/SQL:
-  file.symlink:
-  - target: /usr/share/roundcube/SQL
-  - require:
-    - mail_web_pkgs
-  - require_in:
-    - /var/local/roundcube/database
-{% endif %}
-
 {{ common.local_lib }}/roundcube-generate-dynamic-config:
   file.managed:
   - source: salt://mail/web/generate_dynamic_config.py
@@ -142,11 +130,12 @@ mail_web_pkgs:
   - watch_in:
     - apache_httpd_running
 
-# TODO(https://salsa.debian.org/roundcube-team/roundcube/-/commit/a181ff290e21def5a05c873b6bc946f9deff4fe9):
-# Switch to updatedb.sh.
 roundcube database migrations:
   cmd.run:
-  - name: {{ mail_web.static_root }}/bin/update.sh < /dev/null
+  - name: >-
+      {{ mail_web.static_root }}/bin/updatedb.sh
+      --package=roundcube
+      --dir={{ mail_web.static_root }}/SQL
   - runas: {{ apache_httpd.user }}
   - env:
       RCUBE_CONFIG_PATH: {{ mail_web.config_dir }}
