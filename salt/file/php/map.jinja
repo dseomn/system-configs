@@ -18,6 +18,7 @@
 {% set _version = salt.grains.filter_by(
     {
         'Debian-11': '7.4',
+        'Debian-12': '8.2',
     },
     grain='osfinger',
 ) %}
