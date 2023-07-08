@@ -20,12 +20,20 @@ include:
 - nginx
 
 
+nginx_stream_pkgs:
+  pkg.installed:
+  - pkgs: {{ nginx.stream_pkgs | tojson }}
+  - require:
+    - nginx_pkgs
+
+
 {{ nginx.config_dir }}/local-modules.d/20-stream.conf:
   file.managed:
   - contents: |
       load_module modules/ngx_stream_module.so;
   - require:
     - {{ nginx.config_dir }}/local-modules.d exists
+    - nginx_stream_pkgs
   - require_in:
     - {{ nginx.config_dir }}/local-modules.d is clean
   - watch_in:

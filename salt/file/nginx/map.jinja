@@ -17,12 +17,13 @@
 
 {% set nginx = salt.grains.filter_by({
     'Debian': {
-        'pkgs': ('nginx-core',),
+        'pkgs': ('nginx',),
         'service': 'nginx',
         'user': 'www-data',
         'pid_file': '/run/nginx.pid',
         'config_dir': '/etc/nginx',
         'dav_pkgs': ('libnginx-mod-http-dav-ext',),
+        'stream_pkgs': ('libnginx-mod-stream',),
     },
 }) %}
 
