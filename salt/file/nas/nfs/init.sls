@@ -49,32 +49,21 @@ nfs_running:
   - watch:
     - {{ nas_nfs.exports_file }}
 
-{% if grains.os_family == 'Debian' %}
-/etc/default/nfs-common:
-  file.blockreplace:
-  - marker_start: '# START: salt nas.nfs :#'
-  - marker_end: '# END: salt nas.nfs :#'
-  - content: |
-      STATDOPTS="--port 32765 --outgoing-port 32766 --nlm-port 32768"
-  - append_if_not_found: true
+{{ nas_nfs.config_file }}:
+  file.managed:
+  - contents: |
+      [mountd]
+      manage-gids = true
+      port = 32767
+      [statd]
+      port = 32765
+      outgoing-port = 32766
+      [lockd]
+      port = 32768
   - require:
     - nas_nfs_pkgs
   - watch_in:
     - nfs_running
-/etc/default/nfs-kernel-server:
-  file.blockreplace:
-  - marker_start: '# START: salt nas.nfs :#'
-  - marker_end: '# END: salt nas.nfs :#'
-  - content: |
-      RPCMOUNTDOPTS="--port 32767 --manage-gids"
-  - append_if_not_found: true
-  - require:
-    - nas_nfs_pkgs
-  - watch_in:
-    - nfs_running
-{% else %}
-{{ {}['Unsupported os_family: ' + grains.os_family] }}
-{% endif %}
 
 
 {{ nftables.config_dir }}/50-nas-nfs.conf:
