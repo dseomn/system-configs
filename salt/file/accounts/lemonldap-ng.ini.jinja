@@ -35,8 +35,6 @@ logLevel = {{ original.all.pop('logLevel') }}
 ; https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2638
 portal = https://{{ pillar.accounts.name }}/
 
-; TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/2637): Remove
-; this.
 locationRules = {}
 
 {%- do original.all.pop('checkTime', None) %}
