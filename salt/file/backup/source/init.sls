@@ -132,7 +132,7 @@ backup_source_borg:
       {{ backup_source.backup_source_borg }}
       --lock-wait {{ backup.borg_lock_wait_noninteractive }}
       create
-      --numeric-owner
+      --numeric-ids
       '::auto-{{ source_host.repository }}-{utcnow:\%Y\%m\%dT\%H\%M\%SZ}'
       .
   - identifier: 9fb0268b-97eb-4c67-a4cb-f186e445eac9
