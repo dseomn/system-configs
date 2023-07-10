@@ -49,15 +49,13 @@ def _args():
 
 def main() -> None:
     args = _args()
-    # TODO(borg >= 1.2): Once `borg list` supports --consider-checkpoints, make
-    # sure checkpoints aren't listed, get rid of logic to ignore checkpoints,
-    # and use --last instead of manually limiting the number of archives shown.
     repository_list_raw = subprocess.run(
         (
             'borg',
             *args.borg_option,
             'list',
             '--json',
+            '--last=5',
             args.repository,
         ),
         stdout=subprocess.PIPE,
@@ -65,8 +63,7 @@ def main() -> None:
     ).stdout
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     repository_list = json.loads(repository_list_raw)
-    archives = tuple(archive for archive in repository_list['archives']
-                     if not archive['archive'].endswith('.checkpoint'))
+    archives = repository_list['archives']
     if not archives:
         print('No archives.')
         return
@@ -74,7 +71,7 @@ def main() -> None:
         archives[-1]['start']).astimezone(datetime.timezone.utc)
     if last_archive_time < now - args.max_age:
         print(f'Latest archive is older than {args.max_age}. Recent archives:')
-        pprint.pprint(archives[-5:])
+        pprint.pprint(archives)
         return
 
 
