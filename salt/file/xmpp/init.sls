@@ -39,16 +39,6 @@ xmpp_pkgs:
     - users and groups are done
 
 
-# TODO(Erlang >= 23.3.4.3 or Erlang >= 24.0.2): Remove this workaround. See
-# https://github.com/processone/ejabberd/issues/3438 and
-# https://github.com/erlang/otp/issues/4838
-/etc/systemd/resolved.conf.d/50-xmpp.conf:
-  file.managed:
-  - makedirs: true
-  - contents: |
-      [Resolve]
-      Domains={{ grains.domain }}
-
 /srv/ejabberd/mod_log_chat:
   file.directory:
   - user: {{ xmpp.ejabberd_user }}
