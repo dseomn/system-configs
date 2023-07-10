@@ -270,26 +270,6 @@ spamd_running:
   - require_in:
     - {{ dovecot.top_config_dir }}/sieve-before is clean
 
-# TODO(dovecot > 2.3.16): Remove this workaround. See
-# https://dovecot.org/pipermail/dovecot/2021-August/122852.html for context.
-{{ dovecot.config_dir }}/mail-storage-secrets.conf.ext:
-  file.managed:
-  - source: salt://mail/storage/dovecot-secrets.conf.jinja
-  - mode: 0600
-  - template: jinja
-  - defaults:
-      certificates: {{ certificates | tojson }}
-      default_certificate: {{ certificates.values() | first | tojson }}
-  - require:
-    - {{ dovecot.config_dir }} exists
-    {% for certificate in certificates.values() %}
-    - {{ certificate.key }}
-    {% endfor %}
-  - require_in:
-    - {{ dovecot.config_dir }} is clean
-  - watch_in:
-    - dovecot_running
-
 {{ dovecot.config_dir }}/50-mail-storage.conf:
   file.managed:
   - source: salt://mail/storage/dovecot.conf.jinja
@@ -307,9 +287,9 @@ spamd_running:
     - {{ common.local_etc }}/mail is clean
     - /var/cache/mail
     {% for certificate in certificates.values() %}
+    - {{ certificate.key }}
     - {{ certificate.fullchain }}
     {% endfor %}
-    - {{ dovecot.config_dir }}/mail-storage-secrets.conf.ext
     - stunnel_pkgs
   - require_in:
     - {{ dovecot.config_dir }} is clean
