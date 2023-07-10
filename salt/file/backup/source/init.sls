@@ -85,12 +85,10 @@ manage_backup_source_sources_d:
   - require:
     - {{ backup.config_dir }}/source/ssh
 
-# TODO(openssh >= 8.5): Remove CheckHostIP.
 {{ backup.config_dir }}/source/ssh/config:
   file.managed:
   - contents: |
       Match all
-        CheckHostIP no
         IdentityFile {{ backup.config_dir }}/source/ssh/id
         StrictHostKeyChecking yes
         UserKnownHostsFile {{ backup.config_dir }}/source/ssh/known_hosts
