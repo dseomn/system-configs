@@ -13,13 +13,9 @@
 # limitations under the License.
 
 
-# TODO(Debian >= 12): Remove conditional below that supports Debian 11.
 {% set system = salt.grains.filter_by({
     'Debian': {
-        'pkgs': (
-            ('systemd-resolved',)
-            if 'osmajorrelease' not in grains or grains.osmajorrelease >= 12
-            else ()),
+        'pkgs': ('systemd-resolved',),
         'service': 'systemd-resolved',
         'config_file': '/etc/systemd/resolved.conf',
         'resolv_conf': '/etc/resolv.conf',
