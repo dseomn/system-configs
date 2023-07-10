@@ -101,13 +101,9 @@ smtpd_tls_fingerprint_digest = {{ crypto.openssl.digest }}
 # ciphersuites all provide a reasonable level of security, unlike some of the
 # options in previous versions of TLS. Discussion:
 # https://marc.info/?t=163244900300001&r=1&w=2
-#
-# TODO(postfix >= 3.6): Specify minimum version instead of a list.
-{%- set tls_mandatory_protocols = crypto.openssl.protocols_disabled_to_string(
-    crypto.openssl.strict_protocols_disabled, disable_prefix='!') %}
-lmtp_tls_mandatory_protocols = {{ tls_mandatory_protocols }}
-smtp_tls_mandatory_protocols = {{ tls_mandatory_protocols }}
-smtpd_tls_mandatory_protocols = {{ tls_mandatory_protocols }}
+lmtp_tls_mandatory_protocols = >={{ crypto.openssl.strict_protocols_min }}
+smtp_tls_mandatory_protocols = >={{ crypto.openssl.strict_protocols_min }}
+smtpd_tls_mandatory_protocols = >={{ crypto.openssl.strict_protocols_min }}
 
 smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
