@@ -47,6 +47,12 @@ def _sa_learn(
     *,
     dbpath: pathlib.Path,
 ) -> None:
+    # TODO(https://bz.apache.org/SpamAssassin/show_bug.cgi?id=8146): Remove this
+    # special handling of empty folders.
+    try:
+        next((folder / 'cur').iterdir())
+    except StopIteration:
+        return
     subprocess.run(
         (
             'sa-learn',
