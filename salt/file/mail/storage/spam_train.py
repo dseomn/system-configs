@@ -53,7 +53,7 @@ def _sa_learn(
         next((folder / 'cur').iterdir())
     except StopIteration:
         return
-    subprocess.run(
+    sa_learn_result = subprocess.run(
         (
             'sa-learn',
             '--quiet',
@@ -61,9 +61,18 @@ def _sa_learn(
             type_arg,
             '.',
         ),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         cwd=folder,
         check=True,
+        text=True,
     )
+    if any(
+        line
+        for line in sa_learn_result.stdout.splitlines()
+        if not line.startswith('Bad UTF7 data escape at ')
+    ):
+        print(f'{folder}:\n{sa_learn_result.stdout}')
 
 
 def main() -> None:
