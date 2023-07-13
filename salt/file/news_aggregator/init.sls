@@ -47,7 +47,7 @@ news_aggregator_pkgs:
       name-format = {feed-title}
       trust-guid = True
       email-protocol = sendmail
-      verbose = warning
+      verbose = error
       {% for email, feeds in pillar.news_aggregator.feeds.items() %}
       {% for feed_id, feed_url in feeds.items() %}
       [feed.{{ email | regex_replace('[^\\w\\d]', '-') }}.{{ feed_id }}]
