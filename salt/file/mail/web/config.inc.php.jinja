@@ -15,12 +15,16 @@
 -#}
 
 
+{%- from 'accounts/client/map.jinja' import accounts_client -%}
 {%- from 'crypto/map.jinja' import crypto -%}
 {%- from 'mail/map.jinja' import mail -%}
 {%- from 'mail/web/map.jinja' import mail_web -%}
 
 
 <?php
+
+// TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1040705): Remove this.
+require_once("GuzzleHttp/autoload.php");
 
 $config = [];
 
@@ -33,6 +37,21 @@ $config['smtp_host'] = 'localhost:587';
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
 
+$config['oauth_provider'] = 'generic';
+$config['oauth_provider_name'] = 'Accounts';
+$config['oauth_client_id'] = '{{ pillar.mail.web.name }}';
+$config['oauth_client_secret'] = '{{
+    salt.file.read(
+        accounts_client.oauth2_client_secret_filename(pillar.mail.web.name)
+    ).strip()
+}}';
+$config['oauth_auth_uri'] =
+    'https://{{ pillar.accounts.client.oidc.provider }}/oauth2/authorize';
+$config['oauth_token_uri'] =
+    'https://{{ pillar.accounts.client.oidc.provider }}/oauth2/token';
+$config['oauth_scope'] = 'openid email email-read-write';
+$config['oauth_login_redirect'] = true;
+
 $config['session_samesite'] = 'Strict';
 
 $config['trusted_host_patterns'] = [
@@ -40,6 +59,11 @@ $config['trusted_host_patterns'] = [
 ];
 
 $config['max_message_size'] = {{ mail.message_size_limit_bytes }};
+
+// TODO(roundcube >= 1.6.2): Remove this once
+// https://github.com/roundcube/roundcubemail/issues/8878 is fixed in the Debian
+// version.
+$config['request_path'] = 'SCRIPT_NAME';
 
 $config['plugins'] = [];
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+{% from 'accounts/client/map.jinja' import accounts_client %}
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'apache_httpd/map.jinja' import apache_httpd %}
 {% from 'common/map.jinja' import common %}
@@ -29,6 +30,7 @@
 
 
 include:
+- accounts.client
 - acme
 - apache_httpd
 - apache_httpd.acme_hooks
@@ -40,9 +42,6 @@ include:
 - virtual_machine.guest
 
 
-# TODO(roundcube >= 1.5-beta): Use OAuth2 to integrate with the accounts state.
-
-
 mail_web_pkgs:
   pkg.installed:
   - pkgs: {{ mail_web.pkgs | tojson }}
@@ -52,6 +51,9 @@ mail_web_pkgs:
 
 
 {{ acme_cert(pillar.mail.web.name) }}
+
+
+{{ accounts_client.oauth2_client_secret_file(pillar.mail.web.name) }}
 
 
 # TODO(https://bugs.php.net/bug.php?id=81528): Have roundcube connect directly
@@ -122,10 +124,14 @@ mail_web_pkgs:
 {{ mail_web.config_dir }}/config.inc.php:
   file.managed:
   - source: salt://mail/web/config.inc.php.jinja
+  - user: root
+  - group: {{ apache_httpd.group }}
+  - mode: 0640
   - template: jinja
   - require:
     - mail_web_pkgs
     - /var/local/roundcube/database
+    - {{ accounts_client.oauth2_client_secret_filename(pillar.mail.web.name) }} exists
     - {{ mail_web.config_dir }}/config-dynamic.inc.php
   - watch_in:
     - apache_httpd_running
