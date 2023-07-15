@@ -13,10 +13,12 @@
 # limitations under the License.
 
 
+{% from 'accounts/client/map.jinja' import accounts_client %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
 
 
 include:
+- accounts.client
 - common
 
 
@@ -108,6 +110,39 @@ dovecot_running:
     - {{ dovecot.config_dir }} exists
     - {{ dovecot.config_dir }}/10-passwd.passdb
     - {{ dovecot.config_dir }}/10-passwd.userdb
+  - require_in:
+    - {{ dovecot.config_dir }} is clean
+  - watch_in:
+    - dovecot_running
+
+{{ accounts_client.oauth2_client_secret_file(grains.id) }}
+
+{{ dovecot.config_dir }}/20-oauth2.conf.ext:
+  file.managed:
+  - source: salt://mail/dovecot/oauth2.conf.ext.jinja
+  - user: root
+  - group: {{ dovecot.group }}
+  - mode: 0640
+  - template: jinja
+  - require:
+    - {{ dovecot.config_dir }} exists
+    - {{ accounts_client.oauth2_client_secret_filename(grains.id) }} exists
+  - require_in:
+    - {{ dovecot.config_dir }} is clean
+  - watch_in:
+    - dovecot_running
+{{ dovecot.config_dir }}/20-oauth2.conf:
+  file.managed:
+  - contents: |
+      auth_mechanisms = $auth_mechanisms oauthbearer xoauth2
+      passdb {
+        driver = oauth2
+        mechanisms = oauthbearer xoauth2
+        args = {{ dovecot.config_dir }}/20-oauth2.conf.ext
+      }
+  - require:
+    - {{ dovecot.config_dir }} exists
+    - {{ dovecot.config_dir }}/20-oauth2.conf.ext
   - require_in:
     - {{ dovecot.config_dir }} is clean
   - watch_in:
