@@ -143,7 +143,12 @@ oidcRPMetaDataOptions = { \
         }}', \
         'oidcRPMetaDataOptionsDisplayName' => '{{ rp_name }}', \
         'oidcRPMetaDataOptionsRedirectUris' => \
-            '{{ rp.redirection_uris | join(' ') }}', \
+            {#- This field seems to be required, even for service providers. #}
+            '{{
+                rp.redirection_uris | join(' ')
+                if 'redirection_uris' in rp
+                else 'https://' + rp_name + '/.hopefully-not-a-valid-path'
+            }}', \
         'oidcRPMetaDataOptionsIDTokenSignAlg' => 'RS256', \
         'oidcRPMetaDataOptionsIDTokenForceClaims' => 1, \
     }, \
@@ -162,7 +167,8 @@ applicationList = { \
     'applications' => { \
         'type' => 'category', \
         'catname' => 'Applications', \
-        {%- for rp_name in pillar.accounts.oidc.rps %}
+        {%- for rp_name, rp in pillar.accounts.oidc.rps.items()
+            if 'redirection_uris' in rp %}
         '{{ rp_name }}' => { \
             'type' => 'application', \
             'options' => { \

@@ -37,6 +37,7 @@ accounts:
     # Required. Relying parties.
     rps:
       some-client.example.com:
-        # Required. Redirection URIs.
+        # Redirection URIs. This is required for clients. Services that are not
+        # also clients should omit this.
         redirection_uris:
         - https://some-client.example.com
