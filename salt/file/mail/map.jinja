@@ -87,6 +87,11 @@ _database_dir = ${default_database_type}:${config_directory}
 
 message_size_limit = {{ mail.message_size_limit_bytes }}
 
+# TODO(dseomn): Enable this once Dovecot support SMTPUTF8 over LMTP. See
+# https://unix.stackexchange.com/questions/320091/configure-postfix-and-dovecot-lmtp-to-receive-mail-via-smtputf8
+# for more details.
+smtputf8_enable = no
+
 authorized_flush_users =
 authorized_mailq_users =
 
