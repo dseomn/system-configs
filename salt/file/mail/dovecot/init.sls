@@ -54,7 +54,9 @@ dovecot_running:
   - watch_in:
     - dovecot_running
 
-{{ dovecot.config_dir }}/10-passwd.passdb:
+{{ accounts_client.oauth2_client_secret_file(grains.id) }}
+
+{{ dovecot.config_dir }}/10-auth.passdb:
   file.managed:
   - group: {{ dovecot.group }}
   - mode: 0640
@@ -70,54 +72,7 @@ dovecot_running:
     - {{ dovecot.config_dir }} is clean
   - watch_in:
     - dovecot_running
-{{ dovecot.config_dir }}/10-passwd.userdb:
-  file.managed:
-  - group: {{ dovecot.group }}
-  - mode: 0640
-  - contents: |
-      {%- for account_name in pillar.mail.accounts %}
-      {{ account_name }}:::::::
-      {%- endfor %}
-  - require:
-    - {{ dovecot.config_dir }} exists
-  - require_in:
-    - {{ dovecot.config_dir }} is clean
-  - watch_in:
-    - dovecot_running
-{{ dovecot.config_dir }}/10-passwd.conf:
-  file.managed:
-  - contents: |
-      auth_username_chars = {{
-          '+-.'
-          '0123456789'
-          '@'
-          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-          'abcdefghijklmnopqrstuvwxyz'
-      }}
-      service auth-worker {
-        # No need to be root to read the passwd file.
-        user = $default_internal_user
-      }
-      passdb {
-        driver = passwd-file
-        args = {{ dovecot.config_dir }}/10-passwd.passdb
-      }
-      userdb {
-        driver = passwd-file
-        args = {{ dovecot.config_dir }}/10-passwd.userdb
-      }
-  - require:
-    - {{ dovecot.config_dir }} exists
-    - {{ dovecot.config_dir }}/10-passwd.passdb
-    - {{ dovecot.config_dir }}/10-passwd.userdb
-  - require_in:
-    - {{ dovecot.config_dir }} is clean
-  - watch_in:
-    - dovecot_running
-
-{{ accounts_client.oauth2_client_secret_file(grains.id) }}
-
-{{ dovecot.config_dir }}/20-oauth2.conf.ext:
+{{ dovecot.config_dir }}/10-auth.oauth2.conf.ext:
   file.managed:
   - source: salt://mail/dovecot/oauth2.conf.ext.jinja
   - user: root
@@ -131,18 +86,54 @@ dovecot_running:
     - {{ dovecot.config_dir }} is clean
   - watch_in:
     - dovecot_running
-{{ dovecot.config_dir }}/20-oauth2.conf:
+{{ dovecot.config_dir }}/10-auth.userdb:
+  file.managed:
+  - group: {{ dovecot.group }}
+  - mode: 0640
+  - contents: |
+      {%- for account_name in pillar.mail.accounts %}
+      {{ account_name }}:::::::
+      {%- endfor %}
+  - require:
+    - {{ dovecot.config_dir }} exists
+  - require_in:
+    - {{ dovecot.config_dir }} is clean
+  - watch_in:
+    - dovecot_running
+{{ dovecot.config_dir }}/10-auth.conf:
   file.managed:
   - contents: |
-      auth_mechanisms = $auth_mechanisms oauthbearer xoauth2
+      auth_mechanisms = plain oauthbearer xoauth2
+      auth_username_chars = {{
+          '+-.'
+          '0123456789'
+          '@'
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+          'abcdefghijklmnopqrstuvwxyz'
+      }}
+      service auth-worker {
+        # No need to be root to read the passwd file.
+        user = $default_internal_user
+      }
+      passdb {
+        driver = passwd-file
+        mechanisms = plain
+        args = {{ dovecot.config_dir }}/10-auth.passdb
+      }
       passdb {
         driver = oauth2
         mechanisms = oauthbearer xoauth2
-        args = {{ dovecot.config_dir }}/20-oauth2.conf.ext
+        args = {{ dovecot.config_dir }}/10-auth.oauth2.conf.ext
+      }
+      userdb {
+        driver = passwd-file
+        args = {{ dovecot.config_dir }}/10-auth.userdb
       }
   - require:
     - {{ dovecot.config_dir }} exists
-    - {{ dovecot.config_dir }}/20-oauth2.conf.ext
+    - {{ dovecot.config_dir }}/10-auth.passdb
+    - {{ dovecot.config_dir }}/10-auth.oauth2.conf.ext
+    - {{ dovecot.config_dir }}/10-auth.userdb
   - require_in:
     - {{ dovecot.config_dir }} is clean
   - watch_in:
