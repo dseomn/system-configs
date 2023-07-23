@@ -209,13 +209,14 @@ nextcloud_usable:
 upgrade_nextcloud:
   cron.present:
   - name: >-
+      {
       {{ php.bin }}
       {{ occ }}
       app:update
       --quiet
       --all
       &&
-      {{ php.bin }} {{ occ }} update:check | grep -v '^Everything up to date$'
+      {{ php.bin }} {{ occ }} update:check
       &&
       {{ php.bin }}
       {{ occ }}
@@ -231,6 +232,8 @@ upgrade_nextcloud:
       {{ occ }}
       db:add-missing-indices
       --quiet
+      ;
+      } | grep -v '^Everything up to date$' || true
   - user: {{ apache_httpd.user }}
   - identifier: db4ae9a2-802e-490d-884f-5a6e86ce3db9
   - minute: random
