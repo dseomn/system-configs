@@ -22,7 +22,7 @@ from typing import IO
 import unittest
 
 
-class FooTest(unittest.TestCase):
+class EjabberdAuthenticationTest(unittest.TestCase):
 
     @contextlib.contextmanager
     def _main(
