@@ -19,11 +19,11 @@ Much of the complexity here comes from working around PrivateTmp=true in
 ejabberd.service.
 """
 
+from collections.abc import Generator, Sequence
 import contextlib
 import os
 import shutil
 import subprocess
-from typing import ContextManager, Sequence
 
 
 def _wait_and_check(popen: subprocess.Popen) -> None:
@@ -68,7 +68,7 @@ def _ejabberd_tempfile(
     *,
     nsenter: Sequence[str],
     copy_to: str,
-) -> ContextManager[str]:
+) -> Generator[str, None, None]:
     with contextlib.ExitStack() as exit_stack:
         tempfile_ = subprocess.run(
             (*nsenter, 'mktemp'),
@@ -96,7 +96,7 @@ def _ejabberd_tempdir(
     *,
     nsenter: Sequence[str],
     copy_to: str,
-) -> ContextManager[str]:
+) -> Generator[str, None, None]:
     with contextlib.ExitStack() as exit_stack:
         tempdir = subprocess.run(
             (*nsenter, 'mktemp', '-d'),

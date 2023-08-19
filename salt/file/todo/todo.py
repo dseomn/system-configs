@@ -79,13 +79,18 @@ class _TodoConfig:
         except ValueError as e:
             raise ValueError(f'Invalid start {self.start!r}') from e
         try:
-            self.recurrence_rule_parsed = (  #
+            recurrence_rule_parsed = (  #
                 None if self.recurrence_rule is None else
                 dateutil.rrule.rrulestr(self.recurrence_rule,
                                         dtstart=self.start_parsed))
         except ValueError as e:
             raise ValueError(
                 f'Invalid recurrence_rule {self.recurrence_rule!r}') from e
+        if isinstance(recurrence_rule_parsed, dateutil.rrule.rruleset):
+            raise ValueError(
+                'recurrence_rule should be an rrule, not an rruleset: '
+                f'{self.recurrence_rule!r}')
+        self.recurrence_rule_parsed = recurrence_rule_parsed
 
 
 @dataclasses.dataclass

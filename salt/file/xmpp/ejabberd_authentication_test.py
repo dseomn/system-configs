@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Generator
 import contextlib
 import crypt
 import pathlib
@@ -30,7 +31,7 @@ class EjabberdAuthenticationTest(unittest.TestCase):
         *,
         config: str = '',
         max_passwords_per_user: int = 25,
-    ) -> contextlib.AbstractContextManager[tuple[IO[bytes], IO[bytes]]]:
+    ) -> Generator[tuple[IO[bytes], IO[bytes]], None, None]:
         """Runs the main program, yielding its (stdin, stdout)."""
         with tempfile.NamedTemporaryFile(mode='w+t') as config_file:
             config_file.write(config)

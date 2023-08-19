@@ -174,6 +174,17 @@ class TodoTest(parameterized.TestCase):
             error_regex='Invalid recurrence_rule',
         ),
         dict(
+            testcase_name='config_invalid_recurrence_rule_is_rruleset',
+            config=dict(some_group=dict(todos=dict(some_todo=dict(
+                email_headers={},
+                summary='foo',
+                start='20010101T000000Z',
+                recurrence_rule='RRULE:FREQ=DAILY\nRRULE:FREQ=DAILY',
+            )))),
+            error_class=ValueError,
+            error_regex='not an rruleset',
+        ),
+        dict(
             testcase_name='state_unexpected_key',
             config={},
             state=dict(some_todo=dict(kumquat='')),
