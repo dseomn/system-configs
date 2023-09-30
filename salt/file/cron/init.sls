@@ -13,11 +13,20 @@
 # limitations under the License.
 
 
+cron_pkgs:
+  pkg.installed:
+  - pkgs:
+    - cron
+  - reload_modules: true
+
+
 root_crontab_path:
   cron.env_present:
   - name: PATH
   - value: {{ salt['environ.get']('PATH') | tojson }}
   - user: root
+  - require:
+    - cron_pkgs
 
 
 {% set pillar_job_id_prefix = '58623700-61fe-456a-8104-73472b24211e/' %}
@@ -34,16 +43,20 @@ root_crontab_path:
   {% for arg in args %}
   - {{ arg | tojson }}
   {% endfor %}
+  - require:
+    - cron_pkgs
 {% endfor %}
 {% endfor %}
 
 {% for username in salt.user.list_users() %}
-{% for cron_job in salt.cron.list_tab(username).crons
+{% for cron_job in salt.cron.list_tab(username).get('crons', ())
     if cron_job.identifier.startswith(pillar_job_id_prefix) and
     cron_job.identifier not in pillar_job_ids_by_user.get(username, {}) %}
 {{ cron_job.identifier | tojson }}:
   cron.absent:
   - user: {{ username }}
   - identifier: {{ cron_job.identifier | tojson }}
+  - require:
+    - cron_pkgs
 {% endfor %}
 {% endfor %}
