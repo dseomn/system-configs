@@ -58,6 +58,14 @@ warn about network interface changes:
       # This system uses systemd-networkd to configure its interfaces.
   - onchanges_in:
     - warn about network interface changes
+
+other network managing packages removed:
+  pkg.removed:
+  - pkgs:
+    - netplan-generator
+    - netplan.io
+  - onchanges_in:
+    - warn about network interface changes
 {% endif %}
 
 
