@@ -22,6 +22,7 @@
 {% set mail = salt.grains.filter_by({
     'Debian': {
         'pkgs': (
+            'libsasl2-modules',
             'postfix',
             'postfix-cdb',
         ),
