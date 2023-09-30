@@ -34,6 +34,7 @@
     'federation',
     'files',
     'files_pdfviewer',
+    'files_reminders',
     'files_rightclick',
     'files_sharing',
     'files_trashbin',
