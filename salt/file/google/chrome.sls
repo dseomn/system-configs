@@ -14,18 +14,28 @@
 
 
 include:
+- debian
 - google.repo_key
 
 {% if grains.os_family == 'Debian' and grains.osarch == 'amd64' %}
 chrome:
-  pkgrepo.managed:
-  - name: |
+  file.managed:
+  - name: /etc/apt/sources.list.d/google-chrome.list
+  - contents: |
+      ### THIS FILE IS AUTOMATICALLY CONFIGURED ###
+      # You may comment out this entry, but any other modifications may be lost.
       deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main
-  - file: /etc/apt/sources.list.d/google-chrome.list
   - require:
     - sls: google.repo_key
+  - require_in:
+    - /etc/apt/sources.list.d is clean
+  - onchanges_in:
+    - apt_update
   pkg.installed:
   - name: google-chrome-stable
+  - require:
+    - file: chrome
+    - apt_update
 {% else %}
 error:
   cmd.run:

@@ -19,12 +19,20 @@ preferences:
   - source: salt://debian/preferences.jinja
   - template: jinja
 
-sources.list:
-  file.managed:
-  - name: /etc/apt/sources.list
-  - source: salt://debian/sources.list.jinja
-  - template: jinja
+apt_update:
   cmd.run:
   - name: apt-get update
-  - onchanges:
-    - file: sources.list
+
+/etc/apt/sources.list:
+  file.managed:
+  - source: salt://debian/sources.list.jinja
+  - template: jinja
+  - onchanges_in:
+    - apt_update
+
+/etc/apt/sources.list.d is clean:
+  file.directory:
+  - name: /etc/apt/sources.list.d
+  - clean: true
+  - onchanges_in:
+    - apt_update
