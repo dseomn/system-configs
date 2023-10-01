@@ -21,8 +21,8 @@ This makes it possible to have multiple passwords per user (up to
 
 The format of the file is one password per line. Each line has three columns
 separated by colons: username, domain name, and hashed salted password. See
-https://docs.python.org/3/library/crypt.html#crypt.crypt for how to generate
-values for the last column. For example, if the only user were
+https://passlib.readthedocs.io/en/stable/lib/passlib.hash.html for how to
+generate values for the last column. For example, if the only user were
 alice@example.com and her password were "password", the file might look like:
 
 alice:example.com:$6$wntdG0RUDD9lt304$06Lf2Lrlqn7rgdTc3VL4lFjUOz3AadknDPEmrpWyFr5Jzkv9lQyyRz7mWYJ/ILnBRHfHbori.X4sR9B5DcKB60
@@ -48,12 +48,14 @@ passwords a user has configured.
 import argparse
 import collections
 from collections.abc import Collection, Iterable, Mapping
-import crypt
 import enum
 import hmac
 import pathlib
 import struct
 import sys
+
+import passlib.apps
+import passlib.hash
 
 # Map from (user, server) to that user's crypted passwords.
 _Config = Mapping[tuple[bytes, bytes], Collection[str]]
@@ -149,8 +151,12 @@ def _auth(operation_args: bytes, *, config: _Config) -> _Response:
         return _Response.FAILURE
     password_checks_failure = bytes((False,) * len(crypted_passwords))
     password_checks_actual = bytes(
-        hmac.compare_digest(crypt.crypt(password_str, salt=crypted), crypted)
-        for crypted in crypted_passwords)
+        passlib.apps.custom_app_context.verify(
+            secret=password_str,
+            hash=crypted,
+        )
+        for crypted in crypted_passwords
+    )
     if hmac.compare_digest(password_checks_failure, password_checks_actual):
         return _Response.FAILURE
     else:

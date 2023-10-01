@@ -14,13 +14,18 @@
 
 from collections.abc import Generator
 import contextlib
-import crypt
 import pathlib
 import subprocess
 import sys
 import tempfile
 from typing import IO
 import unittest
+
+import passlib.hash
+
+
+def _crypt(password: str) -> str:
+    return passlib.hash.sha512_crypt.using(rounds=1000).hash(password)
 
 
 class EjabberdAuthenticationTest(unittest.TestCase):
@@ -117,8 +122,8 @@ class EjabberdAuthenticationTest(unittest.TestCase):
 
     def test_auth_wrong_password_failure(self):
         with self._main(
-                config=(f'alice:example.com:{crypt.crypt("foo")}\n'
-                        f'bob:example.com:{crypt.crypt("bar")}\n'),  #
+                config=(f'alice:example.com:{_crypt("foo")}\n'
+                        f'bob:example.com:{_crypt("bar")}\n'),  #
         ) as (stdin, stdout):
             stdin.write(b'\x00\x18auth:bob:example.com:foo')
             stdin.close()
@@ -126,8 +131,8 @@ class EjabberdAuthenticationTest(unittest.TestCase):
 
     def test_auth_success(self):
         with self._main(
-                config=(f'alice:example.com:{crypt.crypt("bar")}\n'
-                        f'alice:example.com:{crypt.crypt("foo")}\n'),  #
+                config=(f'alice:example.com:{_crypt("bar")}\n'
+                        f'alice:example.com:{_crypt("foo")}\n'),  #
         ) as (stdin, stdout):
             stdin.write(b'\x00\x1aauth:alice:example.com:foo')
             stdin.close()
@@ -136,7 +141,7 @@ class EjabberdAuthenticationTest(unittest.TestCase):
     def test_auth_success_colon_in_password(self):
         # https://github.com/processone/ejabberd/issues/3677
         with self._main(
-                config=f'alice:example.com:{crypt.crypt("foo:bar")}\n',  #
+                config=f'alice:example.com:{_crypt("foo:bar")}\n',  #
         ) as (stdin, stdout):
             stdin.write(b'\x00\x1eauth:alice:example.com:foo:bar')
             stdin.close()

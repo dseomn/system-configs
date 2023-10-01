@@ -33,6 +33,7 @@ jobs:
         pip install \
           absl-py \
           freezegun \
+          passlib \
           pytest \
           pytest-cov \
           python-dateutil \

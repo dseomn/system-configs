@@ -28,7 +28,7 @@ xmpp:
 
         alice:
           # Required. Hashed salted passwords. See
-          # https://docs.python.org/3/library/crypt.html#crypt.crypt for how to
-          # generate them.
+          # https://passlib.readthedocs.io/en/stable/lib/passlib.hash.html for
+          # how to generate them.
           crypted_passwords:
           - '$6$...'

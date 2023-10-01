@@ -65,12 +65,14 @@ show dovecot_password for relay:
       printf '%s' "$SCRIPT" | python3 - {{ relay_password_file }}
   - env:
     - SCRIPT: |
-        import crypt
         import sys
+        import passlib.hash
         with open(sys.argv[1], mode='rt') as password_file:
             password = password_file.read().rstrip('\n')
-        crypted = crypt.crypt(password, crypt.METHOD_SHA512)
+        crypted = passlib.hash.sha512_crypt.hash(password)
         print('{SHA512-CRYPT}' + crypted)
+  - require:
+    - mail_pkgs
   - onchanges:
     - {{ relay_password_file }}
   test.configurable_test_state:
