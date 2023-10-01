@@ -93,6 +93,9 @@ base:
   - plymouth
   - ssh.server
 
+  'G@role:media-tracker':
+  - media_tracker
+
   'G@role:nas':
   - nas
   - nas.http
