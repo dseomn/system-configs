@@ -126,34 +126,6 @@ media-center autologin:
       }
 
 
-/var/local/media-center/.local/bin/leave-a-note:
-  file.managed:
-  - user: media-center
-  - group: media-center
-  - mode: 0755
-  - makedirs: true
-  - contents: |
-      #!/bin/bash -e
-      if mail --subject='note from media center' root; then
-        printf '%s' 'Sent. Press Enter to continue.'
-      else
-        printf '%s' "ERROR: mail returned $?."
-      fi
-      read -r x
-/var/local/media-center/.local/share/applications/leave-a-note.desktop:
-  file.managed:
-  - user: media-center
-  - group: media-center
-  - makedirs: true
-  - contents: |
-      [Desktop Entry]
-      Type=Application
-      Name=Leave a Note
-      Icon=mail-send
-      Exec=/var/local/media-center/.local/bin/leave-a-note
-      Terminal=true
-
-
 /var/local/media-center/.local/share/applications/fix-audio.desktop:
   file.managed:
   - user: media-center
