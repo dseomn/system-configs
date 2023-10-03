@@ -175,7 +175,7 @@ media-center autologin:
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-battery-type "'nothing'"
       gsettings set org.gnome.shell enabled-extensions \
-        "['caffeine@patapon.info']"
+        "['caffeine@patapon.info', 'drive-menu@gnome-shell-extensions.gcampax.github.com']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
       gsettings set org.gnome.Lollypop artist-artwork false
