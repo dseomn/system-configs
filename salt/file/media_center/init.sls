@@ -50,6 +50,50 @@ media_center_pkgs:
 {% endfor %}
 
 
+{{ media_center.firefox_config_dir }}/local.js:
+  file.managed:
+  - contents: |
+      pref("browser.aboutwelcome.enabled", false, locked);
+      pref("browser.download.always_ask_before_handling_new_types", true, locked);
+      pref("browser.download.start_downloads_in_tmp_dir", true, locked);
+      pref("browser.download.useDownloadDir", false, locked);
+      pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons", false, locked);
+      pref("browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features", false, locked);
+      pref("browser.newtabpage.enabled", false, locked);
+      pref("browser.startup.homepage", "chrome://browser/content/blanktab.html", locked);
+      pref("browser.urlbar.suggest.quicksuggest.sponsored", false, locked);
+      pref("extensions.formautofill.addresses.enabled", false, locked);
+      pref("extensions.formautofill.creditCards.enabled", false, locked);
+      pref("privacy.clearOnShutdown.cache", true, locked);
+      pref("privacy.clearOnShutdown.cookies", true, locked);
+      pref("privacy.clearOnShutdown.downloads", true, locked);
+      pref("privacy.clearOnShutdown.formdata", true, locked);
+      pref("privacy.clearOnShutdown.history", true, locked);
+      pref("privacy.clearOnShutdown.offlineApps", true, locked);
+      pref("privacy.clearOnShutdown.openWindows", true, locked);
+      pref("privacy.clearOnShutdown.sessions", true, locked);
+      pref("privacy.clearOnShutdown.siteSettings", true, locked);
+      pref("privacy.history.custom", true, locked);
+      pref("privacy.sanitize.sanitizeOnShutdown", true, locked);
+      pref("signon.rememberSignons", false, locked);
+  - require:
+    - media_center_pkgs
+
+{% load_yaml as firefox_policies %}
+policies:
+  Bookmarks: {{
+      salt['pillar.get']('media_center:firefox_bookmarks', ()) | tojson
+  }}
+  NoDefaultBookmarks: true
+{% endload %}
+{{ media_center.firefox_policies_file }}:
+  file.managed:
+  - makedirs: true
+  - contents: {{ firefox_policies | tojson(indent=2, sort_keys=True) | tojson }}
+  - require:
+    - media_center_pkgs
+
+
 {{ common.system_user_and_group(
     'media-center',
     groups=media_center.user_groups,
