@@ -23,9 +23,6 @@
 
 <?php
 
-// TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1040705): Remove this.
-require_once("GuzzleHttp/autoload.php");
-
 $config = [];
 
 $config['db_dsnw'] =
@@ -59,11 +56,6 @@ $config['trusted_host_patterns'] = [
 ];
 
 $config['max_message_size'] = {{ mail.message_size_limit_bytes }};
-
-// TODO(roundcube >= 1.6.2): Remove this once
-// https://github.com/roundcube/roundcubemail/issues/8878 is fixed in the Debian
-// version.
-$config['request_path'] = 'SCRIPT_NAME';
 
 $config['plugins'] = [];
 
