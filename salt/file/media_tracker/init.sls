@@ -28,13 +28,13 @@ media_tracker_pkgs:
     - git
     - protobuf-compiler
     - python3-absl
-    - python3-cachecontrol
     - python3-dateutil
     - python3-filelock
     - python3-immutabledict
     - python3-pip
     - python3-protobuf
     - python3-requests
+    - python3-requests-cache
     - python3-setuptools
     - python3-setuptools-protobuf
     - python3-urllib3
