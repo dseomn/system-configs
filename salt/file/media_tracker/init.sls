@@ -31,6 +31,8 @@ media_tracker_pkgs:
     - python3-dateutil
     - python3-filelock
     - python3-immutabledict
+    - python3-jmespath
+    - python3-jsonschema
     - python3-pip
     - python3-protobuf
     - python3-requests
