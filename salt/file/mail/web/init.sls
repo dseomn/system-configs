@@ -205,3 +205,16 @@ roundcube database migrations:
     - {{ apache_httpd.config_dir }}/sites-enabled is clean
   - watch_in:
     - apache_httpd_running
+
+{{ apache_httpd.config_dir }}/conf-enabled/roundcube.conf:
+  file.managed:
+  - contents: |
+      # The Debian package re-creates a symlink at this path on every upgrade.
+      # This file exists to prevent that from happening.
+  - follow_symlinks: false
+  - require:
+    - {{ apache_httpd.config_dir }}/conf-enabled exists
+  - require_in:
+    - {{ apache_httpd.config_dir }}/conf-enabled is clean
+  - watch_in:
+    - apache_httpd_running
