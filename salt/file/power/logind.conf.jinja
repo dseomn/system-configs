@@ -13,7 +13,10 @@
 # limitations under the License.
 
 [Login]
-{% if 'desktop' not in grains.role %}
+{% if 'desktop' in grains.role %}
+HandleLidSwitchExternalPower=lock
+HandleLidSwitchDocked=ignore
+{% else %}
 HandleLidSwitch=ignore
 HandleLidSwitchExternalPower=ignore
 HandleLidSwitchDocked=ignore
