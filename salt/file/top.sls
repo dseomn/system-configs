@@ -73,6 +73,9 @@ base:
   - ssh.server
   - standard
 
+  'G@role:hp-printer':
+  - hp_printer
+
   'G@role:irc:bouncer':
   - irc.bouncer
 
