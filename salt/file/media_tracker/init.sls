@@ -107,22 +107,36 @@ rock_paper_sand_installed:
 {% endfor %}
 
 {% for user in salt.user.list_users() %}
-{% set job_id = user + '/8ecfa7d5-6905-4b4d-9d18-9094f74f0963' %}
 {% if user in pillar.media_tracker.users %}
-{{ job_id | tojson }}:
+rock_paper_sand_keep_cache_warm_{{ user }}:
   cron.present:
-  - name: /usr/local/bin/rock-paper-sand reports notify
+  - name: /usr/local/bin/rock-paper-sand reports print > /dev/null 2>&1 || true
   - user: {{ user }}
-  - identifier: {{ job_id | tojson }}
+  - identifier: {{ user }}/cbc46066-f3f1-493c-b59a-7da842500b8c
   - minute: random
   - require:
     - rock_paper_sand_installed
     - ~{{ user }}/.config/rock-paper-sand/config.yaml
     - ~{{ user }}/.local/share/rock-paper-sand
+rock_paper_sand_notify_{{ user }}:
+  cron.present:
+  - name: /usr/local/bin/rock-paper-sand reports notify
+  - user: {{ user }}
+  - identifier: {{ user }}/8ecfa7d5-6905-4b4d-9d18-9094f74f0963
+  - minute: random
+  - hour: random
+  - require:
+    - rock_paper_sand_installed
+    - ~{{ user }}/.config/rock-paper-sand/config.yaml
+    - ~{{ user }}/.local/share/rock-paper-sand
 {% else %}
-{{ job_id | tojson }}:
+rock_paper_sand_keep_cache_warm_{{ user }}:
   cron.absent:
   - user: {{ user }}
-  - identifier: {{ job_id | tojson }}
+  - identifier: {{ user }}/cbc46066-f3f1-493c-b59a-7da842500b8c
+rock_paper_sand_notify_{{ user }}:
+  cron.absent:
+  - user: {{ user }}
+  - identifier: {{ user }}/8ecfa7d5-6905-4b4d-9d18-9094f74f0963
 {% endif %}
 {% endfor %}
