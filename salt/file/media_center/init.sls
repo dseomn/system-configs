@@ -17,12 +17,14 @@
 {% from 'flatpak/map.jinja' import flatpak %}
 {% from 'gdm/map.jinja' import gdm %}
 {% from 'media_center/map.jinja' import media_center %}
+{% from 'network/firewall/map.jinja' import nftables %}
 
 
 include:
 - common
 - gdm
 - gdm.custom_conf
+- network.firewall
 {% if media_center.flatpak_apps %}
 - flatpak
 {% endif %}
@@ -187,6 +189,130 @@ media-center autologin:
           'pipewire.socket',
           'wireplumber.service',
       )) }}
+
+
+/var/local/media-center/.mpd:
+  file.directory:
+  - user: media-center
+  - group: media-center
+  - require:
+    - media-center user and group
+/var/local/media-center/.config/mpd/mpd.conf:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - require:
+    - media-center user and group
+    - /var/local/media-center/.mpd
+  - contents: |
+      db_file "~/.mpd/database"
+      state_file "~/.mpd/state"
+      restore_paused "yes"
+      follow_outside_symlinks "yes"
+      follow_inside_symlinks "yes"
+      replaygain "album"
+      audio_output {
+        name "default"
+        # TODO(mpd >= 0.23.13): Try switching to pipewire. With mpd 0.23.12 I
+        # was getting the error below which looks like it might be related to
+        # https://github.com/MusicPlayerDaemon/MPD/issues/1812 and
+        # https://github.com/MusicPlayerDaemon/MPD/issues/1753.
+        #
+        # 'builder->data == ((void *)0) || builder->state.offset < sizeof(struct spa_pod) || builder->state.offset == ((uint64_t)sizeof(struct spa_pod) + (((struct spa_pod*)(pod))->size))' failed at ../src/modules/module-protocol-native.c:1395 assert_single_pod()
+        type "pulse"
+      }
+
+{{ nftables.config_dir }}/50-mpd.conf:
+  file.managed:
+  - contents: |
+      add rule inet filter input tcp dport 6600 accept
+  - require:
+    - create_nftables_config_dir
+  - require_in:
+    - manage_nftables_config_dir
+  - onchanges_in:
+    - warn about firewall changes
+
+mpd_system_service:
+  service.dead:
+  - name: mpd.service
+  - enable: false
+  - require:
+    - media_center_pkgs
+mpd_user_service:
+  cmd.run:
+  - name: systemctl --machine=media-center@ --user enable mpd.service
+  - unless: systemctl --machine=media-center@ --user is-enabled mpd.service
+  - require:
+    - media-center user and group
+    - media_center_pkgs
+    - /var/local/media-center/.config/mpd/mpd.conf
+
+/var/local/media-center/.config/mpDris2/mpDris2.conf:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - require:
+    - media-center user and group
+  - contents: |
+      [Bling]
+      mmkeys = True
+      notify = False
+/etc/systemd/user/mpDris2.service.d/50-salt-media-center.conf:
+  file.managed:
+  - makedirs: true
+  - contents: |
+      [Unit]
+      # Override Debian's ConditionUser=!@system which prevents media-center
+      # from running this service.
+      ConditionUser=
+mpdris2_global_user_service:
+  cmd.run:
+  - name: systemctl --global disable mpDris2.service
+  - onlyif: systemctl --global is-enabled mpDris2.service
+  - require:
+    - media_center_pkgs
+mpdris2_user_service:
+  cmd.run:
+  - name: systemctl --machine=media-center@ --user enable mpDris2.service
+  - unless: systemctl --machine=media-center@ --user is-enabled mpDris2.service
+  - require:
+    - media-center user and group
+    - media_center_pkgs
+    - /var/local/media-center/.config/mpDris2/mpDris2.conf
+
+/etc/mpdscribble.conf:
+  file.managed:
+  - user: root
+  - group: mpdscribble
+  - mode: 0640
+  - require:
+    - media_center_pkgs
+  - contents: |
+      {% for scrobbler_name, scrobbler_config in
+          pillar.media_center.get('mpdscribble', {}).get('scrobblers', {}).items() %}
+      [{{ scrobbler_name}}]
+      journal = /var/cache/mpdscribble/{{ scrobbler_name }}.journal
+      {{ scrobbler_config | indent(6) }}
+      {% endfor %}
+mpdscribble_global_user_service:
+  cmd.run:
+  - name: systemctl --global disable mpdscribble.service
+  - onlyif: systemctl --global is-enabled mpdscribble.service
+  - require:
+    - media_center_pkgs
+mpdscribble_enabled:
+  service.enabled:
+  - name: mpdscribble.service
+  - require:
+    - media_center_pkgs
+mpdscribble_running:
+  service.running:
+  - name: mpdscribble.service
+  - watch:
+    - /etc/mpdscribble.conf
 
 
 {{ media_center.stepmania_user_data_folder }}/Save/Preferences.ini:

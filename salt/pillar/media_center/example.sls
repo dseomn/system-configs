@@ -29,3 +29,12 @@ media_center:
   # Symlinks to make in the media center user's home directory.
   home_symlinks:
     Videos: /path/to/Videos
+
+  # Config for mpdscribble.
+  mpdscribble:
+    # Scrobblers, see mpdscribble(1).
+    scrobblers:
+      lastfm: |
+        url = https://post.audioscrobbler.com/
+        username = foo
+        password = bar
