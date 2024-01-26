@@ -214,12 +214,13 @@ media-center autologin:
       gsettings set org.gnome.desktop.background picture-uri \
         "'file://{{ background_image }}'"
       gsettings set org.gnome.desktop.screensaver lock-enabled false
+      gsettings set org.gnome.desktop.session idle-delay 0
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-ac-type "'nothing'"
       gsettings set org.gnome.settings-daemon.plugins.power \
         sleep-inactive-battery-type "'nothing'"
       gsettings set org.gnome.shell enabled-extensions \
-        "['caffeine@patapon.info', 'drive-menu@gnome-shell-extensions.gcampax.github.com']"
+        "['drive-menu@gnome-shell-extensions.gcampax.github.com']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
       gsettings set org.gnome.Lollypop artist-artwork false
