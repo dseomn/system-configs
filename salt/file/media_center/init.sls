@@ -349,6 +349,8 @@ mpdscribble_running:
         "['drive-menu@gnome-shell-extensions.gcampax.github.com']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
+      gsettings set org.gnome.shell.keybindings toggle-overview \
+        "['<Super>s', 'Super_L', 'Super_R']"
       gsettings set org.gnome.Lollypop artist-artwork false
       gsettings set org.gnome.Lollypop auto-update false
       gsettings set org.gnome.Lollypop network-access-acl \
