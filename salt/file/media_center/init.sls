@@ -212,6 +212,7 @@ media-center autologin:
       follow_outside_symlinks "yes"
       follow_inside_symlinks "yes"
       replaygain "album"
+      replaygain_preamp "-5.0"
       audio_output {
         name "default"
         # TODO(mpd >= 0.23.13): Try switching to pipewire. With mpd 0.23.12 I
@@ -358,6 +359,7 @@ mpdscribble_running:
       gsettings set org.gnome.Lollypop notification-flag {{ 0b11 }}
       gsettings set org.gnome.Lollypop notifications "'mpris'"
       gsettings set org.gnome.Lollypop replay-gain "'album'"
+      gsettings set org.gnome.Lollypop replay-gain-db -5.0
       gsettings set org.gnome.Lollypop show-tag-tracknumber true
       gsettings set org.gnome.Lollypop shown-album-lists \
         "[-4, -13, -15, -99, -101, -103]"
