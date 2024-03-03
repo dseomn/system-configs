@@ -171,6 +171,21 @@ media-center autologin:
         channelmix.upmix = false
       }
 
+/var/local/media-center/.config/autostart/easyeffects-service.desktop:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      [Desktop Entry]
+      Name=Easy Effects
+      Exec=easyeffects --gapplication-service
+      Terminal=false
+      Type=Application
+  - require:
+    - media-center user and group
+    - media_center_pkgs
+
 
 /var/local/media-center/.local/share/applications/fix-audio.desktop:
   file.managed:
@@ -212,7 +227,7 @@ media-center autologin:
       follow_outside_symlinks "yes"
       follow_inside_symlinks "yes"
       replaygain "album"
-      replaygain_preamp "-5.0"
+      replaygain_preamp "-12.0"
       audio_output {
         name "default"
         # TODO(mpd >= 0.23.13): Try switching to pipewire. With mpd 0.23.12 I
@@ -338,6 +353,12 @@ mpdscribble_running:
   - makedirs: true
   - contents: |
       #!/bin/bash -e
+      gsettings set com.github.wwmm.easyeffects.streamoutputs blocklist \
+        "['Lollypop', 'Music Player Daemon']"
+      gsettings set com.github.wwmm.easyeffects.streamoutputs plugins \
+        "['equalizer#0']"
+      dconf write \
+        /com/github/wwmm/easyeffects/streamoutputs/equalizer/0/input-gain -12.0
       gsettings set org.gnome.desktop.background picture-uri \
         "'file://{{ background_image }}'"
       gsettings set org.gnome.desktop.screensaver lock-enabled false
@@ -359,7 +380,7 @@ mpdscribble_running:
       gsettings set org.gnome.Lollypop notification-flag {{ 0b11 }}
       gsettings set org.gnome.Lollypop notifications "'mpris'"
       gsettings set org.gnome.Lollypop replay-gain "'album'"
-      gsettings set org.gnome.Lollypop replay-gain-db -5.0
+      gsettings set org.gnome.Lollypop replay-gain-db -12.0
       gsettings set org.gnome.Lollypop show-tag-tracknumber true
       gsettings set org.gnome.Lollypop shown-album-lists \
         "[-4, -13, -15, -99, -101, -103]"
