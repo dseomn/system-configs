@@ -13,15 +13,17 @@
 # limitations under the License.
 
 
-# Salt's debconf state doesn't work without this.
-debconf-utils:
-  pkg.installed: []
+debian_extras_pkgs:
+  pkg.installed:
+  - pkgs:
+    - apt-listbugs
+    - apt-listchanges
+    - aptitude
+    - debconf-utils  # Salt's debconf state doesn't work without this.
+    - debian-security-support
+    - mailutils  # Provides mailx which unattended-upgrades needs to send email.
+    - unattended-upgrades
 
-apt-listbugs:
-  pkg.installed: []
-
-apt-listchanges:
-  pkg.installed: []
 
 /etc/apt/listchanges.conf.d/local.conf:
   file.managed:
@@ -30,22 +32,11 @@ apt-listchanges:
       frontend=mail
       headers=true
 
-aptitude:
-  pkg.installed: []
-
-debian-security-support:
-  pkg.installed: []
 
 unattended-upgrades:
-  pkg.installed: []
   file.managed:
   - name: /etc/apt/apt.conf.d/50unattended-upgrades-local
   - source: salt://debian/extras/unattended-upgrades-local.apt.conf
-
-# unattended-upgrades requires a package that provides mailx in order to send
-# email. mailutils provides mailx.
-mailutils:
-  pkg.installed: []
 
 # This is a crontab entry instead of using APT::Periodic::Update-Package-Lists
 # and APT::Periodic::Unattended-Upgrade for a few reasons:
