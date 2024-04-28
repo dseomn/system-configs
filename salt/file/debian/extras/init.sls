@@ -51,3 +51,11 @@ apt-get -qq update && unattended-upgrade && /usr/share/unattended-upgrades/updat
   - identifier: 03d139b7-b29a-4bde-8e7d-2cf4dc58b52f
   - minute: random
   - hour: random
+
+
+aptitude search '?obsolete' || true:
+  cron.present:
+  - identifier: ccb4bc08-78a1-43b0-b08b-263032e5de83
+  - minute: random
+  - hour: random
+  - dayweek: random
