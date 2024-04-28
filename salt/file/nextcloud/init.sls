@@ -21,6 +21,13 @@
 {% from 'php/map.jinja' import php %}
 
 
+# Default apps that are disabled.
+#
+# logreader does not support the syslog log_type.
+{% set apps_disabled = [
+    'logreader',
+] %}
+
 # Non-default apps managed by this file.
 {% set apps_managed = [] %}
 
@@ -219,7 +226,7 @@ re-run state.apply to manage Nextcloud apps:
         apps_managed +
         pillar.nextcloud.apps.enabled
     )
-    | reject('in', pillar.nextcloud.apps.disabled)
+    | reject('in', apps_disabled + pillar.nextcloud.apps.disabled)
     | unique
 %}
 
