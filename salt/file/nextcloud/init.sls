@@ -21,52 +21,6 @@
 {% from 'php/map.jinja' import php %}
 
 
-# https://github.com/nextcloud/server/blob/master/core/shipped.json
-{% set apps_default = [
-    'activity',
-    'circles',
-    'cloud_federation_api',
-    'comments',
-    'contactsinteraction',
-    'dashboard',
-    'dav',
-    'federatedfilesharing',
-    'federation',
-    'files',
-    'files_pdfviewer',
-    'files_reminders',
-    'files_rightclick',
-    'files_sharing',
-    'files_trashbin',
-    'files_versions',
-    'firstrunwizard',
-    'logreader',
-    'lookup_server_connector',
-    'nextcloud_announcements',
-    'notifications',
-    'oauth2',
-    'password_policy',
-    'photos',
-    'privacy',
-    'provisioning_api',
-    'recommendations',
-    'related_resources',
-    'serverinfo',
-    'settings',
-    'sharebymail',
-    'support',
-    'survey_client',
-    'systemtags',
-    'text',
-    'theming',
-    'twofactor_backupcodes',
-    'updatenotification',
-    'user_status',
-    'viewer',
-    'weather_status',
-    'workflowengine',
-] %}
-
 # Non-default apps managed by this file.
 {% set apps_managed = [] %}
 
@@ -250,12 +204,21 @@ re-run state.apply to manage Nextcloud apps:
 
 {% else %}
 
+{% set apps_shipped =
+    salt.file.read('/var/local/nextcloud/webroot/core/shipped.json')
+    | load_json
+%}
 {% set apps = salt.cmd.run_stdout(
     php.bin + ' ' + occ + ' app:list --output=json',
     runas=apache_httpd.user,
 ) | load_json %}
 {% set apps_desired =
-    (apps_default + apps_managed + pillar.nextcloud.apps.enabled)
+    (
+        apps_shipped.alwaysEnabled +
+        apps_shipped.defaultEnabled +
+        apps_managed +
+        pillar.nextcloud.apps.enabled
+    )
     | reject('in', pillar.nextcloud.apps.disabled)
     | unique
 %}
