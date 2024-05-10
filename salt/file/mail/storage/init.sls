@@ -191,6 +191,7 @@ spamd_running:
   - identifier: {{ identifier | tojson }}
   - minute: random
   - hour: random
+  - dayweek: random
   - require:
     - {{ common.local_lib }}/spam-train
     - /var/cache/mail
