@@ -23,3 +23,8 @@ all:
 .in:
 	./preprocess '$<' '$@'
 all: salt/config/master
+
+
+salt/config/minion.d/local.conf:
+	id="$$(hostname --fqdn)" && ln -s "../minion.hosts/$${id}.conf" '$@'
+all: salt/config/minion.d/local.conf

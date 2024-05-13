@@ -1,3 +1,2 @@
 /master
-
-*-local.conf
+/minion.d/local.conf
