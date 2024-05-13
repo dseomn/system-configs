@@ -13,10 +13,13 @@
 # limitations under the License.
 
 
-all: salt/config/master
+all:
+.PHONY: all
 
 .SUFFIXES:
+
 
 .SUFFIXES: .in
 .in:
 	./preprocess '$<' '$@'
+all: salt/config/master
