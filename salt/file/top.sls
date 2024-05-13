@@ -64,6 +64,7 @@ base:
 
   'G@role:dev':
   - gvisor
+  - salt
 
   'G@role:home-router':
   - ddns
