@@ -15,7 +15,7 @@
  #}
 
 
-{% set xmpp = salt.grains.filter_by({
+{% set xmpp = {
     'Debian': {
         'pkgs': [
             'ejabberd',
@@ -29,4 +29,4 @@
         'ejabberd_rotate_logs': False,
         'ejabberd_data_dir': '/var/lib/ejabberd',
     },
-}) %}
+}[grains.os_family] %}

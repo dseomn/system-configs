@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% set system = salt.grains.filter_by({
+{% set system = {
     'Debian': {
         'pkgs': ('systemd-resolved',),
         'service': 'systemd-resolved',
@@ -21,7 +21,7 @@
         'resolv_conf': '/etc/resolv.conf',
         'resolv_conf_target': '/run/systemd/resolve/stub-resolv.conf',
     },
-}) %}
+}[grains.os_family] %}
 
 
 local_resolver_pkgs:

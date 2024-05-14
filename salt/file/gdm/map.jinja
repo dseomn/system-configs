@@ -15,7 +15,7 @@
  #}
 
 
-{% set gdm = salt.grains.filter_by({
+{% set gdm = {
     'Debian': {
         'pkgs': (
             'gdm3',
@@ -24,4 +24,4 @@
         'config_dir': '/etc/gdm3',
         'custom_conf': 'daemon.conf',
     },
-}) %}
+}[grains.os_family] %}

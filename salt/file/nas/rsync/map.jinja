@@ -15,7 +15,7 @@
  #}
 
 
-{% set nas_rsync = salt.grains.filter_by({
+{% set nas_rsync = {
     'Debian': {
         'pkgs': (
             'rsync',
@@ -23,4 +23,4 @@
         'config_file': '/etc/rsyncd.conf',
         'service': 'rsync.service',
     },
-}) %}
+}[grains.os_family] %}

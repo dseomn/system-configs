@@ -15,11 +15,11 @@
  #}
 
 
-{% set ddns = salt.grains.filter_by({
+{% set ddns = {
     'Debian': {
         'deps': ['curl'],
         'bin': '/usr/local/bin/ddns',
         'bin_txt': '/usr/local/bin/ddns-txt',
         'conf_dir': '/etc/ddns',
     },
-}) %}
+}[grains.os_family] %}

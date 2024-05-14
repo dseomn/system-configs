@@ -15,7 +15,7 @@
  #}
 
 
-{% set mail_storage = salt.grains.filter_by({
+{% set mail_storage = {
     'Debian': {
         'pkgs': (
             'dovecot-imapd',
@@ -29,4 +29,4 @@
         'spamd_service': 'spamd',
         'spamc_config_file': '/etc/spamassassin/spamc.conf',
     },
-}) %}
+}[grains.os_family] %}

@@ -15,8 +15,8 @@
  #}
 
 
-{% set grub = salt.grains.filter_by({
+{% set grub = {
     'Debian': {
         'default_grub_d': '/etc/default/grub.d',
     },
-}) %}
+}[grains.os_family] %}

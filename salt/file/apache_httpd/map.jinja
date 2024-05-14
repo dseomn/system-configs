@@ -18,7 +18,7 @@
 {% from 'port_mux/map.jinja' import port_mux %}
 
 
-{% set apache_httpd = salt.grains.filter_by({
+{% set apache_httpd = {
     'Debian': {
         'pkgs': ('apache2',),
         'service': 'apache2',
@@ -49,7 +49,7 @@
         ),
         'fcgid_pkgs': ('libapache2-mod-fcgid',),
     },
-}) %}
+}[grains.os_family] %}
 
 
 {% macro _enable_fragment(type, name, require) %}

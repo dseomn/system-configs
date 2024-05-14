@@ -15,7 +15,7 @@
  #}
 
 
-{% set mail_web = salt.grains.filter_by({
+{% set mail_web = {
     'Debian': {
         'pkgs': (
             'dbconfig-no-thanks',
@@ -27,4 +27,4 @@
         'static_root': '/usr/share/roundcube',
         'document_root': '/var/lib/roundcube/public_html',
     },
-}) %}
+}[grains.os_family] %}

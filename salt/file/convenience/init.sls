@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% set convenience = salt.grains.filter_by({
+{% set convenience = {
     'Debian': {
         'pkgs': [
             'bash-completion',
@@ -29,7 +29,7 @@
             'wget',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 
 pkgs:

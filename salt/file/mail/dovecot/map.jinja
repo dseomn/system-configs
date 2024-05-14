@@ -15,7 +15,7 @@
  #}
 
 
-{% set dovecot = salt.grains.filter_by({
+{% set dovecot = {
     'Debian': {
         'pkgs': (
             'dovecot-core',
@@ -26,4 +26,4 @@
         'config_dir': '/etc/dovecot/conf.d',
         'base_dir': '/run/dovecot',
     },
-}) %}
+}[grains.os_family] %}

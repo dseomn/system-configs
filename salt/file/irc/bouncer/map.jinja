@@ -25,11 +25,11 @@
         ],
     },
 } %}
-{% do irc_bouncer.update(salt.grains.filter_by({
+{% do irc_bouncer.update({
     'Debian': {
         'pkgs': ['znc'],
         'znc_user': '_znc',
         'znc_group': '_znc',
         'znc_service': 'znc.service',
     },
-})) %}
+}[grains.os_family]) %}

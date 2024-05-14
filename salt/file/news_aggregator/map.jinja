@@ -15,8 +15,8 @@
  #}
 
 
-{% set news_aggregator = salt.grains.filter_by({
+{% set news_aggregator = {
     'Debian': {
         'pkgs': ['rss2email'],
     },
-}) %}
+}[grains.os_family] %}

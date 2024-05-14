@@ -15,7 +15,7 @@
  #}
 
 
-{% set backup_source = salt.grains.filter_by({
+{% set backup_source = {
     'Debian': {
         'pkgs': [
             'borgbackup',
@@ -24,4 +24,4 @@
         'backup_exec': '/usr/local/sbin/backup-exec',
         'backup_source_borg': '/usr/local/sbin/backup-source-borg',
     },
-}) %}
+}[grains.os_family] %}

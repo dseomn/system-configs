@@ -13,12 +13,12 @@
 # limitations under the License.
 
 
-{% set smartd = salt['grains.filter_by']({
+{% set smartd = {
     'Debian': {
         'pkg': 'smartmontools',
         'service': 'smartmontools',
     },
-}) %}
+}[grains.os_family] %}
 
 
 smartd:

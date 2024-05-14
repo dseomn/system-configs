@@ -21,7 +21,7 @@
 {#
  # https://docs.nextcloud.com/server/latest/admin_manual/installation/source_installation.html#prerequisites-for-manual-installation
  #}
-{% set nextcloud = salt.grains.filter_by({
+{% set nextcloud = {
     'Debian': {
         'pkgs': (
             'ffmpeg',
@@ -39,4 +39,4 @@
             php.versioned_pkg('zip'),
         ),
     },
-}) %}
+}[grains.os_family] %}

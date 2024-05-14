@@ -13,14 +13,14 @@
 # limitations under the License.
 
 
-{% set firmware = salt.grains.filter_by({
+{% set firmware = {
     'Debian': {
         'pkgs': [
             'firmware-linux',
             'fwupd',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 
 firmware:

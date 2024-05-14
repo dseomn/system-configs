@@ -25,11 +25,11 @@
         'zen.spamhaus.org',
     ],
 } %}
-{% do home_router.update(salt.grains.filter_by({
+{% do home_router.update({
     'Debian': {
         'dnsmasq_pkgs': ['dnsmasq', 'dnsmasq-utils'],
         'dnsmasq_service': 'dnsmasq',
         'dnsmasq_conf': '/etc/dnsmasq.conf',
         'update_nftables_bin': '/usr/local/bin/home-router-update-nftables',
     },
-})) %}
+}[grains.os_family]) %}

@@ -15,7 +15,7 @@
  #}
 
 
-{% set mail_inbound = salt.grains.filter_by({
+{% set mail_inbound = {
     'Debian': {
         'pkgs': ('opendmarc',),
         'opendmarc_service': 'opendmarc',
@@ -23,4 +23,4 @@
         'opendmarc_group': 'opendmarc',
         'opendmarc_config_file': '/etc/opendmarc.conf',
     },
-}) %}
+}[grains.os_family] %}

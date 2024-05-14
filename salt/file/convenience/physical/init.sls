@@ -13,14 +13,14 @@
 # limitations under the License.
 
 
-{% set convenience_physical = salt.grains.filter_by({
+{% set convenience_physical = {
     'Debian': {
         'pkgs': [
             'lm-sensors',
             'nvme-cli',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 
 convenience_physical_pkgs:

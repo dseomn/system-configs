@@ -13,13 +13,13 @@
 # limitations under the License.
 
 
-{% set basic_desktop = salt.grains.filter_by({
+{% set basic_desktop = {
     'Debian': {
         'pkgs': [
             'task-gnome-desktop',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 
 basic_desktop_pkgs:

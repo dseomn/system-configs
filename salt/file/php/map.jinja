@@ -15,15 +15,12 @@
  #}
 
 
-{% set _version = salt.grains.filter_by(
-    {
-        'Debian-12': '8.2',
-    },
-    grain='osfinger',
-) %}
+{% set _version = {
+    'Debian-12': '8.2',
+}[grains.osfinger] %}
 
 
-{% set php = salt.grains.filter_by({
+{% set php = {
     'Debian': {
         'bin': 'php' + _version,
         'mod_php_pkgs': ('libapache2-mod-php' + _version,),
@@ -31,13 +28,13 @@
         'mod_php_conf': '/etc/apache2/mods-available/php' + _version + '.conf',
         'config_dir': '/etc/php/' + _version,
     },
-}) %}
+}[grains.os_family] %}
 
 
 {% macro _versioned_pkg(pkg) -%}
-  {{ salt.grains.filter_by({
+  {{ {
       'Debian': 'php{}-{}'.format(_version, pkg),
-  }) }}
+  }[grains.os_family] }}
 {%- endmacro %}
 
 

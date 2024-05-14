@@ -13,14 +13,14 @@
 # limitations under the License.
 
 
-{% set sshd = salt.grains.filter_by({
+{% set sshd = {
     'Debian': {
         'pkg': 'openssh-server',
         'service': 'ssh',
         'config_directory': '/etc/ssh',
         'sftp_command': '/usr/lib/openssh/sftp-server',
     },
-}) %}
+}[grains.os_family] %}
 
 {% from 'network/firewall/map.jinja' import nftables %}
 {% from 'ssh/map.jinja' import ssh %}

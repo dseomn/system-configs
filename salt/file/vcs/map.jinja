@@ -15,10 +15,10 @@
  #}
 
 
-{% set vcs = salt.grains.filter_by({
+{% set vcs = {
     'Debian': {
         'pkgs': [
             'git',
         ],
     },
-}) %}
+}[grains.os_family] %}

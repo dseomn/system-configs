@@ -18,7 +18,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% set stunnel = salt.grains.filter_by({
+{% set stunnel = {
     'Debian': {
         'pkgs': [
             'stunnel4',
@@ -32,7 +32,7 @@
             'pid =',
         )),
     },
-}) %}
+}[grains.os_family] %}
 {% do stunnel.update({'service_instance': stunnel.service_instance.format}) %}
 
 

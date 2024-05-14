@@ -15,8 +15,8 @@
  #}
 
 
-{% set disk_usage = salt.grains.filter_by({
+{% set disk_usage = {
     'Debian': {
         'bin': '/usr/local/bin/disk_usage_at_least',
     },
-}) %}
+}[grains.os_family] %}

@@ -19,7 +19,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% set mail = salt.grains.filter_by({
+{% set mail = {
     'Debian': {
         'pkgs': (
             'libsasl2-modules',
@@ -34,7 +34,7 @@
         '_postfix_data_dir': '/var/lib/postfix',
         '_postfix_queue_dir': '/var/spool/postfix',
     },
-}) %}
+}[grains.os_family] %}
 {% do mail.update({
     'message_size_limit_bytes': 32 * 1024 * 1024,
 }) %}

@@ -15,10 +15,10 @@
  #}
 
 
-{% set mount = salt.grains.filter_by({
+{% set mount = {
     'Debian': {
         'pkgs_by_fs_type': {
             'nfs': ('nfs-common',),
         },
     },
-}) %}
+}[grains.os_family] %}

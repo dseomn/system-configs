@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-{% set system = salt.grains.filter_by({
+{% set system = {
     'Debian': {
         'service': 'systemd-networkd',
         'config_directory': '/etc/systemd/network',
@@ -31,7 +31,7 @@
             'wireguard',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 {% from 'network/firewall/map.jinja' import nftables %}
 

@@ -15,11 +15,11 @@
  #}
 
 
-{% set cryptsetup = salt.grains.filter_by({
+{% set cryptsetup = {
     'Debian': {
         'pkgs': (
             'cryptsetup',
             'cryptsetup-initramfs',
         ),
     },
-}) %}
+}[grains.os_family] %}

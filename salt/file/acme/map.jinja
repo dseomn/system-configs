@@ -22,13 +22,13 @@
 {% set acme = {
     'email': 'david@mandelberg.org',
 } %}
-{% do acme.update(salt.grains.filter_by({
+{% do acme.update({
     'Debian': {
         'pkgs': ['certbot'],
         'certbot_config_dir': '/etc/letsencrypt',
         'certbot_bin': 'certbot',
     },
-})) %}
+}[grains.os_family]) %}
 
 
 {#

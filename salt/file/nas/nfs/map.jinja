@@ -15,7 +15,7 @@
  #}
 
 
-{% set nas_nfs = salt.grains.filter_by({
+{% set nas_nfs = {
     'Debian': {
         'pkgs': (
             'nfs-kernel-server',
@@ -24,4 +24,4 @@
         'exports_file': '/etc/exports',
         'config_file': '/etc/nfs.conf.d/local.conf',
     },
-}) %}
+}[grains.os_family] %}

@@ -15,8 +15,8 @@
  #}
 
 
-{% set uptime = salt.grains.filter_by({
+{% set uptime = {
     'Debian': {
         'bin': '/usr/local/bin/uptime-warning',
     },
-}) %}
+}[grains.os_family] %}

@@ -15,12 +15,12 @@
  #}
 
 
-{% set backup = salt.grains.filter_by({
+{% set backup = {
     'Debian': {
         'config_dir': '/etc/backup',
         'data_dir': '/srv/backup',
     },
-}) %}
+}[grains.os_family] %}
 
 
 {% do backup.update({

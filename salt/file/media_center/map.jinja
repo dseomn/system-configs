@@ -19,7 +19,7 @@
  # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=200715): Use system
  # package for stepmania.
  #}
-{% set media_center = salt.grains.filter_by({
+{% set media_center = {
     'Debian': {
         'pkgs': (
             'easyeffects',
@@ -65,4 +65,4 @@
             '/var/local/media-center/.var/app/com.stepmania.StepMania/.stepmania-5.1'
         ),
     },
-}) %}
+}[grains.os_family] %}

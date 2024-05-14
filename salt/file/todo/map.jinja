@@ -15,10 +15,10 @@
  #}
 
 
-{% set todo = salt.grains.filter_by({
+{% set todo = {
     'Debian': {
         'pkgs': [
             'python3-dateutil',
         ],
     },
-}) %}
+}[grains.os_family] %}

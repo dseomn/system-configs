@@ -16,7 +16,7 @@
 
 
 {# Note: 'whois' is in the list of packages because it provides mkpasswd. #}
-{% set accounts = salt.grains.filter_by({
+{% set accounts = {
     'Debian': {
         'pkgs': (
             'libauthen-pam-perl',
@@ -30,4 +30,4 @@
         'llng_share_dir': '/usr/share/lemonldap-ng',
         'llng_var_lib_dir': '/var/lib/lemonldap-ng',
     },
-}) %}
+}[grains.os_family] %}

@@ -15,7 +15,7 @@
  #}
 
 
-{% set nginx = salt.grains.filter_by({
+{% set nginx = {
     'Debian': {
         'pkgs': ('nginx',),
         'service': 'nginx',
@@ -25,7 +25,7 @@
         'dav_pkgs': ('libnginx-mod-http-dav-ext',),
         'stream_pkgs': ('libnginx-mod-stream',),
     },
-}) %}
+}[grains.os_family] %}
 
 
 {% macro _https_server_config(fullchain, privkey) %}

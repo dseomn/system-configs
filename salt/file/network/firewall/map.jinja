@@ -21,7 +21,7 @@
         'dnat_hairpin': 2,
     },
 } %}
-{% do nftables.update(salt.grains.filter_by({
+{% do nftables.update({
     'Debian': {
         'pkg': 'nftables',
         'service': 'nftables',
@@ -29,7 +29,7 @@
         'config_file': '/etc/nftables.conf',
         'config_dir': '/etc/nftables.conf.d',
     },
-})) %}
+}[grains.os_family]) %}
 
 
 {# Returns an nftables set (or map) given an iterable of entries. #}

@@ -15,7 +15,7 @@
  #}
 
 
-{% set virtual_machine_host = salt.grains.filter_by({
+{% set virtual_machine_host = {
     'Debian': {
         'pkgs': [
             'curl',
@@ -33,4 +33,4 @@
         ],
         'libvirt_guests_config': '/etc/default/libvirt-guests',
     },
-}) %}
+}[grains.os_family] %}

@@ -15,7 +15,7 @@
  #}
 
 
-{% set common =  salt.grains.filter_by({
+{% set common = {
     'Debian': {
         'local_bin': '/usr/local/bin',
         'local_etc': '/usr/local/etc',
@@ -25,7 +25,7 @@
         'nologin_shell': '/usr/sbin/nologin',
         'nonexistent_path': '/nonexistent',
     }
-}) %}
+}[grains.os_family] %}
 
 
 {% macro _system_user_and_group(

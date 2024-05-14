@@ -15,7 +15,7 @@
 
 {% from 'grub/map.jinja' import grub %}
 
-{% set plymouth = salt.grains.filter_by({
+{% set plymouth = {
     'Debian': {
         'pkgs': [
             'desktop-base',
@@ -23,7 +23,7 @@
             'plymouth-label',
         ],
     },
-}) %}
+}[grains.os_family] %}
 
 
 include:
