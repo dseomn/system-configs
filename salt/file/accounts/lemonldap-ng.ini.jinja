@@ -190,5 +190,5 @@ applicationList = { \
 {%- do original.pop('handler', None) %}
 {%- do original.pop('manager', None) %}
 {%- if original %}
-  {{ {}['unexpected original config: ' + (original | string)] }}
+  {{ raise('unexpected original config: ' + (original | string)) }}
 {%- endif %}

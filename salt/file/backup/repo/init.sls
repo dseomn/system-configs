@@ -104,7 +104,7 @@
       args:
       - {{ repo_path }}/*
 {% else %}
-{{ {}['Invalid repo type: ' + type] }}
+{{ raise('Invalid repo type: ' + type) }}
 {% endif %}
 {% endmacro %}
 
@@ -136,7 +136,7 @@ check {{ repo_path }}:
   - require:
     - {{ repo_path }} is initialized
 {% else %}
-{{ {}['Invalid repo type: ' + type] }}
+{{ raise('Invalid repo type: ' + type) }}
 {% endif %}
 {% endmacro %}
 
@@ -420,7 +420,7 @@ monitor recency of {{ repo_path }}:
 # https://github.com/borgbackup/borg/issues/895 for ideas/caveats about making
 # sure deletes/corruption don't propagate to the replica.
 # TODO(dseomn): Monitor recency of backups.
-{{ {}['Unsupported.'] }}
+{{ raise('Unsupported.') }}
 
 {% else %}
 

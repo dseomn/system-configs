@@ -73,7 +73,7 @@
     peer_certs=None,
     require=()) %}
 {% if client and peer_certs is none %}
-  {{ {}['ERROR: Clients must verify peer certificates.'] }}
+  {{ raise('ERROR: Clients must verify peer certificates.') }}
 {% endif %}
 {% set service_instance = stunnel.service_instance(instance_name) %}
 {% set peer_name = 'server' if client else 'client' %}

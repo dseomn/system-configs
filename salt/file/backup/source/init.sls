@@ -28,7 +28,7 @@
       source_host.repository,
   ) %}
 {% else %}
-  {{ {}['Unsupported repo type: ' + repository.type] }}
+  {{ raise('Unsupported repo type: ' + repository.type) }}
 {% endif %}
 
 

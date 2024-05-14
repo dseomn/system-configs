@@ -246,7 +246,7 @@ active dkim keys should be rotated:
         {%- elif account.recipients == 'local' %}
           {%- set account_access = 'reject_unauth_destination permit' %}
         {%- else %}
-          {%- do {}['invalid "recipients" value for ' + account_name] %}
+          {%- do raise('invalid "recipients" value for ' + account_name) %}
         {%- endif %}
       {{ account_name }} {{ account_access }}
       {%- endfor %}

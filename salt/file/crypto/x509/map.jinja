@@ -136,7 +136,7 @@ boilerplate_certificate_{{ name }}:
 
 {% else %}
 
-{{ {}['error: unknown certificate type: ' + certificate.type] }}
+{{ raise('error: unknown certificate type: ' + certificate.type) }}
 
 {% endif %}
 
