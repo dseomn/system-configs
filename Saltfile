@@ -25,6 +25,7 @@ salt-run:
 
 salt-ssh:
   config_dir: salt/config
+  ssh_max_procs: 100
   ssh_priv: agent-forwarding
   state_output: changes
   state_verbose: false
