@@ -26,7 +26,7 @@ ephemeral_swap_crypttab:
   - marker_start: '# START: salt cryptsetup.ephemeral_swap :#'
   - marker_end: '# END: salt cryptsetup.ephemeral_swap :#'
   - content: |
-      {%- for uuid in salt['pillar.get']('cryptsetup:ephemeral_swap', {}) %}
+      {%- for uuid in pillar.get('cryptsetup', {}).get('ephemeral_swap', {}) %}
       {{ ' '.join((
           'ephemeral-swap-' + uuid,
           'UUID=' + uuid,
@@ -44,7 +44,7 @@ ephemeral_swap_crypttab:
   - append_if_not_found: true
   - require:
     - cryptsetup_pkgs
-  {% if salt['pillar.get']('cryptsetup:ephemeral_swap', {}) %}
+  {% if pillar.get('cryptsetup', {}).get('ephemeral_swap', {}) %}
   cmd.run:
   - name: >-
       cryptdisks_start
@@ -61,7 +61,7 @@ ephemeral_swap_fstab:
   - marker_start: '# START: salt cryptsetup.ephemeral_swap :#'
   - marker_end: '# END: salt cryptsetup.ephemeral_swap :#'
   - content: |
-      {%- for uuid in salt['pillar.get']('cryptsetup:ephemeral_swap', {}) %}
+      {%- for uuid in pillar.get('cryptsetup', {}).get('ephemeral_swap', {}) %}
       /dev/mapper/ephemeral-swap-{{ uuid }} none swap defaults 0 0
       {%- endfor %}
   - append_if_not_found: true

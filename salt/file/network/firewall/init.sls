@@ -43,8 +43,13 @@ manage_nftables_config_dir:
   - onchanges_in:
     - warn about firewall changes
 
-{% set custom_rules = salt['pillar.get'](
-    'network:hosts:{}:firewall:custom_nftables'.format(grains.id), None) %}
+{% set custom_rules = pillar
+    .get('network', {})
+    .get('hosts', {})
+    .get(grains.id, {})
+    .get('firewall', {})
+    .get('custom_nftables')
+%}
 {% if custom_rules is not none %}
 {{ nftables.config_dir }}/90-local.conf:
   file.managed:

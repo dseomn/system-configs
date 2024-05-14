@@ -19,7 +19,7 @@
  # Raises an error if it's not running on a VM guest.
  #}
 {% macro require_running_on_vm_guest() %}
-  {% if not salt.grains.has_value('role:virtual-machine:guest') %}
+  {% if 'guest' not in grains.get('role', {}).get('virtual-machine', {}) %}
     {{ raise('This state can only be run from a VM guest.') }}
   {% endif %}
 {% endmacro %}

@@ -16,7 +16,7 @@
 {% from 'mount/map.jinja' import mount %}
 
 
-{% set fstab = salt['pillar.get']('mount:fstab', ()) %}
+{% set fstab = pillar.get('mount', {}).get('fstab', ()) %}
 
 
 {% set pkgs = {} %}

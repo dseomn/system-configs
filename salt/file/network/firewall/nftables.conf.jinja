@@ -16,10 +16,12 @@
 # limitations under the License.
 
 
-{% set host_firewall = salt.pillar.get(
-    'network:hosts:{}:firewall'.format(grains.id),
-    {},
-) %}
+{% set host_firewall = pillar
+    .get('network', {})
+    .get('hosts', {})
+    .get(grains.id, {})
+    .get('firewall', {})
+%}
 {% set forward_interface_pairs = [] %}
 {% for iifname, oifname in host_firewall.get('forward', ()) %}
   {% do forward_interface_pairs.append('{} . {}'.format(iifname, oifname)) %}

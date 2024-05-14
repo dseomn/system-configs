@@ -84,7 +84,7 @@ media_center_pkgs:
 {% load_yaml as firefox_policies %}
 policies:
   Bookmarks: {{
-      salt['pillar.get']('media_center:firefox_bookmarks', ()) | tojson
+      pillar.get('media_center', {}).get('firefox_bookmarks', ()) | tojson
   }}
   NoDefaultBookmarks: true
 {% endload %}
@@ -132,7 +132,7 @@ media-center autologin:
 
 
 {% for name, target
-    in salt['pillar.get']('media_center:home_symlinks', {}).items() %}
+    in pillar.get('media_center', {}).get('home_symlinks', {}).items() %}
 /var/local/media-center/{{ name }}:
   file.symlink:
   - target: {{ target }}
