@@ -16,12 +16,11 @@
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'common/map.jinja' import common %}
 {% from 'network/firewall/map.jinja' import nftables %}
+{% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
 {% from 'xmpp/map.jinja' import xmpp %}
 
 
-{% if not salt.grains.has_value('role:virtual-machine:guest') %}
-  {{ error_this_state_can_only_be_run_from_a_vm }}
-{% endif %}
+{{ require_running_on_vm_guest() }}
 
 
 include:

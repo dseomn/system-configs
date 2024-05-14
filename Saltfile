@@ -71,4 +71,5 @@ salt-ssh:
   - salt://uptime/map.jinja
   - salt://vcs/map.jinja
   - salt://virtual_machine/host/map.jinja
+  - salt://virtual_machine/guest/map.jinja
   - salt://xmpp/map.jinja

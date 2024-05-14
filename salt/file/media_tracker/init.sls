@@ -13,9 +13,10 @@
 # limitations under the License.
 
 
-{% if not salt.grains.has_value('role:virtual-machine:guest') %}
-  {{ error_this_state_can_only_be_run_from_a_vm }}
-{% endif %}
+{% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
+
+
+{{ require_running_on_vm_guest() }}
 
 
 include:

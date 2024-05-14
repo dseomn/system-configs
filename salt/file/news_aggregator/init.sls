@@ -15,11 +15,10 @@
 
 {% from 'common/map.jinja' import common %}
 {% from 'news_aggregator/map.jinja' import news_aggregator %}
+{% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
 
 
-{% if not salt.grains.has_value('role:virtual-machine:guest') %}
-  {{ error_this_state_can_only_be_run_from_a_vm }}
-{% endif %}
+{{ require_running_on_vm_guest() }}
 
 
 include:

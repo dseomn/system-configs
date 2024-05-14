@@ -18,6 +18,7 @@
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'irc/bouncer/map.jinja' import irc_bouncer %}
 {% from 'network/firewall/map.jinja' import nftables %}
+{% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
 
 
 # https://github.com/znc/znc/blob/e0ffdddd473e97cb843f2bc8ad4fa16cf47c65b4/src/ZNCString.cpp#L1508
@@ -40,9 +41,7 @@
 {% endmacro %}
 
 
-{% if not salt.grains.has_value('role:virtual-machine:guest') %}
-  {{ error_this_state_can_only_be_run_from_a_vm }}
-{% endif %}
+{{ require_running_on_vm_guest() }}
 
 
 include:

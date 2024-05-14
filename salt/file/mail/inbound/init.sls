@@ -20,6 +20,7 @@
 {% from 'mail/inbound/map.jinja' import mail_inbound %}
 {% from 'mail/map.jinja' import mail %}
 {% from 'network/firewall/map.jinja' import nftables %}
+{% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
 
 
 {% set postfix_instance = 'postfix-inbound' %}
@@ -27,9 +28,7 @@
 {% set postfix_queue_dir = mail.postfix_queue_dir(postfix_instance) %}
 
 
-{% if not salt.grains.has_value('role:virtual-machine:guest') %}
-  {{ error_this_state_can_only_be_run_from_a_vm }}
-{% endif %}
+{{ require_running_on_vm_guest() }}
 
 
 include:
