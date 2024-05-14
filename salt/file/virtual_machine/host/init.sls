@@ -267,7 +267,6 @@ warn about {{ guest_id }}_install:
     - {{ guest_id }}_install
 
 # TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
-# TODO(https://github.com/saltstack/salt/issues/60700): Manage autostart.
 #
 # Disks are not managed here, because virt-install seems to provide better
 # defaults (e.g., type="block" instead of type="file" for block device sources)
@@ -284,6 +283,7 @@ warn about {{ guest_id }}_install:
       source: {{ network.bridge }}
       mac: {{ network.mac }}
     {% endfor %}
+  - autostart: true
   - require:
     - {{ guest_id }}_install
 
