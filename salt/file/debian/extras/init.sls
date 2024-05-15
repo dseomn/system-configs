@@ -19,7 +19,7 @@ debian_extras_pkgs:
     - apt-listbugs
     - apt-listchanges
     - aptitude
-    - debconf-utils  # Salt's debconf state doesn't work without this.
+    - debconf-utils
     - debian-security-support
     - mailutils  # Provides mailx which unattended-upgrades needs to send email.
     - unattended-upgrades
