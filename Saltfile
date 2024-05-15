@@ -38,6 +38,7 @@ salt-ssh:
   - salt://backup/repo/map.jinja
   - salt://backup/source/map.jinja
   - salt://common/map.jinja
+  - salt://cron/map.jinja
   - salt://crypto/map.jinja
   - salt://crypto/x509/map.jinja
   - salt://cryptsetup/map.jinja

@@ -1,0 +1,124 @@
+{#
+ # Copyright 2024 Google LLC
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{#
+ # Defines a cron job.
+ #
+ # Time fields can be standard cron format, '?' for a random-but-stable value,
+ # or '?/n' where n is an integer for every n units with a random-but-stable
+ # offset.
+ #
+ # NOTE: The randomness is not completely uniform. E.g., if the month and
+ # day_of_month are both '?', then a uniformly random month is picked followed
+ # by a uniformly random day in that month, ignoring leap days. That is not the
+ # same distribution as a uniformly random day in a year.
+ #}
+{% macro cron_job(
+    state_id,
+    user,
+    command,
+    minute='*',
+    hour='*',
+    day_of_month='*',
+    month='*',
+    day_of_week='*') %}
+
+{% macro random_int(first, last, field_name) %}
+  {%- set seed = '\x00'.join((grains.id, state_id, field_name)) %}
+  {{- (range(first, last + 1) | random_sample(1, seed=seed))[0] }}
+{%- endmacro %}
+
+{% macro parse_time_field(value, first, last_min, field_name, last_max=none) %}
+  {%- if last_max is none %}
+    {%- set last_max = last_min %}
+  {%- endif %}
+  {%- if value == '?' %}
+    {{- random_int(first, last_min, field_name=field_name) }}
+  {%- elif value.startswith('?/') %}
+    {%- set step = value.removeprefix('?/') | int(default=0) %}
+    {%- if step == 0 %}
+      {{- raise(
+          'Invalid {} field in state {!r}: {!r}'.format(
+              field_name, state_id, value
+          )
+      ) }}
+    {%- endif %}
+    {%- set start = random_int(
+        first,
+        first + step - 1,
+        field_name=field_name,
+    ) %}
+    {{- start }}-{{ last_max }}/{{ step }}
+  {%- else %}
+    {{- value }}
+  {%- endif %}
+{%- endmacro %}
+
+{% set month_parsed = parse_time_field(month, 1, 12, 'month') %}
+{% set last_day_of_month = {
+    1: 31,
+    2: 28,
+    3: 31,
+    4: 30,
+    5: 31,
+    6: 30,
+    7: 31,
+    8: 31,
+    9: 30,
+    10: 31,
+    11: 30,
+    12: 31,
+}.get(month_parsed | int(default=0), none) %}
+{% if last_day_of_month is none %}
+  {% set day_of_month_parsed = parse_time_field(
+      day_of_month,
+      first=1,
+      last_min=28,
+      last_max=31,
+      field_name='day_of_month',
+  ) %}
+{% else %}
+  {% set day_of_month_parsed = parse_time_field(
+      day_of_month,
+      first=1,
+      last_min=last_day_of_month,
+      last_max=last_day_of_month,
+      field_name='day_of_month',
+  ) %}
+{% endif %}
+
+{{ state_id }}:
+  file.accumulated:
+  - filename: /etc/cron.d/local
+  - text: {{
+        ' '.join((
+            parse_time_field(minute, 0, 59, 'minute'),
+            parse_time_field(hour, 0, 23, 'hour'),
+            day_of_month_parsed,
+            month_parsed,
+            parse_time_field(day_of_week, 0, 6, 'day_of_week'),
+            user,
+            command,
+        )) | tojson
+    }}
+  - require_in:
+    - file: /etc/cron.d/local
+  {% for key, value in kwargs.items() %}
+  - {{ key | tojson }}: {{ value | tojson }}
+  {% endfor %}
+
+{% endmacro %}

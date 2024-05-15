@@ -16,15 +16,9 @@ cron:
 
   # Extra cron jobs that aren't in another salt state.
   jobs:
-
-    # User that the jobs run as.
-    root:
-
-      # Part of the job identifier.
-      test-cron:
-      # Args to
-      # <https://docs.saltproject.io/en/latest/ref/states/all/salt.states.cron.html#salt.states.cron.present>.
-      # Must not include user or identifier.
-      - name: echo test cron
-      - minute: random
-      - hour: random
+  - # Args to cron_job() in salt/file/cron/map.jinja
+    state_id: example-cron-state
+    user: root
+    command: echo test cron
+    minute: '?'
+    hour: '?'
