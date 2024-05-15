@@ -17,6 +17,7 @@
 {% from 'acme/map.jinja' import acme, acme_cert %}
 {% from 'apache_httpd/map.jinja' import apache_httpd %}
 {% from 'common/map.jinja' import common %}
+{% from 'cron/map.jinja' import cron_job %}
 {% from 'nextcloud/map.jinja' import nextcloud %}
 {% from 'php/map.jinja' import php %}
 {% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
@@ -44,6 +45,7 @@ include:
 - apache_httpd.https
 - apache_httpd.php
 - apache_httpd.rewrite
+- cron
 - virtual_machine.guest
 
 
@@ -155,13 +157,15 @@ nextcloud_usable:
     - /var/local/nextcloud/hostname
 
 # https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/background_jobs_configuration.html#cron
-{{ php.bin }} -f /var/local/nextcloud/webroot/cron.php:
-  cron.present:
-  - user: {{ apache_httpd.user }}
-  - identifier: a714d4d0-42d7-4cc3-a994-90da6e98b45b
-  - minute: '*/5'
-  - require:
-    - nextcloud_usable
+{{ cron_job(
+    state_id='nextcloud_cron',
+    user=apache_httpd.user,
+    command=php.bin + ' -f /var/local/nextcloud/webroot/cron.php',
+    minute='?/5',
+    require=(
+        'nextcloud_usable',
+    ),
+) }}
 
 # https://docs.nextcloud.com/server/latest/admin_manual/maintenance/update.html#batch-mode-for-command-line-based-updater
 # https://docs.nextcloud.com/server/latest/admin_manual/maintenance/upgrade.html#long-running-migration-steps
