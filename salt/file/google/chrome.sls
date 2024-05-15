@@ -13,11 +13,15 @@
 # limitations under the License.
 
 
+{% if grains.os_family != 'Debian' or grains.osarch != 'amd64' %}
+  {{ raise('Unsupported platform.') }}
+{% endif %}
+
+
 include:
 - debian
 - google.repo_key
 
-{% if grains.os_family == 'Debian' and grains.osarch == 'amd64' %}
 chrome:
   file.managed:
   - name: /etc/apt/sources.list.d/google-chrome.list
@@ -36,8 +40,3 @@ chrome:
   - require:
     - file: chrome
     - apt_update
-{% else %}
-error:
-  cmd.run:
-  - name: 'echo "Error: Unsupported platform." >&2; exit 1'
-{% endif %}

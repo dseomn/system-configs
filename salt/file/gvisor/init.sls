@@ -13,13 +13,12 @@
 # limitations under the License.
 
 
-{% from 'grub/map.jinja' import grub %}
-
 {% if grains.os_family != 'Debian' %}
-error:
-  cmd.run:
-  - name: 'echo "Error: Unsupported platform." >&2; exit 1'
+  {{ raise('Unsupported platform.') }}
 {% endif %}
+
+
+{% from 'grub/map.jinja' import grub %}
 
 
 include:
