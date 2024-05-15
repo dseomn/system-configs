@@ -31,6 +31,10 @@ include:
   file.managed:
   - source: https://gvisor.dev/archive.key
   - source_hash: 14f9edb6a623b335f29d26a11e7a458652c252bce0e1f15fcc8bdf02f97283c2e2eb2de89e65cfc6088d90cf5d7410bd9dde9a2821b0beb014e7500356a0c4fc
+  - require_in:
+    - /etc/apt/keyrings
+  - onchanges_in:
+    - apt_update
 gvisor_repo:
   file.managed:
   - name: /etc/apt/sources.list.d/gvisor.list

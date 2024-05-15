@@ -22,21 +22,46 @@ include:
 - debian
 - google.repo_key
 
-chrome:
+
+# Prevent chrome from managing the repo key:
+# https://gist.github.com/jprenken/92757c76b24caec8718231205238eaf1
+/etc/apt/trusted.gpg.d/google-chrome.gpg:
+  file.symlink:
+  - target: /dev/null
+  - force: true
+  - require_in:
+    - /etc/apt/trusted.gpg.d is clean
+  - onchanges_in:
+    - apt_update
+
+# Prevent chrome from managing the repo:
+# https://www.chromium.org/developers/linux-technical-faq/
+/etc/default/google-chrome:
+  file.symlink:
+  - target: /dev/null
+  - force: true
+
+/etc/apt/sources.list.d/google-chrome.sources:
   file.managed:
-  - name: /etc/apt/sources.list.d/google-chrome.list
   - contents: |
-      ### THIS FILE IS AUTOMATICALLY CONFIGURED ###
-      # You may comment out this entry, but any other modifications may be lost.
-      deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main
+      Types: deb
+      URIs: https://dl.google.com/linux/chrome/deb
+      Suites: stable
+      Components: main
+      Signed-By: /etc/apt/keyrings/google.asc
   - require:
-    - sls: google.repo_key
+    - /etc/apt/keyrings/google.asc
   - require_in:
     - /etc/apt/sources.list.d is clean
   - onchanges_in:
     - apt_update
+
+chrome_pkgs:
   pkg.installed:
-  - name: google-chrome-stable
+  - pkgs:
+    - google-chrome-stable
   - require:
-    - file: chrome
+    - /etc/apt/trusted.gpg.d/google-chrome.gpg
+    - /etc/default/google-chrome
+    - /etc/apt/sources.list.d/google-chrome.sources
     - apt_update

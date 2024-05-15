@@ -29,6 +29,10 @@ include:
   file.managed:
   - source: https://repo.saltproject.io/salt/py3/src/SALT-PROJECT-GPG-PUBKEY-2023.gpg
   - source_hash: b60cfe38c5e854f0bdaa61d5fcd638c35d2b7613547e8cbf442402ff02f9d5fb3f1c22a97ca9afe2ecd7831d39fd2535ad6336e28e1f2b54815f5dabcfd8b7ca
+  - require_in:
+    - /etc/apt/keyrings
+  - onchanges_in:
+    - apt_update
 
 /etc/apt/sources.list.d/salt.sources:
   file.managed:

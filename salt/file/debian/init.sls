@@ -23,6 +23,22 @@ apt_update:
   cmd.run:
   - name: apt-get update
 
+/etc/apt/trusted.gpg.d is clean:
+  file.directory:
+  - name: /etc/apt/trusted.gpg.d
+  - clean: true
+  - exclude_pat:
+    - debian-archive-*
+  - onchanges_in:
+    - apt_update
+
+/etc/apt/keyrings is clean:
+  file.directory:
+  - name: /etc/apt/keyrings
+  - clean: true
+  - onchanges_in:
+    - apt_update
+
 /etc/apt/sources.list:
   file.managed:
   - source: salt://debian/sources.list.jinja

@@ -18,9 +18,16 @@
 {% endif %}
 
 
+include:
+- debian
+
+
 # https://www.google.com/linuxrepositories/
-google:
+/etc/apt/keyrings/google.asc:
   file.managed:
-  - name: /etc/apt/trusted.gpg.d/google.asc
   - source: https://dl.google.com/linux/linux_signing_key.pub
   - source_hash: 0ccf8f2f4396f5acee4e7cd7a3e8e1c83233fc17c2e4785d82c71b887c3cacd2faf0feae50d6f42fc5e86d2b492d7a88c8a31720ace591b3b62326176c4ca6d2
+  - require_in:
+    - /etc/apt/keyrings
+  - onchanges_in:
+    - apt_update
