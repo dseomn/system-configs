@@ -13,9 +13,13 @@
 # limitations under the License.
 
 
+{% from 'cron/map.jinja' import stable_random_int %}
+
+
 {% set smartd = {
     'Debian': {
         'pkg': 'smartmontools',
+        'config_file': '/etc/smartd.conf',
         'service': 'smartmontools',
     },
 }[grains.os_family] %}
@@ -36,3 +40,26 @@ smartd_running:
   - name: {{ smartd.service }}
   - require:
     - smartd_pkgs
+
+{% set test_day =
+    stable_random_int(1, 7, seed=(grains.id, 'smart-long-test-day-of-week'))
+%}
+{% set test_hour =
+    '{:02d}'.format(
+        stable_random_int(0, 23, seed=(grains.id, 'smart-long-test-hour')) | int
+    )
+%}
+{{ smartd.config_file }}:
+  file.managed:
+  - contents: |
+      DEVICESCAN \
+        -d removable \
+        -n standby,48 \
+        -s L/../../{{ test_day }}/{{ test_hour }}:005-167 \
+        -m root \
+        -M daily \
+        -a
+  - require:
+    - smartd_pkgs
+  - watch_in:
+    - smartd_running
