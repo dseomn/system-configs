@@ -16,6 +16,14 @@
 
 
 {#
+ # Returns a stable random integer between first and last, inclusive.
+ #}
+{% macro stable_random_int(first, last, seed) %}
+  {{- (range(first, last + 1) | random_sample(1, seed='\x00'.join(seed)))[0] }}
+{%- endmacro %}
+
+
+{#
  # Defines a cron job.
  #
  # Time fields can be standard cron format, '?' for a random-but-stable value,
@@ -38,8 +46,7 @@
     day_of_week='*') %}
 
 {% macro random_int(first, last, field_name) %}
-  {%- set seed = '\x00'.join((grains.id, state_id, field_name)) %}
-  {{- (range(first, last + 1) | random_sample(1, seed=seed))[0] }}
+  {{- stable_random_int(first, last, seed=(grains.id, state_id, field_name)) }}
 {%- endmacro %}
 
 {% macro parse_time_field(value, first, last_min, field_name, last_max=none) %}
