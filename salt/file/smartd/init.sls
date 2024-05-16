@@ -56,7 +56,7 @@ smartd_running:
       DEVICESCAN \
         -d removable \
         -n standby,48 \
-        -s L/../../{{ test_day }}/{{ test_hour }}:005-167 \
+        -s L/../../{{ test_day }}/{{ test_hour }}:037-167 \
         -m root \
         -M daily \
         -a
