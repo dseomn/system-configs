@@ -13,7 +13,8 @@
 # limitations under the License.
 
 
-{% from 'cron/map.jinja' import stable_random_int %}
+{% from 'common/map.jinja' import common %}
+{% from 'cron/map.jinja' import cron_job, stable_random_int %}
 
 
 {% set smartd = {
@@ -63,3 +64,24 @@ smartd_running:
     - smartd_pkgs
   - watch_in:
     - smartd_running
+
+
+{{ common.local_sbin }}/smart-report:
+  file.managed:
+  - source: salt://smartd/report.py
+  - mode: 0755
+  - require:
+    - smartd_pkgs
+
+{{ cron_job(
+    state_id='smart-report cron',
+    user='root',
+    command=common.local_sbin + '/smart-report',
+    minute='?',
+    hour='?',
+    day_of_month='?',
+    month='?',
+    require=(
+        common.local_sbin + '/smart-report',
+    ),
+) }}
