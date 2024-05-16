@@ -21,9 +21,18 @@
 }[grains.os_family] %}
 
 
-smartd:
+smartd_pkgs:
   pkg.installed:
   - name: {{ smartd.pkg }}
+
+
+smartd_enabled:
+  service.enabled:
+  - name: {{ smartd.service }}
+  - require:
+    - smartd_pkgs
+smartd_running:
   service.running:
   - name: {{ smartd.service }}
-  - enable: True
+  - require:
+    - smartd_pkgs
