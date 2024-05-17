@@ -53,8 +53,15 @@ apt-get -qq update && unattended-upgrade && /usr/share/unattended-upgrades/updat
   - hour: random
 
 
-aptitude search '?obsolete' || true:
+show_unexpected_obsolete_and_nonlocal_packages:
   cron.present:
+  - name: >-
+      aptitude
+      search
+      --display-format='%t %p'
+      '(?obsolete !?user-tag(local)) | (!?obsolete ?user-tag(local))'
+      ||
+      true
   - identifier: ccb4bc08-78a1-43b0-b08b-263032e5de83
   - minute: random
   - hour: random
