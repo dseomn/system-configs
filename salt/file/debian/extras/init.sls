@@ -58,7 +58,7 @@ show_unexpected_obsolete_and_nonlocal_packages:
   - name: >-
       aptitude
       search
-      --display-format='%t %p'
+      --display-format='\%t \%p'
       '(?obsolete !?user-tag(local)) | (!?obsolete ?user-tag(local))'
       ||
       true
