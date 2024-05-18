@@ -90,12 +90,11 @@ mail_web_pkgs:
   - source: salt://mail/web/generate_dynamic_config.py
   - mode: 0755
 
-# TODO(roundcube > 1.5-rc): Switch to an authenticated encryption mode.
 {% load_yaml as roundcube_generate_dynamic_config %}
 >-
   {{ common.local_lib }}/roundcube-generate-dynamic-config
-  --key-bits={{ crypto.openssl.unauthenticated_symmetric_key_bits }}
-  --cipher-method={{ crypto.openssl.unauthenticated_symmetric_cipher }}
+  --key-bits={{ crypto.openssl.authenticated_symmetric_key_bits }}
+  --cipher-method={{ crypto.openssl.authenticated_symmetric_cipher }}
   --group={{ apache_httpd.group }}
   --output={{ mail_web.config_dir }}/config-dynamic.inc.php
 {% endload %}
