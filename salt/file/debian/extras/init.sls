@@ -53,16 +53,29 @@ apt-get -qq update && unattended-upgrade && /usr/share/unattended-upgrades/updat
   - hour: random
 
 
-show_unexpected_obsolete_and_nonlocal_packages:
+# Shows packages in some unexpected states:
+#
+# * Obsolete packages, i.e., ones that are not in any configured archive. This
+#   excludes packages tagged local, since those were intentionally installed
+#   from outside of an archive. It also excludes versioned kernel packages,
+#   since those are handled specially by apt autoremove. See
+#   /etc/apt/apt.conf.d/01autoremove for more detail about versioned kernel
+#   packages.
+# * Packages tagged as local that are in an archive. (So that the tag can be
+#   removed when a formerly local package is added to an archive.)
+show_packages_in_unexpected_state:
   cron.present:
   - name: >-
       aptitude
       search
       --display-format='\%t \%p'
-      '(?obsolete !?user-tag(local)) | (!?obsolete ?user-tag(local))'
+      '?obsolete !?user-tag(local) !?name(^linux-.*[0-9]+\.[0-9]+)'
+      '?user-tag(local) !?obsolete'
       ||
       true
   - identifier: ccb4bc08-78a1-43b0-b08b-263032e5de83
   - minute: random
   - hour: random
   - dayweek: random
+  - require:
+    - debian_extras_pkgs
