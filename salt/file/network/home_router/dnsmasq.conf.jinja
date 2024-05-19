@@ -73,7 +73,7 @@ enable-ra
 
 dhcp-option=tag:noDefaultRoute,option:router
 
-{%- for interface in host.interfaces.values() if 'ip' in interface %}
+{% for interface in host.interfaces.values() if 'ip' in interface %}
 {%- for interface_ip_config
     in interface.ip
     if 'interface_id' in interface_ip_config %}
