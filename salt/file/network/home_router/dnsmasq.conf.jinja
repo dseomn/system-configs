@@ -13,16 +13,16 @@
 # limitations under the License.
 
 
-{% from 'network/home_router/map.jinja' import home_router %}
-{% from 'network/home_router/dns/map.jinja' import dns %}
+{%- from 'network/home_router/map.jinja' import home_router %}
+{%- from 'network/home_router/dns/map.jinja' import dns %}
 
-{% set host = pillar.network.hosts[grains.id] %}
-{% set segments = pillar.network.segments %}
-{% set sites = pillar.network.sites %}
-{% set site = sites[host.site] %}
-{% set global = pillar.network.global %}
+{%- set host = pillar.network.hosts[grains.id] %}
+{%- set segments = pillar.network.segments %}
+{%- set sites = pillar.network.sites %}
+{%- set site = sites[host.site] %}
+{%- set global = pillar.network.global %}
 
-{% set subdomain = '{}.{}'.format(host.site, global.domain) %}
+{%- set subdomain = '{}.{}'.format(host.site, global.domain) %}
 
 
 # Avoid conflicts with systemd-resolved which is also listening on port 53, but
@@ -34,7 +34,7 @@ server=::1#{{ dns.dnss_port }}
 server=/{{ '/'.join(home_router.unbound_domains) }}/::1#{{ dns.unbound_port }}
 local=/{{ subdomain }}/
 local=/{{ site.id }}.10.in-addr.arpa/
-{% set site_ula_nibbles_reversed = [] -%}
+{%- set site_ula_nibbles_reversed = [] -%}
 {%- for word in global.ula.split(':') -%}
   {%- for nibble in '{:0>4}'.format(word) -%}
     {%- do site_ula_nibbles_reversed.insert(0, nibble) -%}
@@ -92,11 +92,11 @@ host-record={{ '{}.{},{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
 {%- endfor %}
 {%- endfor %}
 
-{% for interface_name, interface in host.interfaces.items()
+{%- for interface_name, interface in host.interfaces.items()
     if 'home_router' in interface %}
-{% set segment = segments[interface.segment] %}
-{% set ipv4_prefix = '10.{}.{}'.format(site.id, segment.id) %}
-{% set ipv6_ula_prefix = '{}:{:02x}{:02x}'.format(
+{%- set segment = segments[interface.segment] %}
+{%- set ipv4_prefix = '10.{}.{}'.format(site.id, segment.id) %}
+{%- set ipv6_ula_prefix = '{}:{:02x}{:02x}'.format(
     global.ula,
     site.id,
     segment.id,
@@ -119,12 +119,14 @@ dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},static,
 
 {% for other_host_name, other_host
     in interface.home_router.get('hosts', {}).items() %}
-{% set other_host_ipv4 = '{}.{}'.format(ipv4_prefix, other_host.interface_id) %}
-{% set other_host_ipv6_ula = '{}::{:x}'.format(
+{%- set other_host_ipv4 = '{}.{}'.format(
+    ipv4_prefix, other_host.interface_id
+) %}
+{%- set other_host_ipv6_ula = '{}::{:x}'.format(
     ipv6_ula_prefix,
     other_host.interface_id,
 ) %}
-{% set other_host_ipv6_dhcp =
+{%- set other_host_ipv6_dhcp =
     '::{:x}'.format(other_host.interface_id)
     if other_host.get('services', ())
     else other_host_ipv6_ula
@@ -137,7 +139,7 @@ dhcp-host={{ '{},{}{},[{}],{},{}'.format(
     other_host_name,
     lease_time,
 ) }}
-{% for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
+{%- for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
 host-record={{ '{}.{},{},{},{}'.format(
     short_host_name,
     subdomain,
@@ -145,14 +147,14 @@ host-record={{ '{}.{},{},{},{}'.format(
     other_host_ipv4,
     other_host_ipv6_ula,
 ) }}
-{% endfor %}
-{% endfor %}
-{% endfor %}
+{%- endfor %}
+{%- endfor %}
+{%- endfor %}
 
 {% for alias_subdomain, aliases
     in global.get('home_router', {}).get('aliases', {}).items() %}
-{% for alias_name, targets in aliases.items() %}
-{% for target in targets %}
+{%- for alias_name, targets in aliases.items() %}
+{%- for target in targets %}
 host-record={{ '{}.{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     alias_name,
     alias_subdomain,
@@ -165,12 +167,12 @@ host-record={{ '{}.{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     segments[target.segment].id,
     target.interface_id,
 ) }}
-{% endfor %}
-{% endfor %}
-{% endfor %}
+{%- endfor %}
+{%- endfor %}
+{%- endfor %}
 
 {% for interface_name, interface in host.interfaces.items()
     if 'wireguard' in interface %}
 interface={{ interface_name }}
 no-dhcp-interface={{ interface_name }}
-{% endfor %}
+{%- endfor %}
