@@ -67,6 +67,7 @@ cache-size=0
 no-ident
 
 no-hosts
+dhcp-ignore-names
 
 domain={{ subdomain }}
 
@@ -132,12 +133,11 @@ dhcp-range={{ set_no_default_route }}::,constructor:{{ interface_name }},static,
     if other_host.get('services', ())
     else other_host_ipv6_ula
 %}
-dhcp-host={{ '{},{}{},[{}],{},{}'.format(
+dhcp-host={{ '{},{}{},[{}],{}'.format(
     other_host.mac,
     set_no_default_route,
     other_host_ipv4,
     other_host_ipv6_dhcp,
-    other_host_name,
     lease_time,
 ) }}
 {%- for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
