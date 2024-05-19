@@ -96,8 +96,9 @@ ddns_deps:
 {% if record_value is none %}
 {{ ddns.conf_dir }}/{{ provider }}/{{ record_name }}:
   file.managed:
+  - source: salt://ddns/password_file.jinja
+  - template: jinja
   - replace: false
-  - contents: {{ ('password=' + crypto.generate_password()) | tojson }}
   - require:
     - {{ ddns.conf_dir }}/{{ provider }} exists
   - require_in:

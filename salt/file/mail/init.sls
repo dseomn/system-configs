@@ -54,9 +54,10 @@ postfix_running:
     pillar.mail.common.outbound.name %}
 {{ relay_password_file }}:
   file.managed:
+  - source: salt://crypto/password_file.jinja
+  - template: jinja
   - mode: 0600
   - replace: false
-  - contents: {{ crypto.generate_password() | tojson }}
   - require:
     - mail_pkgs
 show dovecot_password for relay:

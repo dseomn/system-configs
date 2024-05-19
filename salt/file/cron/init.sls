@@ -38,7 +38,7 @@ cron_pkgs:
 root_crontab_path:
   cron.env_present:
   - name: PATH
-  - value: {{ salt['environ.get']('PATH') | tojson }}
+  - value: __slot__:salt:environ.get(PATH)
   - user: root
   - require:
     - cron_pkgs
