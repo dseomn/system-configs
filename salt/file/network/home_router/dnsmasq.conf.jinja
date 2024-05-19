@@ -64,6 +64,7 @@ rev-server={{ '{}:{:02x}00::/56,{}'.format(
 local=/{{ alias_subdomain }}.{{ global.domain }}/
 {%- endfor %}
 cache-size=0
+no-ident
 
 no-hosts
 
