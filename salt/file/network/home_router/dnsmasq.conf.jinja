@@ -79,10 +79,9 @@ dhcp-option=tag:noDefaultRoute,option:router
 {%- for interface_ip_config
     in interface.ip
     if 'interface_id' in interface_ip_config %}
-host-record={{ '{}.{},{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
+host-record={{ '{}.{},10.{}.{}.{},{}:{:02x}{:02x}::{:x}'.format(
     grains.host,
     subdomain,
-    grains.host,
     site.id,
     segments[interface.segment].id,
     interface_ip_config.interface_id,
@@ -141,10 +140,9 @@ dhcp-host={{ '{},{}{},[{}],{}'.format(
     lease_time,
 ) }}
 {%- for short_host_name in [other_host_name] + other_host.get('aliases', []) %}
-host-record={{ '{}.{},{},{},{}'.format(
+host-record={{ '{}.{},{},{}'.format(
     short_host_name,
     subdomain,
-    short_host_name,
     other_host_ipv4,
     other_host_ipv6_ula,
 ) }}
