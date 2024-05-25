@@ -41,11 +41,4 @@ jobs:
         pytype
     - name: Test
       run: |
-        pytest \
-          --cov=. \
-          --cov-branch \
-          --cov-report=term-missing \
-          --capture=no \
-          -v \
-          -o log_cli=true \
-          --log-cli-level=DEBUG
+        pytest

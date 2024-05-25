@@ -18,3 +18,10 @@ line-length = 80
 [tool.pytype]
 inputs = ["."]
 jobs = "auto"
+
+[tool.pytest.ini_options]
+addopts = """\
+  --cov=. \
+  --cov-branch \
+  --cov-report=term-missing \
+  """
