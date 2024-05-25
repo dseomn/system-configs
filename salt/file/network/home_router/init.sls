@@ -72,7 +72,7 @@ dnsmasq_running:
 {{ home_router.update_nftables_bin }}:
   file.managed:
   - mode: 0700
-  - source: salt://network/home_router/update-nftables.py
+  - source: salt://network/home_router/update-nftables.py.jinja
   - template: jinja
   cron.present:
   - identifier: 0df9d954-ff17-4317-81f1-ce733c31ef04
