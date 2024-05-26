@@ -24,7 +24,8 @@
     name,
     warning_on_change,
     dir_name=none,
-    group='root') %}
+    group='root',
+    keep_ca_cert=false) %}
 {% if dir_name is none %}
   {% set dir_name = name %}
 {% endif %}
@@ -36,6 +37,9 @@ boilerplate_certificate_{{ dir_name }}:
       &&
       {{ common.local_bin }}/boilerplate-certificate
       --name={{ name }}
+      {%- if keep_ca_cert %}
+      --ca-cert={{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem
+      {%- endif %}
       --key={{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
       --cert={{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
       --key-algorithm={{ crypto.openssl.strict_key_algorithm }}
@@ -43,12 +47,23 @@ boilerplate_certificate_{{ dir_name }}:
       --key-option={{ key_option }}
       {%- endfor %}
       --days={{ crypto.secret_validity_period_days }}
+      {%- if keep_ca_cert %}
+      &&
+      echo CA:
+      &&
+      cat {{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem
+      {%- endif %}
+      &&
+      echo EE:
       &&
       openssl x509
       -in {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
       -{{ crypto.openssl.digest }}
       -fingerprint
   - creates:
+    {%- if keep_ca_cert %}
+    - {{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem
+    {%- endif %}
     - {{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
     - {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
   - require:
@@ -58,6 +73,22 @@ boilerplate_certificate_{{ dir_name }}:
   - warnings: {{ warning_on_change | tojson }}
   - onchanges:
     - cmd: boilerplate_certificate_{{ dir_name }}
+
+{% if keep_ca_cert %}
+{{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem:
+  file.exists:
+  - require:
+    - boilerplate_certificate_{{ dir_name }}
+{{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem should be rotated:
+  file.accumulated:
+  - name: boilerplate certificates
+  - filename: {{ common.local_sbin }}/monitor-x509-validity-period
+  - text: {{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem
+  - require:
+    - {{ common.local_etc }}/x509/{{ dir_name }}/cacert.pem
+  - require_in:
+    - file: {{ common.local_sbin }}/monitor-x509-validity-period
+{% endif %}
 
 {{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem:
   file.managed:

@@ -28,11 +28,13 @@ https://datatracker.ietf.org/doc/html/rfc6818#section-2.) Instead, it creates a
 self-signed CA certificate with a single child EE certificate, which seems to
 better match how PKIX and TLS are designed.
 
-The CA certificate and its key are immediately discarded, leaving the EE
-certificate and its key for use with TLS software that can be configured to
-trust an EE certificate directly. If this script ever needs to be used with TLS
-software that requires a CA to trust, it should be re-reviewed for that purpose,
-and it would probably need some security improvements:
+The CA certificate and its key are immediately discarded by default, leaving the
+EE certificate and its key for use with TLS software that can be configured to
+trust an EE certificate directly. The option to keep the CA certificate is
+designed for software that can pin EE certificates but still needs the CA
+certificate too. If this script ever needs to be used with TLS software that
+requires a CA to trust without EE certificate pinning, it should be re-reviewed
+for that purpose, and it would probably need some security improvements:
 
 The exposure surface of the CA's private key should be minimized to avoid an
 attacker surreptitiously creating new EE certs. mlockall(2) looks useful, though
@@ -55,6 +57,7 @@ https://cabforum.org/baseline-requirements-documents/ (Certificate profile)
 import argparse
 from collections.abc import Sequence
 import pathlib
+import shutil
 import subprocess
 import tempfile
 import textwrap
@@ -68,6 +71,11 @@ def _args():
         "--name",
         required=True,
         help="DNS name for the EE certificate.",
+    )
+    parser.add_argument(
+        "--ca-cert",
+        type=pathlib.Path,
+        help="Path to write the CA certificate to.",
     )
     parser.add_argument(
         "--key",
@@ -183,6 +191,8 @@ def main() -> None:
             input=ca_private_key,
             check=True,
         )
+        if args.ca_cert is not None:
+            shutil.copyfile(tempdir.joinpath("ca-cert.pem"), args.ca_cert)
 
         subprocess.run(
             ("openssl", "genpkey", *genpkey_args, "-out", str(args.key)),
