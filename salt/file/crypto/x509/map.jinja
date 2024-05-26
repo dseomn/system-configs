@@ -20,16 +20,24 @@
 {% from 'crypto/map.jinja' import crypto %}
 
 
-{% macro _boilerplate_certificate(name, warning_on_change, group='root') %}
-boilerplate_certificate_{{ name }}:
+{% macro _boilerplate_certificate(
+    name,
+    warning_on_change,
+    dir_name=none,
+    group='root') %}
+{% if dir_name is none %}
+  {% set dir_name = name %}
+{% endif %}
+
+boilerplate_certificate_{{ dir_name }}:
   cmd.run:
   - name: >-
-      mkdir -p {{ common.local_etc }}/x509/{{ name }}
+      mkdir -p {{ common.local_etc }}/x509/{{ dir_name }}
       &&
       {{ common.local_bin }}/boilerplate-certificate
       --name={{ name }}
-      --key={{ common.local_etc }}/x509/{{ name }}/privkey.pem
-      --cert={{ common.local_etc }}/x509/{{ name }}/cert.pem
+      --key={{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
+      --cert={{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
       --key-algorithm={{ crypto.openssl.strict_key_algorithm }}
       {%- for key_option in crypto.openssl.strict_key_options %}
       --key-option={{ key_option }}
@@ -37,49 +45,49 @@ boilerplate_certificate_{{ name }}:
       --days={{ crypto.secret_validity_period_days }}
       &&
       openssl x509
-      -in {{ common.local_etc }}/x509/{{ name }}/cert.pem
+      -in {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
       -{{ crypto.openssl.digest }}
       -fingerprint
   - creates:
-    - {{ common.local_etc }}/x509/{{ name }}/privkey.pem
-    - {{ common.local_etc }}/x509/{{ name }}/cert.pem
+    - {{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
+    - {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
   - require:
     - {{ common.local_etc }}/x509
     - {{ common.local_bin }}/boilerplate-certificate
   test.configurable_test_state:
   - warnings: {{ warning_on_change | tojson }}
   - onchanges:
-    - cmd: boilerplate_certificate_{{ name }}
+    - cmd: boilerplate_certificate_{{ dir_name }}
 
-{{ common.local_etc }}/x509/{{ name }}/privkey.pem:
+{{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem:
   file.managed:
   - create: false
   - replace: false
   - group: {{ group }}
   - mode: 0640
   - require:
-    - boilerplate_certificate_{{ name }}
-{{ common.local_etc }}/x509/{{ name }}/privkey.pem should be rotated:
+    - boilerplate_certificate_{{ dir_name }}
+{{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem should be rotated:
   file.accumulated:
   - name: boilerplate certificate keys
   - filename: {{ common.local_sbin }}/monitor-secret-age
-  - text: {{ common.local_etc }}/x509/{{ name }}/privkey.pem
+  - text: {{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
   - require:
-    - {{ common.local_etc }}/x509/{{ name }}/privkey.pem
+    - {{ common.local_etc }}/x509/{{ dir_name }}/privkey.pem
   - require_in:
     - file: {{ common.local_sbin }}/monitor-secret-age
 
-{{ common.local_etc }}/x509/{{ name }}/cert.pem:
+{{ common.local_etc }}/x509/{{ dir_name }}/cert.pem:
   file.exists:
   - require:
-    - boilerplate_certificate_{{ name }}
-{{ common.local_etc }}/x509/{{ name }}/cert.pem should be rotated:
+    - boilerplate_certificate_{{ dir_name }}
+{{ common.local_etc }}/x509/{{ dir_name }}/cert.pem should be rotated:
   file.accumulated:
   - name: boilerplate certificates
   - filename: {{ common.local_sbin }}/monitor-x509-validity-period
-  - text: {{ common.local_etc }}/x509/{{ name }}/cert.pem
+  - text: {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
   - require:
-    - {{ common.local_etc }}/x509/{{ name }}/cert.pem
+    - {{ common.local_etc }}/x509/{{ dir_name }}/cert.pem
   - require_in:
     - file: {{ common.local_sbin }}/monitor-x509-validity-period
 {% endmacro %}
