@@ -35,7 +35,9 @@ jobs:
           passlib \
           pytest \
           pytest-cov \
-          python-dateutil
+          python-dateutil \
+          types-passlib \
+          types-python-dateutil
     - name: Run mypy
       run: |
         mypy
