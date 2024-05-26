@@ -31,14 +31,14 @@ jobs:
         pip install \
           absl-py \
           freezegun \
+          mypy \
           passlib \
           pytest \
           pytest-cov \
-          python-dateutil \
-          pytype
-    - name: Run pytype
+          python-dateutil
+    - name: Run mypy
       run: |
-        pytype
+        mypy
     - name: Test
       run: |
         pytest

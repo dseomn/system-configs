@@ -24,9 +24,10 @@ import contextlib
 import os
 import shutil
 import subprocess
+from typing import Any, IO, cast
 
 
-def _wait_and_check(popen: subprocess.Popen) -> None:
+def _wait_and_check(popen: subprocess.Popen[Any]) -> None:
     if popen.wait() != 0:
         raise subprocess.CalledProcessError(returncode=popen.returncode,
                                             cmd=popen.args)
@@ -87,7 +88,7 @@ def _ejabberd_tempfile(
             stdout=subprocess.PIPE,
         )
         with open(copy_to, mode='xb') as copy_to_file:
-            shutil.copyfileobj(cat.stdout, copy_to_file)
+            shutil.copyfileobj(cast(IO[bytes], cat.stdout), copy_to_file)
         _wait_and_check(cat)
 
 
@@ -132,7 +133,10 @@ def _ejabberd_tempdir(
             ),
             stdin=subprocess.PIPE,
         )
-        shutil.copyfileobj(tar_create.stdout, tar_extract.stdin)
+        # TODO(https://github.com/python/mypy/issues/15031): Remove type ignore.
+        shutil.copyfileobj(  # type: ignore
+            cast(IO[bytes], tar_create.stdout),
+            cast(IO[bytes], tar_extract.stdin))
         _wait_and_check(tar_create)
         _wait_and_check(tar_extract)
 

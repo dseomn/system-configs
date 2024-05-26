@@ -18,9 +18,18 @@ requires-python = ">=3.11"
 [tool.black]
 line-length = 80
 
-[tool.pytype]
-inputs = ["."]
-jobs = "auto"
+[tool.mypy]
+disallow_any_generics = true
+files = ["**/*.py"]
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+  "absl.*",
+]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = """\

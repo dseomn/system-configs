@@ -28,7 +28,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
-from typing import Optional
+from typing import Any, Optional
 
 import dateutil.parser
 import dateutil.rrule
@@ -206,7 +206,7 @@ def _send_email(
     config: _TodoConfig,
     comment: Optional[str],
     extra: Sequence[Sequence[str]],
-    subprocess_run: ...,
+    subprocess_run: Any,
 ) -> None:
     message = email.message.EmailMessage()
     for header, value in config.email_headers.items():
@@ -241,7 +241,7 @@ def _handle_todo(
     state: _TodoState,
     max_occurrences: int,
     now: datetime.datetime,
-    subprocess_run: ...,
+    subprocess_run: Any,
 ) -> None:
     extra = []  # List of sections, which are lists of lines.
     if now < config.start_parsed:
@@ -300,7 +300,7 @@ def _handle_todo(
 def main(
     args: Sequence[str],
     *,
-    subprocess_run: ... = subprocess.run,
+    subprocess_run: Any = subprocess.run,
 ) -> None:
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     args_parsed = _parse_args(args)

@@ -19,7 +19,7 @@ import email.policy
 import json
 import subprocess
 import textwrap
-from typing import Optional, Type
+from typing import Any, Optional, Type
 from unittest import mock
 
 from absl.testing import absltest
@@ -53,10 +53,10 @@ class TodoTest(parameterized.TestCase):
     def _main(
         self,
         *,
-        config: ...,
-        state: ... = None,
+        config: Any,
+        state: Any = None,
         max_occurrences: int = 10,
-    ) ->...:
+    ) ->Any:
         tempdir = self.create_tempdir()
         if config is not None:
             tempdir.create_file('config', json.dumps(config))
@@ -210,8 +210,8 @@ class TodoTest(parameterized.TestCase):
     def test_error(
         self,
         *,
-        config: ...,
-        state: ... = None,
+        config: Any,
+        state: Any = None,
         error_class: Type[Exception],
         error_regex: str = '',
     ):
@@ -233,7 +233,7 @@ class TodoTest(parameterized.TestCase):
         ),
     )
     @freezegun.freeze_time('2000-01-01')
-    def test_config_defaults(self, group_extra: ..., todo_extra: ...):
+    def test_config_defaults(self, group_extra: Any, todo_extra: Any):
         self._main(config=dict(some_group=dict(
             **group_extra,
             todos=dict(some_todo=dict(
@@ -303,8 +303,8 @@ class TodoTest(parameterized.TestCase):
     @freezegun.freeze_time('2000-01-01')
     def test_nothing_to_send(
         self,
-        initial_state: ...,
-        config: ...,
+        initial_state: Any,
+        config: Any,
     ):
         new_state = self._main(config=config, state=initial_state)
 

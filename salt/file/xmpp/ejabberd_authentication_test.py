@@ -18,7 +18,7 @@ import pathlib
 import subprocess
 import sys
 import tempfile
-from typing import IO
+from typing import IO, cast
 import unittest
 
 import passlib.hash
@@ -54,12 +54,15 @@ class EjabberdAuthenticationTest(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-            yield main.stdin, main.stdout
+            stdin_io = cast(IO[bytes], main.stdin)
+            stdout_io = cast(IO[bytes], main.stdout)
+            stderr_io = cast(IO[bytes], main.stderr)
+            yield stdin_io, stdout_io
             main.wait()
-        stdout = main.stdout.read()
-        main.stdout.close()
-        stderr = main.stderr.read()
-        main.stderr.close()
+        stdout = stdout_io.read()
+        stdout_io.close()
+        stderr = stderr_io.read()
+        stderr_io.close()
         if main.returncode != 0 or stdout or stderr:
             raise RuntimeError(
                 f'Main returned {main.returncode} with unread stdout '
