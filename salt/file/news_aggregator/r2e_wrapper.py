@@ -25,21 +25,23 @@ import subprocess
 import sys
 import tempfile
 
-_CONFIG = '/etc/rss2email.cfg'
-_DATA = '/srv/rss2email/data/rss2email.json'
+_CONFIG = "/etc/rss2email.cfg"
+_DATA = "/srv/rss2email/data/rss2email.json"
 
 
 def main():
     with tempfile.TemporaryDirectory() as temp_dir:
-        temp_config = os.path.join(temp_dir, 'rss2email.cfg')
+        temp_config = os.path.join(temp_dir, "rss2email.cfg")
         shutil.copyfile(_CONFIG, temp_config)
-        return subprocess.run((
-            'r2e',
-            f'--config={temp_config}',
-            f'--data={_DATA}',
-            *sys.argv[1:],
-        )).returncode
+        return subprocess.run(
+            (
+                "r2e",
+                f"--config={temp_config}",
+                f"--data={_DATA}",
+                *sys.argv[1:],
+            )
+        ).returncode
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

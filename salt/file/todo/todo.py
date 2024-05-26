@@ -55,41 +55,49 @@ class _TodoConfig:
             https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5.3
         recurrence_rule_parsed: See above.
     """
+
     email_headers: Mapping[str, str]
     summary: str
     start: str
     start_parsed: datetime.datetime = dataclasses.field(init=False)
     description: Optional[str] = None
-    timezone: str = 'UTC'
+    timezone: str = "UTC"
     timezone_parsed: datetime.tzinfo = dataclasses.field(init=False)
     recurrence_rule: Optional[str] = None
     recurrence_rule_parsed: Optional[dateutil.rrule.rrule] = dataclasses.field(
-        init=False)
+        init=False
+    )
 
     def __post_init__(self):
         timezone_parsed = dateutil.tz.gettz(self.timezone)
         if timezone_parsed is None:
             # See https://github.com/dateutil/dateutil/issues/1237 for why this
             # is an `is None` check instead of try/except.
-            raise ValueError(f'Invalid timezone {self.timezone!r}')
+            raise ValueError(f"Invalid timezone {self.timezone!r}")
         self.timezone_parsed = timezone_parsed
         try:
             self.start_parsed = dateutil.utils.default_tzinfo(
-                dateutil.parser.isoparse(self.start), self.timezone_parsed)
+                dateutil.parser.isoparse(self.start), self.timezone_parsed
+            )
         except ValueError as e:
-            raise ValueError(f'Invalid start {self.start!r}') from e
+            raise ValueError(f"Invalid start {self.start!r}") from e
         try:
             recurrence_rule_parsed = (  #
-                None if self.recurrence_rule is None else
-                dateutil.rrule.rrulestr(self.recurrence_rule,
-                                        dtstart=self.start_parsed))
+                None
+                if self.recurrence_rule is None
+                else dateutil.rrule.rrulestr(
+                    self.recurrence_rule, dtstart=self.start_parsed
+                )
+            )
         except ValueError as e:
             raise ValueError(
-                f'Invalid recurrence_rule {self.recurrence_rule!r}') from e
+                f"Invalid recurrence_rule {self.recurrence_rule!r}"
+            ) from e
         if isinstance(recurrence_rule_parsed, dateutil.rrule.rruleset):
             raise ValueError(
-                'recurrence_rule should be an rrule, not an rruleset: '
-                f'{self.recurrence_rule!r}')
+                "recurrence_rule should be an rrule, not an rruleset: "
+                f"{self.recurrence_rule!r}"
+            )
         self.recurrence_rule_parsed = recurrence_rule_parsed
 
 
@@ -101,65 +109,73 @@ class _TodoState:
         last_sent: When an email was last successfully sent for this TODO.
         last_sent_parsed: See above.
     """
+
     now: dataclasses.InitVar[datetime.datetime]
     last_sent: Optional[str] = None
     last_sent_parsed: Optional[datetime.datetime] = dataclasses.field(
-        init=False)
+        init=False
+    )
 
     def __post_init__(self, now: datetime.datetime):
         try:
-            self.last_sent_parsed = (None if self.last_sent is None else
-                                     dateutil.parser.isoparse(self.last_sent))
+            self.last_sent_parsed = (
+                None
+                if self.last_sent is None
+                else dateutil.parser.isoparse(self.last_sent)
+            )
         except ValueError as e:
-            raise ValueError(f'Invalid last_sent {self.last_sent!r}') from e
+            raise ValueError(f"Invalid last_sent {self.last_sent!r}") from e
         if self.last_sent_parsed is not None and self.last_sent_parsed > now:
             raise RuntimeError(
-                f'last_sent {self.last_sent_parsed} is in the future (after '
-                f'{now}).')
+                f"last_sent {self.last_sent_parsed} is in the future (after "
+                f"{now})."
+            )
 
     def set_last_sent(self, value: datetime.datetime) -> None:
         if value.tzinfo is not datetime.timezone.utc:
-            raise ValueError('last_sent must be UTC')
-        self.last_sent = value.strftime('%Y%m%dT%H%M%SZ')
+            raise ValueError("last_sent must be UTC")
+        self.last_sent = value.strftime("%Y%m%dT%H%M%SZ")
         self.last_sent_parsed = value
 
 
 def _parse_args(args: Sequence[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Send scheduled TODO emails.')
+    parser = argparse.ArgumentParser(description="Send scheduled TODO emails.")
     parser.add_argument(
-        '--config',
+        "--config",
         type=pathlib.Path,
         required=True,
-        help='Path to config file.',
+        help="Path to config file.",
     )
     parser.add_argument(
-        '--state',
+        "--state",
         type=pathlib.Path,
         required=True,
-        help='Path to state file.',
+        help="Path to state file.",
     )
     parser.add_argument(
-        '--max-occurrences',
+        "--max-occurrences",
         type=int,
         default=10,
-        help='Maximum number of occurrences to show at once.',
+        help="Maximum number of occurrences to show at once.",
     )
     return parser.parse_args(args)
 
 
 def _parse_config(config_filename: pathlib.Path) -> Mapping[str, _TodoConfig]:
-    with open(config_filename, mode='rb') as config_file:
+    with open(config_filename, mode="rb") as config_file:
         raw_config = json.load(config_file)
     config = {}
     for group_id, group_config in raw_config.items():
-        defaults = group_config.pop('defaults', {})
-        todos = group_config.pop('todos')
+        defaults = group_config.pop("defaults", {})
+        todos = group_config.pop("todos")
         if group_config:
             raise ValueError(
-                f'Unexpected group config keys: {list(group_config)!r}')
+                f"Unexpected group config keys: {list(group_config)!r}"
+            )
         for todo_id, todo_config in todos.items():
-            config[f'{group_id}.{todo_id}'] = (  #
-                _TodoConfig(**(defaults | todo_config)))
+            config[f"{group_id}.{todo_id}"] = _TodoConfig(  #
+                **(defaults | todo_config)
+            )
     return config
 
 
@@ -169,14 +185,16 @@ def _parse_state(
     now: datetime.datetime,
 ) -> collections.defaultdict[str, _TodoState]:
     try:
-        with open(state_filename, mode='rb') as state_file:
+        with open(state_filename, mode="rb") as state_file:
             raw_state = json.load(state_file)
     except FileNotFoundError:
         raw_state = {}
     return collections.defaultdict(
         lambda: _TodoState(now=now),
-        ((todo_id, _TodoState(**todo_state, now=now))
-         for todo_id, todo_state in raw_state.items()),
+        (
+            (todo_id, _TodoState(**todo_state, now=now))
+            for todo_id, todo_state in raw_state.items()
+        ),
     )
 
 
@@ -192,9 +210,9 @@ def _save_state(
             if field.init
         }
     with tempfile.NamedTemporaryFile(
-            mode='wt',
-            dir=state_filename.parent,
-            delete=False,
+        mode="wt",
+        dir=state_filename.parent,
+        delete=False,
     ) as state_file_new:
         json.dump(raw_state, state_file_new)
     os.replace(state_file_new.name, state_filename)
@@ -211,24 +229,25 @@ def _send_email(
     message = email.message.EmailMessage()
     for header, value in config.email_headers.items():
         message[header] = value
-    message['Subject'] = config.summary + ('' if comment is None else
-                                           f' ({comment})')
-    message['Todo-Id'] = todo_id
-    message['Todo-Summary'] = config.summary
-    message['Todo-Timezone'] = config.timezone
-    message['Todo-Start'] = config.start
+    message["Subject"] = config.summary + (
+        "" if comment is None else f" ({comment})"
+    )
+    message["Todo-Id"] = todo_id
+    message["Todo-Summary"] = config.summary
+    message["Todo-Timezone"] = config.timezone
+    message["Todo-Start"] = config.start
     if config.recurrence_rule is not None:
-        message['Todo-Recurrence-Rule'] = config.recurrence_rule
+        message["Todo-Recurrence-Rule"] = config.recurrence_rule
     if config.description is not None:
-        message.add_attachment(config.description, disposition='inline')
+        message.add_attachment(config.description, disposition="inline")
     if extra:
         message.add_attachment(
-            '\n\n'.join('\n'.join(section) for section in extra),
-            disposition='inline',
-            filename='extra-information',
+            "\n\n".join("\n".join(section) for section in extra),
+            disposition="inline",
+            filename="extra-information",
         )
     subprocess_run(
-        ('/usr/sbin/sendmail', '-i', '-t'),
+        ("/usr/sbin/sendmail", "-i", "-t"),
         check=True,
         input=bytes(message),
     )
@@ -247,8 +266,10 @@ def _handle_todo(
     if now < config.start_parsed:
         return  # Not ready to send yet.
     if config.recurrence_rule_parsed is None:
-        if (state.last_sent_parsed is not None and
-                state.last_sent_parsed >= config.start_parsed):
+        if (
+            state.last_sent_parsed is not None
+            and state.last_sent_parsed >= config.start_parsed
+        ):
             return  # Already sent.
         comment = None
     else:
@@ -258,35 +279,49 @@ def _handle_todo(
             itertools.takewhile(
                 lambda occurrence: occurrence <= now,
                 config.recurrence_rule_parsed.xafter(
-                    (config.start_parsed if state.last_sent_parsed is None else
-                     state.last_sent_parsed),
+                    (
+                        config.start_parsed
+                        if state.last_sent_parsed is None
+                        else state.last_sent_parsed
+                    ),
                     count=max_occurrences + 1,
                     inc=(state.last_sent_parsed is None),
-                )))
+                ),
+            )
+        )
         if not included_occurrences:
             return
         elif len(included_occurrences) == 1:
             comment = None
         elif len(included_occurrences) > max_occurrences:
-            comment = f'x{max_occurrences}+'
+            comment = f"x{max_occurrences}+"
         else:
-            comment = f'x{len(included_occurrences)}'
-        extra.append([
-            'Occurrences included in this email:',
-            *(str(occurrence) if i < max_occurrences else '...'
-              for i, occurrence in enumerate(included_occurrences)),
-        ])
+            comment = f"x{len(included_occurrences)}"
+        extra.append(
+            [
+                "Occurrences included in this email:",
+                *(
+                    str(occurrence) if i < max_occurrences else "..."
+                    for i, occurrence in enumerate(included_occurrences)
+                ),
+            ]
+        )
         next_occurrences = tuple(
             config.recurrence_rule_parsed.xafter(
                 now,
                 count=max_occurrences + 1,
                 inc=False,
-            ))
-        extra.append([
-            'Next occurrences:',
-            *(str(occurrence) if i < max_occurrences else '...'
-              for i, occurrence in enumerate(next_occurrences)),
-        ])
+            )
+        )
+        extra.append(
+            [
+                "Next occurrences:",
+                *(
+                    str(occurrence) if i < max_occurrences else "..."
+                    for i, occurrence in enumerate(next_occurrences)
+                ),
+            ]
+        )
     _send_email(
         todo_id=todo_id,
         config=config,
@@ -318,5 +353,5 @@ def main(
     _save_state(args_parsed.state, state)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])

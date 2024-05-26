@@ -62,38 +62,39 @@ import textwrap
 
 def _args():
     parser = argparse.ArgumentParser(
-        description='Create a key pair and EE certificate for TLS.')
-    parser.add_argument(
-        '--name',
-        required=True,
-        help='DNS name for the EE certificate.',
+        description="Create a key pair and EE certificate for TLS."
     )
     parser.add_argument(
-        '--key',
+        "--name",
+        required=True,
+        help="DNS name for the EE certificate.",
+    )
+    parser.add_argument(
+        "--key",
         type=pathlib.Path,
         required=True,
-        help='Path to write the EE certificate\'s private key to.',
+        help="Path to write the EE certificate's private key to.",
     )
     parser.add_argument(
-        '--cert',
+        "--cert",
         type=pathlib.Path,
         required=True,
-        help='Path to write the EE certificate to.',
+        help="Path to write the EE certificate to.",
     )
     parser.add_argument(
-        '--key-algorithm',
+        "--key-algorithm",
         required=True,
-        help='See the -algorithm argument to openssl genpkey.',
+        help="See the -algorithm argument to openssl genpkey.",
     )
     parser.add_argument(
-        '--key-option',
-        nargs='*',
-        help='See the -pkeyopt argument to openssl genpkey.',
+        "--key-option",
+        nargs="*",
+        help="See the -pkeyopt argument to openssl genpkey.",
     )
     parser.add_argument(
-        '--days',
+        "--days",
         required=True,
-        help='See the -days argument to openssl req and x509.',
+        help="See the -days argument to openssl req and x509.",
     )
     return parser.parse_args()
 
@@ -101,25 +102,25 @@ def _args():
 def _signature_args(args) -> Sequence[str]:
     # See https://cabforum.org/wp-content/uploads/CA-Browser-Forum-BR-1.8.0.pdf
     # section 7.1.3.2 for restrictions on the digest based on the key type.
-    if args.key_algorithm == 'EC':
-        if args.key_option == ['ec_paramgen_curve:P-384']:
-            return ('-sha384',)
-    raise NotImplementedError(f'{args.key_algorithm=}, {args.key_option=}')
+    if args.key_algorithm == "EC":
+        if args.key_option == ["ec_paramgen_curve:P-384"]:
+            return ("-sha384",)
+    raise NotImplementedError(f"{args.key_algorithm=}, {args.key_option=}")
 
 
 def main() -> None:
     args = _args()
 
-    genpkey_args = ['-algorithm', args.key_algorithm]
+    genpkey_args = ["-algorithm", args.key_algorithm]
     for key_option in args.key_option:
-        genpkey_args.extend(('-pkeyopt', key_option))
+        genpkey_args.extend(("-pkeyopt", key_option))
 
     signature_args = _signature_args(args)
 
     with tempfile.TemporaryDirectory() as tempdir_name:
         tempdir = pathlib.Path(tempdir_name)
 
-        with tempdir.joinpath('openssl.cnf').open(mode='wt') as openssl_cnf:
+        with tempdir.joinpath("openssl.cnf").open(mode="wt") as openssl_cnf:
             # Note that subjectKeyIdentifier comes before authorityKeyIdentifier
             # here despite the order being different in
             # https://datatracker.ietf.org/doc/html/rfc5280#section-4.2 because
@@ -127,7 +128,8 @@ def main() -> None:
             #
             # X509 V3 routines:v2i_AUTHORITY_KEYID:unable to get issuer keyid:../crypto/x509v3/v3_akey.c:143
             openssl_cnf.write(
-                textwrap.dedent(f"""
+                textwrap.dedent(
+                    f"""
                     [req]
                     string_mask = utf8only
                     prompt = no
@@ -149,79 +151,81 @@ def main() -> None:
                     subjectAltName = DNS:{args.name}
                     basicConstraints = critical, CA:FALSE
                     extendedKeyUsage = serverAuth, clientAuth
-                """))
+                """
+                )
+            )
 
         ca_private_key = subprocess.run(
-            ('openssl', 'genpkey', *genpkey_args),
+            ("openssl", "genpkey", *genpkey_args),
             stdout=subprocess.PIPE,
             check=True,
         ).stdout
         subprocess.run(
             (
-                'openssl',
-                'req',
-                '-x509',
-                '-batch',
-                '-key',
-                '/dev/stdin',
-                '-config',
-                str(tempdir.joinpath('openssl.cnf')),
-                '-extensions',
-                'x509_ca_extensions',
-                '-subj',
-                f'/CN=Boilerplate CA for {args.name}',
-                '-days',
+                "openssl",
+                "req",
+                "-x509",
+                "-batch",
+                "-key",
+                "/dev/stdin",
+                "-config",
+                str(tempdir.joinpath("openssl.cnf")),
+                "-extensions",
+                "x509_ca_extensions",
+                "-subj",
+                f"/CN=Boilerplate CA for {args.name}",
+                "-days",
                 args.days,
                 *signature_args,
-                '-out',
-                str(tempdir.joinpath('ca-cert.pem')),
+                "-out",
+                str(tempdir.joinpath("ca-cert.pem")),
             ),
             input=ca_private_key,
             check=True,
         )
 
         subprocess.run(
-            ('openssl', 'genpkey', *genpkey_args, '-out', str(args.key)),
+            ("openssl", "genpkey", *genpkey_args, "-out", str(args.key)),
             check=True,
         )
         subprocess.run(
             (
-                'openssl',
-                'req',
-                '-new',
-                '-batch',
-                '-key',
+                "openssl",
+                "req",
+                "-new",
+                "-batch",
+                "-key",
                 str(args.key),
-                '-config',
-                str(tempdir.joinpath('openssl.cnf')),
-                '-subj',
-                f'/CN={args.name}',
+                "-config",
+                str(tempdir.joinpath("openssl.cnf")),
+                "-subj",
+                f"/CN={args.name}",
                 *signature_args,
-                '-out',
-                str(tempdir.joinpath('ee-req.pem')),
+                "-out",
+                str(tempdir.joinpath("ee-req.pem")),
             ),
             check=True,
         )
         subprocess.run(
             (
-                'openssl',
-                'x509',
-                '-req',
-                '-in',
-                str(tempdir.joinpath('ee-req.pem')),
-                '-CA',
-                str(tempdir.joinpath('ca-cert.pem')),
-                '-CAkey',
-                '/dev/stdin',
-                '-CAcreateserial',
-                '-extfile',
-                str(tempdir.joinpath('openssl.cnf')),
-                '-extensions',
-                'x509_ee_extensions',
-                '-days',
+                "openssl",
+                "x509",
+                "-req",
+                "-in",
+                str(tempdir.joinpath("ee-req.pem")),
+                "-CA",
+                str(tempdir.joinpath("ca-cert.pem")),
+                "-CAkey",
+                "/dev/stdin",
+                "-CAcreateserial",
+                "-extfile",
+                str(tempdir.joinpath("openssl.cnf")),
+                "-extensions",
+                "x509_ee_extensions",
+                "-days",
                 args.days,
                 *signature_args,
-                '-out',
+                "-out",
                 str(args.cert),
             ),
             input=ca_private_key,
@@ -229,5 +233,5 @@ def main() -> None:
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

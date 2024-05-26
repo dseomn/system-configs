@@ -36,27 +36,38 @@ def _notify(
 
     unsubscribed = mailboxes - subscribed
     if unsubscribed:
-        sections.append(''.join((
-            'Unsubscribed mailboxes:\n',
-            *(f'  {mailbox}\n' for mailbox in unsubscribed),
-        )))
+        sections.append(
+            "".join(
+                (
+                    "Unsubscribed mailboxes:\n",
+                    *(f"  {mailbox}\n" for mailbox in unsubscribed),
+                )
+            )
+        )
 
     nonexistent_subscribed = subscribed - mailboxes
     if nonexistent_subscribed:
-        sections.append(''.join((
-            'Nonexistent subscriptions:\n',
-            *(f'  {subscription}\n' for subscription in nonexistent_subscribed),
-        )))
+        sections.append(
+            "".join(
+                (
+                    "Nonexistent subscriptions:\n",
+                    *(
+                        f"  {subscription}\n"
+                        for subscription in nonexistent_subscribed
+                    ),
+                )
+            )
+        )
 
     notification = email.message.EmailMessage()
-    notification['To'] = user
-    notification['Subject'] = 'subscriptions do not match mailboxes'
-    notification.set_content('\n'.join(sections))
+    notification["To"] = user
+    notification["Subject"] = "subscriptions do not match mailboxes"
+    notification.set_content("\n".join(sections))
     subprocess.run(
         (
-            '/usr/sbin/sendmail',
-            '-i',
-            '-t',
+            "/usr/sbin/sendmail",
+            "-i",
+            "-t",
         ),
         check=True,
         input=bytes(notification),
@@ -65,7 +76,7 @@ def _notify(
 
 def main() -> None:
     users = subprocess.run(
-        ('doveadm', 'user', '*'),
+        ("doveadm", "user", "*"),
         check=True,
         stdout=subprocess.PIPE,
         text=True,
@@ -77,31 +88,32 @@ def main() -> None:
         # mailboxes.
         mailbox_statuses = subprocess.run(
             (
-                'doveadm',
-                '-f',
-                'tab',
-                'mailbox',
-                'status',
-                '-u',
+                "doveadm",
+                "-f",
+                "tab",
+                "mailbox",
+                "status",
+                "-u",
                 user,
-                'guid',
-                '*',
+                "guid",
+                "*",
             ),
             check=True,
             stdout=subprocess.PIPE,
             text=True,
         ).stdout.splitlines()[1:]
-        mailboxes = {status.split('\t')[0] for status in mailbox_statuses}
+        mailboxes = {status.split("\t")[0] for status in mailbox_statuses}
         subscribed = set(
             subprocess.run(
-                ('doveadm', 'mailbox', 'list', '-u', user, '-s'),
+                ("doveadm", "mailbox", "list", "-u", user, "-s"),
                 check=True,
                 stdout=subprocess.PIPE,
                 text=True,
-            ).stdout.splitlines())
+            ).stdout.splitlines()
+        )
         if mailboxes != subscribed:
             _notify(user=user, mailboxes=mailboxes, subscribed=subscribed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

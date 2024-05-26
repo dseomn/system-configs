@@ -21,12 +21,12 @@ _WARN_AFTER = datetime.timedelta(days=21)
 
 def main():
     # https://en.wikipedia.org/wiki/Uptime#Using_/proc/uptime
-    with open('/proc/uptime') as uptime_file:
+    with open("/proc/uptime") as uptime_file:
         uptime_seconds, _ = uptime_file.read().split()
     uptime = datetime.timedelta(seconds=float(uptime_seconds))
     if uptime > _WARN_AFTER:
-        print(f'Uptime: {uptime}')
+        print(f"Uptime: {uptime}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

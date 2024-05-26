@@ -28,17 +28,17 @@ import pathlib
 import subprocess
 import tempfile
 
-_SPAM_FOLDERS = ('.Junk',)
+_SPAM_FOLDERS = (".Junk",)
 _FORGET_FOLDERS = (
-    '.Archive',
-    '.Drafts',
-    '.Sent',
-    '.Trash',
+    ".Archive",
+    ".Drafts",
+    ".Sent",
+    ".Trash",
 )
 
 
 def _is_inclusive_subfolder(name: str, tests: Collection[str]) -> bool:
-    return name in tests or name.startswith(tuple(f'{test}.' for test in tests))
+    return name in tests or name.startswith(tuple(f"{test}." for test in tests))
 
 
 def _sa_learn(
@@ -50,16 +50,16 @@ def _sa_learn(
     # TODO(https://bz.apache.org/SpamAssassin/show_bug.cgi?id=8146): Remove this
     # special handling of empty folders.
     try:
-        next((folder / 'cur').iterdir())
+        next((folder / "cur").iterdir())
     except StopIteration:
         return
     sa_learn_result = subprocess.run(
         (
-            'sa-learn',
-            '--quiet',
-            f'--dbpath={dbpath}',
+            "sa-learn",
+            "--quiet",
+            f"--dbpath={dbpath}",
             type_arg,
-            '.',
+            ".",
         ),
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -70,36 +70,36 @@ def _sa_learn(
     if any(
         line
         for line in sa_learn_result.stdout.splitlines()
-        if not line.startswith('Bad UTF7 data escape at ')
+        if not line.startswith("Bad UTF7 data escape at ")
     ):
-        print(f'{folder}:\n{sa_learn_result.stdout}')
+        print(f"{folder}:\n{sa_learn_result.stdout}")
 
 
 def main() -> None:
-    user_dir = pathlib.Path(os.environ['USER_DIR'])
-    maildir = pathlib.Path(os.environ['MAILDIR'])
+    user_dir = pathlib.Path(os.environ["USER_DIR"])
+    maildir = pathlib.Path(os.environ["MAILDIR"])
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = pathlib.Path(temp_dir)
-        temp_path.joinpath('spamassassin').symlink_to(user_dir)
-        dbpath = temp_path.joinpath('spamassassin').joinpath('bayes')
-        _sa_learn('--ham', maildir, dbpath=dbpath)
+        temp_path.joinpath("spamassassin").symlink_to(user_dir)
+        dbpath = temp_path.joinpath("spamassassin").joinpath("bayes")
+        _sa_learn("--ham", maildir, dbpath=dbpath)
         for subdir in maildir.iterdir():
             if _is_inclusive_subfolder(subdir.name, _SPAM_FOLDERS):
-                _sa_learn('--spam', subdir, dbpath=dbpath)
+                _sa_learn("--spam", subdir, dbpath=dbpath)
             elif _is_inclusive_subfolder(subdir.name, _FORGET_FOLDERS):
-                _sa_learn('--forget', subdir, dbpath=dbpath)
-            elif subdir.name.startswith('.'):
-                _sa_learn('--ham', subdir, dbpath=dbpath)
+                _sa_learn("--forget", subdir, dbpath=dbpath)
+            elif subdir.name.startswith("."):
+                _sa_learn("--ham", subdir, dbpath=dbpath)
         subprocess.run(
             (
-                'sa-learn',
-                '--quiet',
-                f'--dbpath={dbpath}',
-                '--force-expire',
+                "sa-learn",
+                "--quiet",
+                f"--dbpath={dbpath}",
+                "--force-expire",
             ),
             check=True,
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

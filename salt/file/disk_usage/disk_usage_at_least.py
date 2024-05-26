@@ -21,14 +21,16 @@ import sys
 
 
 def _lvm_pool_usage(*, min_percent):
-    if not shutil.which('lvs'):
-        return ''
+    if not shutil.which("lvs"):
+        return ""
     lvs = subprocess.run(
         (
-            'lvs',
-            '-S',
-            ('lv_layout=pool,'
-             f'(data_percent>={min_percent}||metadata_percent>={min_percent})'),
+            "lvs",
+            "-S",
+            (
+                "lv_layout=pool,"
+                f"(data_percent>={min_percent}||metadata_percent>={min_percent})"
+            ),
         ),
         stdout=subprocess.PIPE,
         text=True,
@@ -39,7 +41,7 @@ def _lvm_pool_usage(*, min_percent):
 
 def _filesystem_usage(*, min_percent):
     df = subprocess.run(
-        ('df', '-h'),
+        ("df", "-h"),
         stdout=subprocess.PIPE,
         text=True,
         check=True,
@@ -47,29 +49,31 @@ def _filesystem_usage(*, min_percent):
     df_lines = df.stdout.splitlines()
     df_header = df_lines[0]
     df_lines_to_print = [
-        line for line in df_lines[1:]
-        if float(line.split()[4].rstrip('%')) >= min_percent
+        line
+        for line in df_lines[1:]
+        if float(line.split()[4].rstrip("%")) >= min_percent
     ]
     if df_lines_to_print:
-        return ''.join(line + '\n' for line in (df_header, *df_lines_to_print))
+        return "".join(line + "\n" for line in (df_header, *df_lines_to_print))
     else:
-        return ''
+        return ""
 
 
 def main():
     arg_parser = argparse.ArgumentParser(
-        description='Conditionally print disk usage.')
-    arg_parser.add_argument(
-        '--lvm-pool-threshold',
-        type=float,
-        required=True,
-        help='Minimum usage percent to print for LVM pools.',
+        description="Conditionally print disk usage."
     )
     arg_parser.add_argument(
-        '--fs-threshold',
+        "--lvm-pool-threshold",
         type=float,
         required=True,
-        help='Minimum usage percent to print for filesystems.',
+        help="Minimum usage percent to print for LVM pools.",
+    )
+    arg_parser.add_argument(
+        "--fs-threshold",
+        type=float,
+        required=True,
+        help="Minimum usage percent to print for filesystems.",
     )
     args = arg_parser.parse_args()
 
@@ -77,8 +81,8 @@ def main():
         _lvm_pool_usage(min_percent=args.lvm_pool_threshold),
         _filesystem_usage(min_percent=args.fs_threshold),
     )
-    sys.stdout.write('\n'.join(section for section in sections if section))
+    sys.stdout.write("\n".join(section for section in sections if section))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -63,18 +63,19 @@ _Config = Mapping[tuple[bytes, bytes], Collection[str]]
 
 def _args():
     parser = argparse.ArgumentParser(
-        description='External authentication helper for ejabberd.')
-    parser.add_argument(
-        '--config',
-        type=pathlib.Path,
-        required=True,
-        help='Absolute path to the authentication config file.',
+        description="External authentication helper for ejabberd."
     )
     parser.add_argument(
-        '--max-passwords-per-user',
+        "--config",
+        type=pathlib.Path,
+        required=True,
+        help="Absolute path to the authentication config file.",
+    )
+    parser.add_argument(
+        "--max-passwords-per-user",
         default=25,
         type=int,
-        help='Max number of passwords per user.',
+        help="Max number of passwords per user.",
     )
     return parser.parse_args()
 
@@ -85,12 +86,12 @@ def _config(
     max_passwords_per_user: int,
 ) -> _Config:
     raw_config = collections.defaultdict(list)
-    with config_path.open(mode='rb') as config_file:
+    with config_path.open(mode="rb") as config_file:
         for line in config_file:
-            if not line.strip() or line.lstrip().startswith(b'#'):
+            if not line.strip() or line.lstrip().startswith(b"#"):
                 continue
-            user, server, crypted_password = line.rstrip(b'\n').split(b':')
-            raw_config[(user, server)].append(crypted_password.decode('utf-8'))
+            user, server, crypted_password = line.rstrip(b"\n").split(b":")
+            raw_config[(user, server)].append(crypted_password.decode("utf-8"))
     # collections.defaultdict makes it easy to accidentally add new keys, which
     # is useful above, but a potential security risk after parsing is done.
     # E.g., if some code did `config[(user, server)]` with untrusted input, that
@@ -100,12 +101,14 @@ def _config(
     config = {}
     for key, crypted_passwords in raw_config.items():
         if len(crypted_passwords) > max_passwords_per_user:
-            raise ValueError(f'{key!r} has too many passwords')
+            raise ValueError(f"{key!r} has too many passwords")
         # Ensure exactly max_passwords_per_user entries by repeating the
         # entries. This makes it harder to figure out how many passwords a user
         # has by measuring how long it takes to test a password.
-        config[key] = tuple(crypted_passwords[i % len(crypted_passwords)]
-                            for i in range(max_passwords_per_user))
+        config[key] = tuple(
+            crypted_passwords[i % len(crypted_passwords)]
+            for i in range(max_passwords_per_user)
+        )
     return config
 
 
@@ -120,24 +123,24 @@ def _read_operations() -> Iterable[tuple[bytes, bytes]]:
         if not length_bytes:
             return
         elif len(length_bytes) != 2:
-            raise ValueError(f'Expected 2 bytes, got {len(length_bytes)}')
-        (length,) = struct.unpack('!H', length_bytes)
+            raise ValueError(f"Expected 2 bytes, got {len(length_bytes)}")
+        (length,) = struct.unpack("!H", length_bytes)
         value_bytes = sys.stdin.buffer.read(length)
         if len(value_bytes) != length:
-            raise ValueError(f'Expected {length} bytes, got {len(value_bytes)}')
-        operation, _, args = value_bytes.partition(b':')
+            raise ValueError(f"Expected {length} bytes, got {len(value_bytes)}")
+        operation, _, args = value_bytes.partition(b":")
         yield operation, args
 
 
 def _respond(response: _Response) -> None:
-    sys.stdout.buffer.write(struct.pack('!HH', 2, response))
+    sys.stdout.buffer.write(struct.pack("!HH", 2, response))
     sys.stdout.buffer.flush()
 
 
 def _auth(operation_args: bytes, *, config: _Config) -> _Response:
-    user, server, password = operation_args.split(b':', maxsplit=2)
+    user, server, password = operation_args.split(b":", maxsplit=2)
     try:
-        password_str = password.decode('utf-8')
+        password_str = password.decode("utf-8")
     except UnicodeDecodeError:
         return _Response.FAILURE
     crypted_passwords = config.get((user, server))
@@ -164,7 +167,7 @@ def _auth(operation_args: bytes, *, config: _Config) -> _Response:
 
 
 def _isuser(operation_args: bytes, *, config: _Config) -> _Response:
-    user, server = operation_args.split(b':')
+    user, server = operation_args.split(b":")
     return _Response.SUCCESS if (user, server) in config else _Response.FAILURE
 
 
@@ -175,13 +178,13 @@ def main() -> None:
         max_passwords_per_user=args.max_passwords_per_user,
     )
     for operation, operation_args in _read_operations():
-        if operation == b'auth':
+        if operation == b"auth":
             _respond(_auth(operation_args, config=config))
-        elif operation == b'isuser':
+        elif operation == b"isuser":
             _respond(_isuser(operation_args, config=config))
         else:
             _respond(_Response.FAILURE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

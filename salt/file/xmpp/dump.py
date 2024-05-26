@@ -29,18 +29,19 @@ from typing import Any, IO, cast
 
 def _wait_and_check(popen: subprocess.Popen[Any]) -> None:
     if popen.wait() != 0:
-        raise subprocess.CalledProcessError(returncode=popen.returncode,
-                                            cmd=popen.args)
+        raise subprocess.CalledProcessError(
+            returncode=popen.returncode, cmd=popen.args
+        )
 
 
 def _service_property(name: str) -> str:
     return subprocess.run(
         (
-            'systemctl',
-            'show',
-            f'--property={name}',
-            '--value',
-            'ejabberd.service',
+            "systemctl",
+            "show",
+            f"--property={name}",
+            "--value",
+            "ejabberd.service",
         ),
         stdout=subprocess.PIPE,
         check=True,
@@ -49,18 +50,18 @@ def _service_property(name: str) -> str:
 
 
 def _nsenter() -> Sequence[str]:
-    pid = _service_property('MainPID')
-    uid = _service_property('UID')
-    gid = _service_property('GID')
-    if pid == '0' or uid == '[not set]' or gid == '[not set]':
-        raise RuntimeError('ejabberd is not running')
+    pid = _service_property("MainPID")
+    uid = _service_property("UID")
+    gid = _service_property("GID")
+    if pid == "0" or uid == "[not set]" or gid == "[not set]":
+        raise RuntimeError("ejabberd is not running")
     return (
-        'nsenter',
-        f'--target={pid}',
-        '--mount',
-        f'--setuid={uid}',
-        f'--setgid={gid}',
-        '--',
+        "nsenter",
+        f"--target={pid}",
+        "--mount",
+        f"--setuid={uid}",
+        f"--setgid={gid}",
+        "--",
     )
 
 
@@ -72,22 +73,22 @@ def _ejabberd_tempfile(
 ) -> Generator[str, None, None]:
     with contextlib.ExitStack() as exit_stack:
         tempfile_ = subprocess.run(
-            (*nsenter, 'mktemp'),
+            (*nsenter, "mktemp"),
             stdout=subprocess.PIPE,
             check=True,
             text=True,
         ).stdout.rstrip()
         exit_stack.callback(
             subprocess.run,
-            (*nsenter, 'rm', tempfile_),
+            (*nsenter, "rm", tempfile_),
             check=True,
         )
         yield tempfile_
         cat = subprocess.Popen(
-            (*nsenter, 'cat', tempfile_),
+            (*nsenter, "cat", tempfile_),
             stdout=subprocess.PIPE,
         )
-        with open(copy_to, mode='xb') as copy_to_file:
+        with open(copy_to, mode="xb") as copy_to_file:
             shutil.copyfileobj(cast(IO[bytes], cat.stdout), copy_to_file)
         _wait_and_check(cat)
 
@@ -100,25 +101,25 @@ def _ejabberd_tempdir(
 ) -> Generator[str, None, None]:
     with contextlib.ExitStack() as exit_stack:
         tempdir = subprocess.run(
-            (*nsenter, 'mktemp', '-d'),
+            (*nsenter, "mktemp", "-d"),
             stdout=subprocess.PIPE,
             check=True,
             text=True,
         ).stdout.rstrip()
         exit_stack.callback(
             subprocess.run,
-            (*nsenter, 'rm', '-rf', tempdir),
+            (*nsenter, "rm", "-rf", tempdir),
             check=True,
         )
         yield tempdir
         tar_create = subprocess.Popen(
             (
                 *nsenter,
-                'tar',
-                '--create',
-                '--file=-',
-                f'--directory={tempdir}',
-                '.',
+                "tar",
+                "--create",
+                "--file=-",
+                f"--directory={tempdir}",
+                ".",
             ),
             stdout=subprocess.PIPE,
         )
@@ -126,33 +127,37 @@ def _ejabberd_tempdir(
         os.mkdir(copy_to)
         tar_extract = subprocess.Popen(
             (
-                'tar',
-                '--extract',
-                '--file=-',
-                f'--directory={copy_to}',
+                "tar",
+                "--extract",
+                "--file=-",
+                f"--directory={copy_to}",
             ),
             stdin=subprocess.PIPE,
         )
         # TODO(https://github.com/python/mypy/issues/15031): Remove type ignore.
         shutil.copyfileobj(  # type: ignore
             cast(IO[bytes], tar_create.stdout),
-            cast(IO[bytes], tar_extract.stdin))
+            cast(IO[bytes], tar_extract.stdin),
+        )
         _wait_and_check(tar_create)
         _wait_and_check(tar_extract)
 
 
 def main() -> None:
     nsenter = _nsenter()
-    with _ejabberd_tempfile(nsenter=nsenter,
-                            copy_to='ejabberd.dump') as dump_filename:
-        subprocess.run(('ejabberdctl', 'dump', dump_filename), check=True)
+    with _ejabberd_tempfile(
+        nsenter=nsenter, copy_to="ejabberd.dump"
+    ) as dump_filename:
+        subprocess.run(("ejabberdctl", "dump", dump_filename), check=True)
     # NOTE: This doesn't actually generate useful data, see
     # https://github.com/processone/ejabberd/issues/3705
-    with _ejabberd_tempdir(nsenter=nsenter,
-                           copy_to='ejabberd.piefxis') as dump_dirname:
-        subprocess.run(('ejabberdctl', 'export_piefxis', dump_dirname),
-                       check=True)
+    with _ejabberd_tempdir(
+        nsenter=nsenter, copy_to="ejabberd.piefxis"
+    ) as dump_dirname:
+        subprocess.run(
+            ("ejabberdctl", "export_piefxis", dump_dirname), check=True
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

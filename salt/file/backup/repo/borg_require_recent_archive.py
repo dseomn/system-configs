@@ -24,25 +24,26 @@ import sys
 
 def _args():
     parser = argparse.ArgumentParser(
-        description='Print a message if the latest archive is too old.')
+        description="Print a message if the latest archive is too old."
+    )
     parser.add_argument(
-        '--repository',
+        "--repository",
         type=str,
         required=True,
-        help='Repository to check.',
+        help="Repository to check.",
     )
     parser.add_argument(
-        '--max-age',
+        "--max-age",
         default=datetime.timedelta(days=2, hours=12),
         type=lambda arg: datetime.timedelta(seconds=float(arg)),
-        help='How old to warn about, in seconds.',
+        help="How old to warn about, in seconds.",
     )
     parser.add_argument(
-        'borg_option',
-        nargs='*',
+        "borg_option",
+        nargs="*",
         default=[],
         type=str,
-        help='Borg common options.',
+        help="Borg common options.",
     )
     return parser.parse_args()
 
@@ -51,11 +52,11 @@ def main() -> None:
     args = _args()
     repository_list_raw = subprocess.run(
         (
-            'borg',
+            "borg",
             *args.borg_option,
-            'list',
-            '--json',
-            '--last=5',
+            "list",
+            "--json",
+            "--last=5",
             args.repository,
         ),
         stdout=subprocess.PIPE,
@@ -63,17 +64,18 @@ def main() -> None:
     ).stdout
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     repository_list = json.loads(repository_list_raw)
-    archives = repository_list['archives']
+    archives = repository_list["archives"]
     if not archives:
-        print('No archives.')
+        print("No archives.")
         return
     last_archive_time = datetime.datetime.fromisoformat(
-        archives[-1]['start']).astimezone(datetime.timezone.utc)
+        archives[-1]["start"]
+    ).astimezone(datetime.timezone.utc)
     if last_archive_time < now - args.max_age:
-        print(f'Latest archive is older than {args.max_age}. Recent archives:')
+        print(f"Latest archive is older than {args.max_age}. Recent archives:")
         pprint.pprint(archives)
         return
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -25,18 +25,19 @@ import uuid
 
 def _args():
     parser = argparse.ArgumentParser(
-        description='Generate dynamic parts of lemonldap-ng.ini.')
-    parser.add_argument(
-        '--input',
-        type=pathlib.Path,
-        required=True,
-        help='Path to the static lemonldap-ng.ini to read.',
+        description="Generate dynamic parts of lemonldap-ng.ini."
     )
     parser.add_argument(
-        '--output',
+        "--input",
         type=pathlib.Path,
         required=True,
-        help='Path to the dynamic lemonldap-ng.ini to replace.',
+        help="Path to the static lemonldap-ng.ini to read.",
+    )
+    parser.add_argument(
+        "--output",
+        type=pathlib.Path,
+        required=True,
+        help="Path to the dynamic lemonldap-ng.ini to replace.",
     )
     return parser.parse_args()
 
@@ -52,12 +53,12 @@ def _portal_lines() -> Sequence[str]:
     # algorithms in the static part of the config file to match.
     private_key = subprocess.run(
         (
-            'openssl',
-            'genpkey',
-            '-algorithm',
-            'RSA',
-            '-pkeyopt',
-            'rsa_keygen_bits:3072',
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "RSA",
+            "-pkeyopt",
+            "rsa_keygen_bits:3072",
         ),
         stdout=subprocess.PIPE,
         # See https://github.com/openssl/openssl/issues/13177
@@ -66,7 +67,7 @@ def _portal_lines() -> Sequence[str]:
         text=True,
     ).stdout
     public_key = subprocess.run(
-        ('openssl', 'pkey', '-pubout'),
+        ("openssl", "pkey", "-pubout"),
         input=private_key,
         stdout=subprocess.PIPE,
         check=True,
@@ -74,26 +75,26 @@ def _portal_lines() -> Sequence[str]:
     ).stdout
     key_id = str(uuid.uuid4())
     return (
-        'oidcServicePrivateKeySig = <<EOF\n',
+        "oidcServicePrivateKeySig = <<EOF\n",
         private_key,
-        'EOF\n',
-        'oidcServicePublicKeySig = <<EOF\n',
+        "EOF\n",
+        "oidcServicePublicKeySig = <<EOF\n",
         public_key,
-        'EOF\n',
-        f'oidcServiceKeyIdSig = {key_id}\n',
+        "EOF\n",
+        f"oidcServiceKeyIdSig = {key_id}\n",
     )
 
 
 def main() -> None:
     args = _args()
-    with args.input.open('rt') as input_file:
+    with args.input.open("rt") as input_file:
         config = list(input_file)
-    portal_index = config.index('[portal]\n')
-    config[portal_index + 1:portal_index + 1] = _portal_lines()
+    portal_index = config.index("[portal]\n")
+    config[portal_index + 1 : portal_index + 1] = _portal_lines()
     with tempfile.NamedTemporaryFile(
-            mode='wt',
-            dir=args.output.parent,
-            delete=False,
+        mode="wt",
+        dir=args.output.parent,
+        delete=False,
     ) as output_tempfile:
         output_tempfile.writelines(config)
     input_stat = args.input.stat()
@@ -102,5 +103,5 @@ def main() -> None:
     os.replace(output_tempfile.name, args.output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
