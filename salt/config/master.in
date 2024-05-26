@@ -26,5 +26,3 @@ roster_defaults:
 ssh_log_file: ${HOME}/.local/log/salt/ssh
 ssh_minion_opts:
   backup_mode: minion
-  use_superseded:
-  - module.run
