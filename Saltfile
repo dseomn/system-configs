@@ -49,6 +49,7 @@ salt-ssh:
   - salt://gdm/map.jinja
   - salt://grub/map.jinja
   - salt://irc/bouncer/map.jinja
+  - salt://log/syslog_ng/map.jinja
   - salt://mail/dkimpy_milter/map.jinja
   - salt://mail/dovecot/map.jinja
   - salt://mail/inbound/map.jinja
