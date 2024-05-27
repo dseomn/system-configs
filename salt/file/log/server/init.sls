@@ -14,6 +14,7 @@
 
 
 {% from 'common/map.jinja' import common %}
+{% from 'cron/map.jinja' import cron_job %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'network/firewall/map.jinja' import nftables %}
 {% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
@@ -23,6 +24,7 @@
 
 
 include:
+- cron
 - crypto.x509
 - log.syslog_ng
 - network.firewall
@@ -58,6 +60,19 @@ log_server_pkgs:
     - /srv/logs
     - syslog-ng user and group
 
+/srv/logs/archive:
+  file.directory:
+  - user: root
+  - group: adm
+  - recurse:
+    - user
+    - group
+    - mode
+  - dir_mode: 0750
+  - file_mode: 0440
+  - require:
+    - /srv/logs
+
 
 /etc/syslog-ng/conf.d/server-ca-certs.pem:
   file.managed:
@@ -92,6 +107,26 @@ log_server_pkgs:
     - /etc/syslog-ng/conf.d is clean
   - watch_in:
     - syslog_ng_running
+
+
+/usr/local/sbin/archive-logs:
+  file.managed:
+  - source: salt://log/server/archive_logs.py
+  - mode: 0755
+  - require:
+    - /srv/logs/current
+    - /srv/logs/archive
+
+{{ cron_job(
+    state_id='archive-logs cron',
+    user='root',
+    command='archive-logs',
+    minute='?',
+    hour='5',
+    require=(
+        '/usr/local/sbin/archive-logs',
+    ),
+) }}
 
 
 {{ nftables.config_dir }}/50-log-server.conf:
