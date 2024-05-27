@@ -81,6 +81,7 @@ base:
   - irc.bouncer
 
   'G@role:log:server':
+  - log.client  # TODO(dseomn): Give this to most/all hosts.
   - log.server
 
   'G@role:mail:inbound':
