@@ -38,7 +38,7 @@ $config['oauth_provider'] = 'generic';
 $config['oauth_provider_name'] = 'Accounts';
 $config['oauth_client_id'] = '{{ pillar.mail.web.name }}';
 $config['oauth_client_secret'] = '{{
-    salt.file.read(
+    salt['file.read'](
         accounts_client.oauth2_client_secret_filename(pillar.mail.web.name)
     ).strip()
 }}';

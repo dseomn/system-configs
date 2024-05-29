@@ -16,12 +16,12 @@
 
 
 {% macro _backend_ipv4(hostname, port) -%}
-  {{ salt.dnsutil.A(hostname)[0] }}:{{ port }}
+  {{ salt['dnsutil.A'](hostname)[0] }}:{{ port }}
 {%- endmacro %}
 
 
 {% macro _backend_ipv6(hostname, port) -%}
-  [{{ salt.dnsutil.AAAA(hostname)[0] }}]:{{ port }}
+  [{{ salt['dnsutil.AAAA'](hostname)[0] }}]:{{ port }}
 {%- endmacro %}
 
 

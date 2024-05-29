@@ -166,7 +166,7 @@ spamd_running:
 
 {% set spam_train_id_prefix = 'f1d84c3f-9ce3-46d3-88f1-90648b58d0c2.' %}
 {% set old_spam_train_cron_jobs = {} %}
-{% for cron_job in salt.cron.list_tab('vmail').crons
+{% for cron_job in salt['cron.list_tab']('vmail').crons
     if cron_job.identifier.startswith(spam_train_id_prefix) %}
   {% do old_spam_train_cron_jobs.update({cron_job.identifier: None}) %}
 {% endfor %}

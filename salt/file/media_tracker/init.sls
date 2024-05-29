@@ -107,7 +107,7 @@ rock_paper_sand_installed:
 
 {% endfor %}
 
-{% for user in salt.user.list_users() %}
+{% for user in salt['user.list_users']() %}
 {% if user in pillar.media_tracker.users %}
 rock_paper_sand_keep_cache_warm_{{ user }}:
   cron.present:

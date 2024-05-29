@@ -55,7 +55,7 @@ $CONFIG = [
         'https://{{ pillar.accounts.client.oidc.provider }}',
     'oidc_login_client_id' => '{{ pillar.nextcloud.name }}',
     'oidc_login_client_secret' => '{{
-        salt.file.read(
+        salt['file.read'](
             accounts_client.oauth2_client_secret_filename(pillar.nextcloud.name)
         ).strip()
     }}',

@@ -207,7 +207,7 @@ upgrade_nextcloud:
     - nextcloud_usable
 
 
-{% if not salt.file.file_exists(occ) %}
+{% if not salt['file.file_exists'](occ) %}
 
 re-run state.apply to manage Nextcloud apps:
   test.fail_without_changes: []
@@ -215,10 +215,10 @@ re-run state.apply to manage Nextcloud apps:
 {% else %}
 
 {% set apps_shipped =
-    salt.file.read('/var/local/nextcloud/webroot/core/shipped.json')
+    salt['file.read']('/var/local/nextcloud/webroot/core/shipped.json')
     | load_json
 %}
-{% set apps = salt.cmd.run_stdout(
+{% set apps = salt['cmd.run_stdout'](
     php.bin + ' ' + occ + ' app:list --output=json',
     runas=apache_httpd.user,
 ) | load_json %}

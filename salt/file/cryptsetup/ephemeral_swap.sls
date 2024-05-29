@@ -74,7 +74,7 @@ ephemeral_swap_fstab:
     - file: ephemeral_swap_fstab
 
 
-{% for entry in salt.mount.fstab().values()
+{% for entry in salt['mount.fstab']().values()
     if entry.fstype == 'swap' and
     not entry.device.startswith('/dev/mapper/ephemeral-swap-') %}
 {{ entry.device }} should be removed from /etc/fstab:

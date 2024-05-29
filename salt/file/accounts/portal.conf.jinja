@@ -21,7 +21,7 @@
 
 
 {%- set default_config =
-    salt.file.read(accounts.llng_config_dir + '/portal-apache2.X.conf') %}
+    salt['file.read'](accounts.llng_config_dir + '/portal-apache2.X.conf') %}
 
 
 {%- for line in default_config.splitlines() %}

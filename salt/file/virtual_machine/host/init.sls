@@ -318,7 +318,7 @@ warn about {{ guest_id }}_install:
 
 
 {% for unmanaged_guest_id
-    in (salt.virt.list_domains() if 'virt.list_domains' in salt else ())
+    in (salt['virt.list_domains']() if 'virt.list_domains' in salt else ())
     if unmanaged_guest_id not in host.guests %}
 {{ unmanaged_guest_id }} is unaccounted for in salt/pillar/virtual_machine/data.yaml.jinja:
   test.fail_without_changes: []

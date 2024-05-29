@@ -45,7 +45,7 @@
  # though the directory might be better for performance.
  #}
 {% macro _generate_password() -%}
-  {{ salt.cmd.run_stdout(
+  {{ salt['cmd.run_stdout'](
       "python3 -c 'import secrets; print(secrets.token_urlsafe(nbytes=32))'") }}
 {%- endmacro %}
 {% set crypto = {
@@ -160,7 +160,7 @@
     },
 }) %}
 {% macro _cert_fingerprint(certificate) -%}
-  {{ salt.cmd.run_stdout(
+  {{ salt['cmd.run_stdout'](
       'openssl x509 -noout -fingerprint -' + crypto.openssl.digest,
       stdin=certificate,
   ).partition('=')[2] }}

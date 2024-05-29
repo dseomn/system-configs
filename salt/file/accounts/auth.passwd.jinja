@@ -18,8 +18,10 @@
 {%- from 'accounts/map.jinja' import accounts %}
 
 
-{%- if salt.file.file_exists(accounts.llng_config_dir + '/auth.passwd') %}
-  {%- set old_raw = salt.file.read(accounts.llng_config_dir + '/auth.passwd') %}
+{%- if salt['file.file_exists'](accounts.llng_config_dir + '/auth.passwd') %}
+  {%- set old_raw = salt['file.read'](
+      accounts.llng_config_dir + '/auth.passwd'
+  ) %}
 {%- else %}
   {%- set old_raw = '' %}
 {%- endif %}

@@ -156,10 +156,10 @@ backup_repo_pkgs:
 
 
 {% set old_backup_users_and_groups = {} %}
-{% for user in salt.user.list_users() if user.startswith('backup-') %}
+{% for user in salt['user.list_users']() if user.startswith('backup-') %}
   {% do old_backup_users_and_groups.update({user: None}) %}
 {% endfor %}
-{% for group in salt.group.getent() if group.name.startswith('backup-') %}
+{% for group in salt['group.getent']() if group.name.startswith('backup-') %}
   {% do old_backup_users_and_groups.update({group.name: None}) %}
 {% endfor %}
 
@@ -212,8 +212,8 @@ backup_repo_pkgs:
 {% set reserved_space_mb = 2 * 1024 %}
 {% set reserved_space_bytes = reserved_space_mb * 1024 * 1024 %}
 {% set reserved_space_file = backup.data_dir + '/repo/reserved-space' %}
-{% if not salt.file.file_exists(reserved_space_file) or
-    salt.file.stats(reserved_space_file).size != reserved_space_bytes %}
+{% if not salt['file.file_exists'](reserved_space_file) or
+    salt['file.stats'](reserved_space_file).size != reserved_space_bytes %}
 {{ reserved_space_file }}:
   cmd.run:
   - name: >-
@@ -293,8 +293,8 @@ backup_repo_pkgs:
 
 {% set old_repos = {} %}
 {% macro scan_dir_for_old_repos(dir_name) %}
-  {% if salt.file.directory_exists(dir_name) %}
-    {% for filename in salt.file.readdir(dir_name)
+  {% if salt['file.directory_exists'](dir_name) %}
+    {% for filename in salt['file.readdir'](dir_name)
         if filename not in ('.', '..') %}
       {% do old_repos.update({dir_name + '/' + filename: None}) %}
     {% endfor %}
@@ -463,7 +463,7 @@ monitor recency of {{ repo_path }}:
 {{ repo }} is unaccounted for in salt/pillar/backup/data.yaml.jinja:
   test.fail_without_changes: []
 {% endfor %}
-{% for filename in salt.file.readdir(backup.data_dir + '/repo')
+{% for filename in salt['file.readdir'](backup.data_dir + '/repo')
     if filename not in (
         '.',
         '..',
@@ -479,8 +479,8 @@ monitor recency of {{ repo_path }}:
 {% endfor %}
 
 
-{% for user in salt.user.list_users() if user.startswith('backup-') %}
-{% for cron_job in salt.cron.list_tab(user).crons
+{% for user in salt['user.list_users']() if user.startswith('backup-') %}
+{% for cron_job in salt['cron.list_tab'](user).crons
     if cron_job.identifier.startswith(cron_uuid + '/') and
     cron_job.identifier not in cron_jobs_by_user.get(user, {}) %}
 {{ cron_job.identifier | tojson }}:

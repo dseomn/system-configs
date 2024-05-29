@@ -18,7 +18,7 @@
 
 {%- set original = apache_httpd.config_dir + '/mods-available/mime.conf' %}
 
-{%- for line_raw in salt.file.read(original).splitlines() if line_raw %}
+{%- for line_raw in salt['file.read'](original).splitlines() if line_raw %}
 {%- set line = line_raw.strip() %}
 {%- if line.split()[0] in (
     'TypesConfig',

@@ -20,7 +20,7 @@
 {%- set postfix_queue_dir = mail.postfix_queue_dir('postfix-inbound') %}
 {%- set original = mail_inbound.opendmarc_config_file + '.orig' %}
 
-{%- for line in salt.file.read(original).splitlines()
+{%- for line in salt['file.read'](original).splitlines()
     if line and line.split()[0] in (
         'Syslog',
         'UserID',

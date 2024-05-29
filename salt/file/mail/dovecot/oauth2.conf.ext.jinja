@@ -21,7 +21,7 @@
 
 client_id = {{ grains.id }}
 client_secret = {{
-    salt.file.read(
+    salt['file.read'](
         accounts_client.oauth2_client_secret_filename(grains.id)
     ).strip()
 }}

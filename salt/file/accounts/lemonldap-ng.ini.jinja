@@ -19,7 +19,7 @@
 
 
 {%- set original =
-    salt.ini.get_ini(accounts.llng_config_dir + '/lemonldap-ng.ini.orig') %}
+    salt['ini.get_ini'](accounts.llng_config_dir + '/lemonldap-ng.ini.orig') %}
 
 
 ; Code that seems to have the possible and default values of the options, along
@@ -137,7 +137,7 @@ oidcRPMetaDataOptions = { \
     '{{ rp_name }}' => { \
         'oidcRPMetaDataOptionsClientID' => '{{ rp_name }}', \
         'oidcRPMetaDataOptionsClientSecret' => '{{
-            salt.file.read(
+            salt['file.read'](
                 accounts.llng_config_dir + '/oauth2-client-secrets/' + rp_name
             ).strip()
         }}', \
