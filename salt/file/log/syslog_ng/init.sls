@@ -76,6 +76,7 @@ syslog_ng_running:
   file.managed:
   - contents: |
       @version: 3.38
+      @include "scl.conf"
       options {
         frac-digits(9);
         keep-hostname(yes);
