@@ -17,6 +17,7 @@
 
 
 source s_remote {
+  # TODO(dseomn): Switch to a reliable protocol.
   syslog(
     ip-protocol(6)
     {{ syslog_ng.tls_config(
@@ -45,6 +46,10 @@ destination d_file {
     perm(0640)
     local-time-zone(UTC)
     ts-format(iso)
+    # TODO(dseomn): Structure this to not be so specific to the syslog protocol.
+    # Outer object should have log-host-generated fields like R_ISODATE (but
+    # with a name that isn't so specific to syslog-ng). Payload field can have
+    # .SDATA.journal and syslog fields like MESSAGE, PRIORITY, etc.
     {%- set d_file_json_args = (
         '--key=.SDATA.*',
         '--key=FACILITY',
