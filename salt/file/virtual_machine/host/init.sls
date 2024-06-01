@@ -266,12 +266,21 @@ warn about {{ guest_id }}_install:
   - onchanges:
     - {{ guest_id }}_install
 
-# TODO(https://github.com/saltstack/salt/issues/60699): Manage events.
+# TODO(dseomn): Create a new state function that manages the XML directly.
+# Possibly parse the previous XML and pass that into a jinja template that
+# renders to the new XML, or possibly use XSLT. Probably wait until salt's great
+# module migration has progressed more, to see where it makes sense to put the
+# new state function. Some limitations of the current state module that this
+# would improve upon:
 #
-# Disks are not managed here, because virt-install seems to provide better
-# defaults (e.g., type="block" instead of type="file" for block device sources)
-# and more options (e.g., salt doesn't seem to have a way to specify the type,
-# or to configure unmap/discard).
+#   * More control over boot options, so I can try to get UEFI boot working
+#     again.
+#   * Ability to manage events: https://github.com/saltstack/salt/issues/60699
+#   * Better control over disks. Disks are currently not managed here, because
+#     virt-install seems to provide better defaults (e.g., type="block" instead
+#     of type="file" for block device sources) and more options (e.g., salt
+#     doesn't seem to have a way to specify the type, or to configure
+#     unmap/discard).
 {{ guest_id }}:
   virt.running:
   - cpu: {{ guest.vcpus }}
