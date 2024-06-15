@@ -26,6 +26,13 @@ salt-run:
 salt-ssh:
   config_dir: salt/config
   ssh_max_procs: 100
+  ssh_options:
+  # Only use the control path of an existing connection. That way if salt-ssh
+  # breaks sshd, there's a better chance that it will be possible to use the
+  # existing connection to fix it.
+  - KbdInteractiveAuthentication=no
+  - PasswordAuthentication=no
+  - PubkeyAuthentication=no
   ssh_priv: agent-forwarding  # Prevents salt from generating keys.
   state_output: changes
   state_verbose: false
