@@ -37,9 +37,7 @@ include:
       SSLProtocol all {{ crypto.openssl.protocols_disabled_to_string(
           crypto.openssl.general_protocols_disabled) }}
       SSLSessionTickets off
-      SSLStaplingCache shmcb:${APACHE_RUN_DIR}/ssl_stapling_cache
       SSLStrictSNIVHostCheck on
-      SSLUseStapling on
   - require:
     - {{ apache_httpd.config_dir }}/conf-enabled exists
   - require_in:

@@ -31,7 +31,6 @@ include:
           crypto.openssl.general_ciphers) }};
       ssl_protocols {{ ' '.join(crypto.openssl.general_protocols_enabled) }};
       ssl_session_tickets off;
-      ssl_stapling on;
   - require:
     - {{ nginx.config_dir }}/local-http.d exists
   - require_in:
