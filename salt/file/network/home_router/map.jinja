@@ -15,13 +15,28 @@
  #}
 
 
+{#
+ # For the unbound_domains, look in /var/lib/spamassassin on a system with
+ # spamassassin for check_rbl, dns_block_rule, and definitions mentioned in
+ # https://manpages.debian.org/bookworm/spamassassin/Mail::SpamAssassin::Plugin::URIDNSBL.3pm.en.html#RULE_DEFINITIONS_AND_PRIVILEGED_SETTINGS
+ #}
 {% set home_router = {
     'unbound_domains': [
+        'activationcode.r.mail-abuse.com',
+        'bl.mailspike.net',
+        'bl.score.senderscore.com',
+        'bl.spamcop.net',
         'dbl.spamhaus.org',
         'dob.sibl.support-intelligence.net',
+        'iadb.isipp.com',
         'list.dnswl.org',
         'multi.surbl.org',
         'multi.uribl.com',
+        'nonconfirm.mail-abuse.com',
+        'psbl.surriel.com',
+        'sa-accredit.habeas.com',
+        'sa-trusted.bondedsender.org',
+        'wl.mailspike.net',
         'zen.spamhaus.org',
     ],
 } %}
