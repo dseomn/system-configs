@@ -19,6 +19,7 @@
             'bash-completion',
             'bind9-dnsutils',
             'bind9-host',
+            'fdisk',
             'file',
             'man-db',
             'manpages',
