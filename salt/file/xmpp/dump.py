@@ -134,8 +134,7 @@ def _ejabberd_tempdir(
             ),
             stdin=subprocess.PIPE,
         )
-        # TODO(https://github.com/python/mypy/issues/15031): Remove type ignore.
-        shutil.copyfileobj(  # type: ignore
+        shutil.copyfileobj(
             cast(IO[bytes], tar_create.stdout),
             cast(IO[bytes], tar_extract.stdin),
         )
