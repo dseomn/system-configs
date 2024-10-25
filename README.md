@@ -46,5 +46,3 @@ use a different password on each of their devices). It uses a simple
 configuration file in the style of
 [passwd](https://en.wikipedia.org/wiki/Passwd#Password_file) or
 [shadow](https://en.wikipedia.org/wiki/Passwd#Shadow_file) files
-
-This is not an officially supported Google product.
