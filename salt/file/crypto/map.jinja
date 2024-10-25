@@ -102,11 +102,8 @@
  # openssl-ciphers(1ssl)
  # SSL_CTX_set_security_level(3ssl)
  #
- # TODO(dseomn): Increase general_ciphers to @SECLEVEL=3 once it's easier to get
- # Let's Encrypt certs with a CA path that meets that level. See
- # https://community.letsencrypt.org/t/ecdsa-availability-in-production-environment/150679
- # for a CA path that would work, but is a pain to set up. At level 3,
- # 'HIGH:!kRSA' can probably be simplified to 'DEFAULT'.
+ # Once it's possible to increase general_ciphers to @SECLEVEL=3, 'HIGH:!kRSA'
+ # can probably be simplified to 'DEFAULT'.
  #}
 {% macro _protocols_disabled_to_string(protocols, disable_prefix='-') -%}
   {%- for protocol in protocols -%}
