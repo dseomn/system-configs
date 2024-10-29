@@ -25,10 +25,10 @@ include:
     ('Debian', None): {'number': '12', 'name': 'bookworm'},
 }[(grains.os, grains.get('osmajorrelease'))] %}
 
-/etc/apt/keyrings/salt.gpg:
+/etc/apt/keyrings/salt.asc:
   file.managed:
-  - source: https://repo.saltproject.io/salt/py3/src/SALT-PROJECT-GPG-PUBKEY-2023.gpg
-  - source_hash: b60cfe38c5e854f0bdaa61d5fcd638c35d2b7613547e8cbf442402ff02f9d5fb3f1c22a97ca9afe2ecd7831d39fd2535ad6336e28e1f2b54815f5dabcfd8b7ca
+  - source: https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+  - source_hash: d325a464d8651e9a79816c42a3f3f55c6e023849c6c7ff8dc8a0e029b471fdf69f73ac2ad77f92da74cbc55a69cffc71b9d9cdcd05f39f50105ecf8f9c2db2b1
   - require_in:
     - /etc/apt/keyrings
   - onchanges_in:
@@ -37,13 +37,13 @@ include:
 /etc/apt/sources.list.d/salt.sources:
   file.managed:
   - contents: |
-      Types: deb deb-src
-      URIs: https://repo.saltproject.io/salt/py3/debian/{{ debian.number }}/{{ grains.osarch }}/latest
-      Suites: {{ debian.name }}
+      Types: deb
+      URIs: https://packages.broadcom.com/artifactory/saltproject-deb/
+      Suites: stable
       Components: main
-      Signed-By: /etc/apt/keyrings/salt.gpg
+      Signed-By: /etc/apt/keyrings/salt.asc
   - require:
-    - /etc/apt/keyrings/salt.gpg
+    - /etc/apt/keyrings/salt.asc
   - require_in:
     - /etc/apt/sources.list.d is clean
   - onchanges_in:
