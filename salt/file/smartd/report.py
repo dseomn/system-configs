@@ -26,7 +26,11 @@ def main():
         device, _, _ = line.partition(" ")
         print(f"{device}:")
         try:
-            subprocess.run(("smartctl", "--all", device), check=True)
+            subprocess.run(
+                ("smartctl", "--all", device),
+                stderr=subprocess.STDOUT,
+                check=True,
+            )
         except subprocess.CalledProcessError as e:
             print(f"smartctl returned {e.returncode} for {device}")
         print()
