@@ -31,6 +31,7 @@ mail_pkgs:
     - users and groups are done
 
 
+# TODO(Debian > 12): Support new packaging for multiple instances under systemd.
 postfix_enabled:
   service.enabled:
   - name: {{ mail.postfix_service }}
