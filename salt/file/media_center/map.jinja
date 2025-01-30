@@ -15,10 +15,6 @@
  #}
 
 
-{#
- # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=200715): Use system
- # package for stepmania.
- #}
 {% set media_center = {
     'Debian': {
         'pkgs': (
@@ -38,9 +34,6 @@
             'supertuxkart',
             'vlc',
         ),
-        'flatpak_apps': (
-            'com.stepmania.StepMania',
-        ),
         'user_groups': (
             'audio',
             'cdrom',
@@ -54,7 +47,7 @@
         ),
         'favorite_apps': (
             "'firefox-esr.desktop'",
-            "'com.stepmania.StepMania.desktop'",
+            "'itgmania.desktop'",
             "'org.gnome.Nautilus.desktop'",
             "'org.gnome.Lollypop.desktop'",
             "'vlc.desktop'",
@@ -63,8 +56,5 @@
         ),
         'firefox_config_dir': '/etc/firefox-esr',
         'firefox_policies_file': '/etc/firefox/policies/policies.json',
-        'stepmania_user_data_folder': (
-            '/var/local/media-center/.var/app/com.stepmania.StepMania/.stepmania-5.1'
-        ),
     },
 }[grains.os_family] %}

@@ -14,10 +14,10 @@
 
 
 {% from 'common/map.jinja' import common %}
-{% from 'flatpak/map.jinja' import flatpak %}
 {% from 'gdm/map.jinja' import gdm %}
 {% from 'media_center/map.jinja' import media_center %}
 {% from 'network/firewall/map.jinja' import nftables %}
+{% from 'nix/map.jinja' import nix %}
 
 
 include:
@@ -25,23 +25,18 @@ include:
 - gdm
 - gdm.custom_conf
 - network.firewall
-{% if media_center.flatpak_apps %}
-- flatpak
-{% endif %}
+- nix
+- nix.nixgl
+- nix.nixpkgs
 
-
-{% for app in media_center.flatpak_apps %}
-{{ flatpak.app('flathub', app) }}
-{% endfor %}
 
 media_center_pkgs:
   pkg.installed:
   - pkgs: {{ media_center.pkgs | tojson }}
-  test.nop:
-  - require:
-    {% for app in media_center.flatpak_apps %}
-    - flatpak app {{ app }}
-    {% endfor %}
+
+# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1094293): Use system
+# package for itgmania.
+{{ nix.packages('media_center_nix_pkgs', ('nixpkgs.itgmania',)) }}
 
 {% for service in media_center.masked_services %}
 {{ service }} is masked:
@@ -331,18 +326,49 @@ mpdscribble_running:
     - /etc/mpdscribble.conf
 
 
-{{ media_center.stepmania_user_data_folder }}/Save/Preferences.ini:
+/var/local/media-center/.local/share/applications/itgmania.desktop:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - source: salt://nix/nixgl/wrapper.desktop.jinja
+  - template: jinja
+  - defaults:
+      original: /nix/var/nix/profiles/default/share/applications/itgmania.desktop
+  - require:
+    - media-center user and group
+    - nix_system_default_profile
+
+/var/local/media-center/.itgmania/Save/Preferences.ini:
   # TODO(https://github.com/saltstack/salt/issues/33669): Use
   # ini.options_present.
   file.keyvalue:
   - count: -1
   - key_values:
-      DefaultModifiers: 'FailImmediateContinue'
-      # This works around https://github.com/stepmania/stepmania/issues/1487 and
+      DefaultModifiers: 'FailImmediateContinue, Default'
+      # This works around https://github.com/itgmania/itgmania/issues/94 and
       # also makes gnome-shell recognize this as a window that can be closed
       # from the shell.
       FullscreenIsBorderlessWindow: '1'
+      GlobalOffsetSeconds: '{{ '{:.6f}'.format(
+          salt['pillar.get']('media_center:itgmania:global_offset_seconds', 0.0)
+      ) }}'
       ShowCaution: '0'
+
+/var/local/media-center/.itgmania/Save/ThemePrefs.ini:
+  # TODO(https://github.com/saltstack/salt/issues/33669): Use
+  # ini.options_present.
+  file.keyvalue:
+  - count: -1
+  - key_values:
+      AllowScreenEvalSummary: 'false'
+      AllowScreenGameOver: 'false'
+      AllowScreenNameEntry: 'false'
+      AllowScreenSelectColor: 'false'
+      AllowScreenSelectProfile: 'true'
+      KeyboardFeatures: 'true'
+      SimplyLoveColor: '12'
+      VisualStyle: 'Arrows'
 
 
 /var/local/media-center/.local/bin/autostart:

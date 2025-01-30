@@ -30,6 +30,10 @@ media_center:
   home_symlinks:
     Videos: /path/to/Videos
 
+  # Config for itgmania.
+  itgmania:
+    global_offset_seconds: -0.09
+
   # Config for mpdscribble.
   mpdscribble:
     # Scrobblers, see mpdscribble(1).
