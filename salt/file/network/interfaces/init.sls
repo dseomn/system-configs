@@ -37,7 +37,7 @@
 
 {% set host = pillar.network.hosts[grains.id] %}
 {% set segments = pillar.network.segments %}
-{% set site = pillar.network.sites[host.site] %}
+{% set site = pillar.network.sites[host.site] if 'site' in host else none %}
 {% set global = pillar.network.global %}
 
 

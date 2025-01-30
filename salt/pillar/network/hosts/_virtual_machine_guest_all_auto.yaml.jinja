@@ -16,9 +16,6 @@
 
 {% set guest = virtual_machine_data.guests[grains.id] %}
 
-{% import_yaml 'network/hosts/' + guest.host + '.yaml.jinja' as host_network %}
-
-site: {{ host_network.site }}
 interfaces:
   {% for interface_name, interface in guest.network.items() %}
   {{ interface_name }}:
