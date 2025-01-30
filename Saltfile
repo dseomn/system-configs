@@ -73,6 +73,7 @@ salt-ssh:
   - salt://news_aggregator/map.jinja
   - salt://nextcloud/map.jinja
   - salt://nginx/map.jinja
+  - salt://nix/map.jinja
   - salt://php/map.jinja
   - salt://port_mux/map.jinja
   - salt://stunnel/map.jinja

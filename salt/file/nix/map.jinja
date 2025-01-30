@@ -1,0 +1,48 @@
+{#
+ # Copyright 2025 David Mandelberg
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% macro _channel(name, url) %}
+nix channel {{ name }}:
+  cmd.run:
+  - name: |
+      nix-channel --add '{{ url }}' '{{ name }}' &&
+        nix-channel --update '{{ name }}'
+  - unless:
+    - |
+        nix-channel --list |
+          grep -q --fixed-strings --line-regexp '{{ name }} {{ url }}'
+  - require:
+    - nix_pkgs
+  - require_in:
+    - nix_channels_done
+{% endmacro %}
+
+
+{% macro _packages(state_id, packages) %}
+{{ state_id }}:
+  file.accumulated:
+  - filename: /etc/nix/packages
+  - text: {{ packages | tojson }}
+  - require_in:
+    - file: /etc/nix/packages
+{% endmacro %}
+
+
+{% set nix = {
+    'channel': _channel,
+    'packages': _packages,
+} %}
