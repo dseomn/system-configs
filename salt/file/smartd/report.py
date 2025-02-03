@@ -24,7 +24,7 @@ def main():
     )
     for line in scan_result.stdout.splitlines():
         device, _, _ = line.partition(" ")
-        print(f"{device}:")
+        print(f"{device}:", flush=True)
         try:
             subprocess.run(
                 ("smartctl", "--all", device),
