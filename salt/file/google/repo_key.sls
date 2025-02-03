@@ -26,7 +26,7 @@ include:
 /etc/apt/keyrings/google.asc:
   file.managed:
   - source: https://dl.google.com/linux/linux_signing_key.pub
-  - source_hash: 0ccf8f2f4396f5acee4e7cd7a3e8e1c83233fc17c2e4785d82c71b887c3cacd2faf0feae50d6f42fc5e86d2b492d7a88c8a31720ace591b3b62326176c4ca6d2
+  - source_hash: 7c3ac565990f83b20d30ad5a91027b75c5521adb05dcfe253f83535b1f7a4d47eadac194a88ab3ab691c5654b0f6ba8da73e36a1be4fba346722d2d507edf61b
   - require_in:
     - /etc/apt/keyrings
   - onchanges_in:
