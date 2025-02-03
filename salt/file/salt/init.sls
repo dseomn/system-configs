@@ -34,7 +34,7 @@ include:
   - onchanges_in:
     - apt_update
 
-/etc/apt/sources.list.d/salt.sources:
+/etc/apt/sources.list.d/50-salt.sources:
   file.managed:
   - contents: |
       Types: deb
@@ -55,7 +55,7 @@ salt_pkgs:
     - salt-master  # for salt-run
     - salt-ssh
   - require:
-    - /etc/apt/sources.list.d/salt.sources
+    - /etc/apt/sources.list.d/50-salt.sources
     - apt_update
 
 salt-master.service:

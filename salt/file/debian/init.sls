@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+{% from 'debian/map.jinja' import debian %}
+
+
 preferences:
   file.managed:
   - name: /etc/apt/preferences
@@ -40,9 +43,7 @@ apt_update:
     - apt_update
 
 /etc/apt/sources.list:
-  file.managed:
-  - source: salt://debian/sources.list.jinja
-  - template: jinja
+  file.absent:
   - onchanges_in:
     - apt_update
 
@@ -50,5 +51,37 @@ apt_update:
   file.directory:
   - name: /etc/apt/sources.list.d
   - clean: true
+  - onchanges_in:
+    - apt_update
+
+/etc/apt/sources.list.d/20-debian.sources:
+  file.managed:
+  - contents: |
+      Types: deb deb-src
+      URIs: {{ debian.mirror['debian'] }}
+      Suites: {{ ' '.join(
+          [debian.distribution] +
+          (
+              [
+                  debian.distribution + '-updates',
+                  debian.distribution + '-backports',
+              ]
+              if debian.track == 'stable'
+              else []
+          ) +
+          debian.additional_distributions
+      ) }}
+      Components: {{ debian.components }}
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+
+      {% if debian.track != 'unstable' %}
+      Types: deb deb-src
+      URIs: {{ debian.mirror['debian-security'] }}
+      Suites: {{ debian.distribution + '-security' }}
+      Components: {{ debian.components }}
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+      {% endif %}
+  - require_in:
+    - /etc/apt/sources.list.d is clean
   - onchanges_in:
     - apt_update

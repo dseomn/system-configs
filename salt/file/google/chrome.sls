@@ -41,7 +41,7 @@ include:
   - target: /dev/null
   - force: true
 
-/etc/apt/sources.list.d/google-chrome.sources:
+/etc/apt/sources.list.d/50-google-chrome.sources:
   file.managed:
   - contents: |
       Types: deb
@@ -63,5 +63,5 @@ chrome_pkgs:
   - require:
     - /etc/apt/trusted.gpg.d/google-chrome.gpg
     - /etc/default/google-chrome
-    - /etc/apt/sources.list.d/google-chrome.sources
+    - /etc/apt/sources.list.d/50-google-chrome.sources
     - apt_update

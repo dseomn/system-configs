@@ -37,9 +37,13 @@ include:
     - apt_update
 gvisor_repo:
   file.managed:
-  - name: /etc/apt/sources.list.d/gvisor.list
+  - name: /etc/apt/sources.list.d/50-gvisor.sources
   - contents: |
-      deb [signed-by=/etc/apt/keyrings/gvisor.asc] https://storage.googleapis.com/gvisor/releases release main
+      Types: deb
+      URIs: https://storage.googleapis.com/gvisor/releases
+      Suites: release
+      Components: main
+      Signed-By: /etc/apt/keyrings/gvisor.asc
   - require:
     - /etc/apt/keyrings/gvisor.asc
   - require_in:
