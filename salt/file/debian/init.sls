@@ -43,7 +43,9 @@ apt_update:
     - apt_update
 
 /etc/apt/sources.list:
-  file.absent:
+  file.managed:
+  - contents: |
+      # See /etc/apt/sources.list.d
   - onchanges_in:
     - apt_update
 
