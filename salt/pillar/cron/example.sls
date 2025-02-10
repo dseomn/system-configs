@@ -16,9 +16,10 @@ cron:
 
   # Extra cron jobs that aren't in another salt state.
   jobs:
-  - # Args to cron_job() in salt/file/cron/map.jinja
-    state_id: example-cron-state
-    user: root
-    command: echo test cron
-    minute: '?'
-    hour: '?'
+    # state_id arg to cron_job() in salt/file/cron/map.jinja
+    example-cron-state:
+      # Other args to cron_job()
+      user: root
+      command: echo test cron
+      minute: '?'
+      hour: '?'

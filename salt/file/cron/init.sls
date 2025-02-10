@@ -44,6 +44,6 @@ root_crontab_path:
     - cron_pkgs
 
 
-{% for kwargs in pillar.get('cron', {}).get('jobs', ()) %}
-{{ cron_job(**kwargs) }}
+{% for state_id, kwargs in pillar.get('cron', {}).get('jobs', {}).items() %}
+{{ cron_job(state_id, **kwargs) }}
 {% endfor %}
