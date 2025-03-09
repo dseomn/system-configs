@@ -48,9 +48,14 @@ news_aggregator_pkgs:
       email-protocol = sendmail
       verbose = error
       {% for email, feeds in pillar.news_aggregator.feeds.items() %}
-      {% for feed_id, feed_url in feeds.items() %}
+      {% for feed_id, feed in feeds.items() %}
       [feed.{{ email | regex_replace('[^\\w\\d]', '-') }}.{{ feed_id }}]
-      url = {{ feed_url }}
+      {%- if feed is string %}
+      url = {{ feed }}
+      {%- else %}
+      url = {{ feed.url }}
+      active = {{ not feed.get('paused', false) }}
+      {%- endif %}
       to = {{ email }}
       bonus-header = X-Feed-ID: {{ feed_id }}
       {% endfor %}

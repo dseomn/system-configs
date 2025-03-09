@@ -19,5 +19,10 @@ news_aggregator:
 
     # Email address to send feed to.
     alice@example.com:
-      # Key: feed ID, used locally. Value: feed URL.
+      # Key: feed ID, used locally. Value: feed URL or dict with options.
       bob: https://example.com/feeds/bob/
+      other-feed:
+        # Required. Feed URL.
+        url: https://example.com/feeds/other/
+        # Whether to pause fetching, default false.
+        paused: true
