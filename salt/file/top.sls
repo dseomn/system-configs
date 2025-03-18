@@ -63,7 +63,6 @@ base:
   - ssh.server
 
   'G@role:dev':
-  - gvisor
   - salt
 
   'G@role:home-router':
