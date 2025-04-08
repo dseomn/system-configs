@@ -353,6 +353,7 @@ mpdscribble_running:
       GlobalOffsetSeconds: '{{ '{:.6f}'.format(
           salt['pillar.get']('media_center:itgmania:global_offset_seconds', 0.0)
       ) }}'
+      MachineSyncBias: '0.000000'
       ShowCaution: '0'
 
 /var/local/media-center/.itgmania/Save/ThemePrefs.ini:
