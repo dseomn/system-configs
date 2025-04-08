@@ -398,6 +398,9 @@ mpdscribble_running:
         "['drive-menu@gnome-shell-extensions.gcampax.github.com']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
+      # TODO:
+      # https://gitlab.gnome.org/GNOME/mutter/-/commit/5aabd66481c90834f599c4ad990c8f83f36e796f
+      # - Delete this.
       gsettings set org.gnome.shell.keybindings toggle-overview \
         "['<Super>s', 'Super_L', 'Super_R']"
       gsettings set org.gnome.Lollypop artist-artwork false
