@@ -165,6 +165,26 @@ media-center autologin:
       stream.properties {
         channelmix.upmix = false
       }
+# TODO: wireplumber >= 0.5: Switch config format, see
+# https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/migration.html
+# TODO: https://gitlab.freedesktop.org/pipewire/wireplumber/-/issues/787 -
+# Remove this.
+/var/local/media-center/.config/wireplumber/main.lua.d/local.lua:
+  file.managed:
+  - user: media-center
+  - group: media-center
+  - makedirs: true
+  - contents: |
+      table.insert(alsa_monitor.rules, {
+        matches = {
+          {
+            {"media.class", "matches", "Audio/Sink"},
+          },
+        },
+        apply_properties = {
+          ["session.suspend-timeout-seconds"] = {{ 60 * 60 }},
+        },
+      })
 
 /var/local/media-center/.config/autostart/easyeffects-service.desktop:
   file.managed:
