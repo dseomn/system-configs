@@ -48,9 +48,9 @@ irc:
               # Required. Server.
               server: irc.libera.chat +6697
 
-              # Required. SASL password.
+              # SASL password.
               password: ...
 
-              # Required. Channels.
+              # Channels.
               channels:
               - '#libera'

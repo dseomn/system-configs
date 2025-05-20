@@ -133,12 +133,16 @@ znc_files:
         <Network {{ network_name }}>
           IRCConnectEnabled = true
           LoadModule = keepnick
+          {%- if 'password' in network %}
           LoadModule = sasl
+          {%- endif %}
+          {%- if 'channels' in network %}
           LoadModule = stickychan {{ ','.join(network.channels) }}
+          {%- endif %}
           Server = {{ network.server }}
           TrustAllCerts = false
           TrustPKI = true
-          {% for channel in network.channels %}
+          {% for channel in network.get('channels', ()) %}
           <Chan {{ channel }}>
           </Chan>
           {% endfor %}
@@ -156,6 +160,7 @@ znc_files:
 
 {% for username, user in pillar.irc.bouncer.znc.users.items() %}
 {% for network_name, network in user.networks.items() %}
+{% if 'password' in network %}
 /etc/znc/users/{{ username }}/networks/{{ network_name }}/moddata/sasl/.registry:
   file.managed:
   - group: {{ irc_bouncer.znc_group }}
@@ -171,6 +176,7 @@ znc_files:
     - /etc/znc
   - require_in:
     - znc_files
+{% endif %}
 {% endfor %}
 {% endfor %}
 
