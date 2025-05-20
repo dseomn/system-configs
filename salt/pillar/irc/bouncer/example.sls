@@ -51,6 +51,9 @@ irc:
               # SASL password.
               password: ...
 
+              # NickServ password.
+              nickserv_password: ...
+
               # Channels.
               channels:
               - '#libera'

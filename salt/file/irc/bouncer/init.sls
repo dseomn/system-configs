@@ -136,6 +136,9 @@ znc_files:
           {%- if 'password' in network %}
           LoadModule = sasl
           {%- endif %}
+          {%- if 'nickserv_password' in network %}
+          LoadModule = nickserv
+          {%- endif %}
           {%- if 'channels' in network %}
           LoadModule = stickychan {{ ','.join(network.channels) }}
           {%- endif %}
@@ -171,6 +174,21 @@ znc_files:
         'password': network.password,
         'require_auth': 'yes',
         'username': username,
+    }) | tojson }}
+  - require:
+    - /etc/znc
+  - require_in:
+    - znc_files
+{% endif %}
+
+{% if 'nickserv_password' in network %}
+/etc/znc/users/{{ username }}/networks/{{ network_name }}/moddata/nickserv/.registry:
+  file.managed:
+  - group: {{ irc_bouncer.znc_group }}
+  - mode: 0640
+  - makedirs: true
+  - contents:  {{ znc_registry({
+        'Password': network.nickserv_password,
     }) | tojson }}
   - require:
     - /etc/znc
