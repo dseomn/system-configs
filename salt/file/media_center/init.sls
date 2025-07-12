@@ -186,21 +186,6 @@ media-center autologin:
         },
       })
 
-/var/local/media-center/.config/autostart/easyeffects-service.desktop:
-  file.managed:
-  - user: media-center
-  - group: media-center
-  - makedirs: true
-  - contents: |
-      [Desktop Entry]
-      Name=Easy Effects
-      Exec=easyeffects --gapplication-service
-      Terminal=false
-      Type=Application
-  - require:
-    - media-center user and group
-    - media_center_pkgs
-
 
 /var/local/media-center/.local/share/applications/fix-audio.desktop:
   file.managed:
@@ -400,12 +385,6 @@ mpdscribble_running:
   - makedirs: true
   - contents: |
       #!/bin/bash -e
-      gsettings set com.github.wwmm.easyeffects.streamoutputs blocklist \
-        "['Lollypop', 'Music Player Daemon']"
-      gsettings set com.github.wwmm.easyeffects.streamoutputs plugins \
-        "['equalizer#0']"
-      dconf write \
-        /com/github/wwmm/easyeffects/streamoutputs/equalizer/0/input-gain -12.0
       gsettings set org.gnome.desktop.background picture-uri \
         "'file://{{ background_image }}'"
       gsettings set org.gnome.desktop.screensaver lock-enabled false
