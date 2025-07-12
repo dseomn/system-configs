@@ -47,7 +47,8 @@ media_tracker_pkgs:
 rock_paper_sand_src:
   git.latest:
   - name: https://github.com/dseomn/rock-paper-sand.git
-  - rev: main
+  # TODO: Debian >= 13 - Unpin this.
+  - rev: 7f9d449821166926da4a15e9a984de8c99bf84b3
   - target: /usr/local/src/rock-paper-sand
   - branch: main
   - require:
