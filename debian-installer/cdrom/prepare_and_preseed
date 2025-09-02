@@ -16,7 +16,7 @@
 
 
 mkdir -p /srv/inst-data || exit 1
-mount /dev/disk/by-label/INST-DATA /srv/inst-data || exit 1
+mount -t vfat /dev/disk/by-label/INST-DATA /srv/inst-data || exit 1
 
 # This script is meant to be run from preseed/include_command, which expects
 # preseed filenames as output.
