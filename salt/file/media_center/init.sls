@@ -96,7 +96,7 @@ policies:
     groups=media_center.user_groups,
     home='/var/local/media-center',
     createhome=True,
-    shell=None,
+    shell='/bin/bash',
 ) }}
 
 media-center autologin:
