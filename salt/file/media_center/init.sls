@@ -172,26 +172,28 @@ media-center autologin:
       stream.properties {
         channelmix.upmix = false
       }
-# TODO: wireplumber >= 0.5: Switch config format, see
-# https://pipewire.pages.freedesktop.org/wireplumber/daemon/configuration/migration.html
 # TODO: https://gitlab.freedesktop.org/pipewire/wireplumber/-/issues/787 -
 # Remove this.
-/var/local/media-center/.config/wireplumber/main.lua.d/local.lua:
+/var/local/media-center/.config/wireplumber/wireplumber.conf.d/local.conf:
   file.managed:
   - user: media-center
   - group: media-center
   - makedirs: true
   - contents: |
-      table.insert(alsa_monitor.rules, {
-        matches = {
-          {
-            {"media.class", "matches", "Audio/Sink"},
-          },
-        },
-        apply_properties = {
-          ["session.suspend-timeout-seconds"] = {{ 60 * 60 }},
-        },
-      })
+      monitor.alsa.rules = [
+        {
+          matches = [
+            {
+              media.class = "Audio/Sink"
+            }
+          ]
+          actions = {
+            update-props = {
+              session.suspend-timeout-seconds = {{ 60 * 60 }}
+            }
+          }
+        }
+      ]
 
 
 /var/local/media-center/.local/share/applications/fix-audio.desktop:
@@ -237,13 +239,7 @@ media-center autologin:
       replaygain_preamp "-12.0"
       audio_output {
         name "default"
-        # TODO(mpd >= 0.23.13): Try switching to pipewire. With mpd 0.23.12 I
-        # was getting the error below which looks like it might be related to
-        # https://github.com/MusicPlayerDaemon/MPD/issues/1812 and
-        # https://github.com/MusicPlayerDaemon/MPD/issues/1753.
-        #
-        # 'builder->data == ((void *)0) || builder->state.offset < sizeof(struct spa_pod) || builder->state.offset == ((uint64_t)sizeof(struct spa_pod) + (((struct spa_pod*)(pod))->size))' failed at ../src/modules/module-protocol-native.c:1395 assert_single_pod()
-        type "pulse"
+        type "pipewire"
       }
 
 {{ nftables.config_dir }}/50-mpd.conf:
@@ -404,11 +400,6 @@ mpdscribble_running:
         "['drive-menu@gnome-shell-extensions.gcampax.github.com']"
       gsettings set org.gnome.shell favorite-apps \
         "[{{ media_center.favorite_apps | join(', ') }}]"
-      # TODO:
-      # https://gitlab.gnome.org/GNOME/mutter/-/commit/5aabd66481c90834f599c4ad990c8f83f36e796f
-      # - Delete this.
-      gsettings set org.gnome.shell.keybindings toggle-overview \
-        "['<Super>s', 'Super_L', 'Super_R']"
       gsettings set org.gnome.Lollypop artist-artwork false
       gsettings set org.gnome.Lollypop auto-update false
       gsettings set org.gnome.Lollypop network-access-acl \
