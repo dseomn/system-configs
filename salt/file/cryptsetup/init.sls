@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-{% from 'cryptsetup/map.jinja' import cryptsetup %}
-
-
 cryptsetup_pkgs:
   pkg.installed:
-  - pkgs: {{ cryptsetup.pkgs | tojson }}
+  - pkgs:
+    - cryptsetup
+    - cryptsetup-initramfs
