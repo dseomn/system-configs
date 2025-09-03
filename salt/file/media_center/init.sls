@@ -98,6 +98,13 @@ policies:
     createhome=True,
     shell='/bin/bash',
 ) }}
+/var/local/media-center:
+  file.directory:
+  - user: media-center
+  - group: media-center
+  - mode: 0755
+  - require:
+    - media-center user and group
 
 media-center autologin:
   file.accumulated:
