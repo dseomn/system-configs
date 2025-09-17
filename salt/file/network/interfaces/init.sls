@@ -232,6 +232,15 @@ access_point_pkgs:
   pkg.installed:
   - pkgs: {{ system.access_point_pkgs | tojson }}
 
+{{ system.systemd_unit_dir }}/{{ system.hostapd_service_template.format("") }}.d/50-local.conf:
+  file.managed:
+  - makedirs: true
+  - contents: |
+      # TODO: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=923461 - Delete
+      # this.
+      [Unit]
+      After=sys-subsystem-net-devices-%i.device
+
 {{ system.hostapd_file_settings_dir }}:
   file.directory:
   - mode: 0700
