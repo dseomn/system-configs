@@ -79,12 +79,6 @@ base:
   'G@role:irc:bouncer':
   - irc.bouncer
 
-  'G@role:log:client':
-  - log.client
-
-  'G@role:log:server':
-  - log.server
-
   'G@role:mail:inbound':
   - mail.inbound
 
