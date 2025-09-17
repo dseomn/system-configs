@@ -390,6 +390,7 @@ mpdscribble_running:
       #!/bin/bash -e
       gsettings set org.gnome.desktop.background picture-uri \
         "'file://{{ background_image }}'"
+      gsettings set org.gnome.desktop.interface clock-format "'24h'"
       gsettings set org.gnome.desktop.screensaver lock-enabled false
       gsettings set org.gnome.desktop.session idle-delay 0
       gsettings set org.gnome.settings-daemon.plugins.power \
