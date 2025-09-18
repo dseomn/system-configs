@@ -28,10 +28,10 @@
 # the appropriate stable release name instead of debiantesting.
 {% set base_system = {
     'name': 'debiantesting',
-    'url': 'https://cloud.debian.org/images/cloud/bookworm/20230612-1409/debian-12-generic-amd64-20230612-1409.raw',
+    'url': 'https://cloud.debian.org/images/cloud/trixie/20250911-2232/debian-13-generic-amd64-20250911-2232.raw',
     'hash_type': 'sha512',
-    'hash': '549cc42c95dcb193a19e53cfd742bffb46280d1dbeae7aac4569297e10266afb4c8300c448e0a1c32cd1c05d164d1b9f9ddc3fe7ac50d7ad1f45acb025c7ec4c',
-    'size': '2G',
+    'hash': '19aec54bb6f09ed943e82812d38eabda70edb8a0e71ae7d186e27e9f95424399d83c44c4c597c0f93386baadd9e93ec3b0b7b220156abb01197cfd086a0bf299',
+    'size': '3G',
 } %}
 
 
