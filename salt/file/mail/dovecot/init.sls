@@ -54,6 +54,15 @@ dovecot_running:
   - watch_in:
     - dovecot_running
 
+{{ dovecot.top_config_dir }}/dovecot.conf:
+  file.managed:
+  - contents: |
+      !include {{ dovecot.config_dir }}/*.conf
+  - require:
+    - {{ dovecot.config_dir }} is clean
+  - watch_in:
+    - dovecot_running
+
 {{ accounts_client.oauth2_client_secret_file(grains.id) }}
 
 {{ dovecot.config_dir }}/10-auth.passdb:

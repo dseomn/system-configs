@@ -73,6 +73,8 @@ namespace inbox {
   }
 }
 
+protocols = $protocols imap lmtp
+
 ssl = required
 ssl_min_protocol = {{ crypto.openssl.general_protocols_min }}
 ssl_cipher_list = {{
