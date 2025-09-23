@@ -19,72 +19,83 @@
 
 # The local mail system isn't allowed to send email from any other domains. This
 # should be fine for internal notifications, but if this ever needs to support
-# sending mail externally, dovecot will need a way to send mail from
-# postmaster@%{domain} to non-local addresses.
-postmaster_address = postmaster@%{hostname}
+# sending mail externally, dovecot will need a way to send mail from a different
+# address.
+postmaster_address = postmaster@{{ grains.id }}
 
 mail_uid = vmail
 mail_gid = vmail
 
-mail_location = \
-  maildir:/var/local/mail/persistent/mail/%{domain}/%{username}/Maildir
+mail_driver = maildir
+mail_path = \
+  /var/local/mail/persistent/mail/%{user | domain}/%{user | username}/Maildir
 
-mail_plugins = listescape
+mailbox_list_storage_escape_char = "\\"
 
-plugin {
-  sieve_plugins = sieve_extprograms
-  sieve_global_extensions = +vnd.dovecot.filter
+sieve_plugins = sieve_extprograms
+sieve_global_extensions {
+  vnd.dovecot.filter = yes
+}
 
-  sieve_filter_bin_dir = {{ dovecot.top_config_dir }}/sieve-filter-bin
-  # This should be less than lmtp_data_done_timeout in postfix and more than
-  # --connect-timeout plus --timeout in spamc.
-  sieve_filter_exec_timeout = 540s
+sieve_filter_bin_dir = {{ dovecot.top_config_dir }}/sieve-filter-bin
+# This should be less than lmtp_data_done_timeout in postfix and more than
+# --connect-timeout plus --timeout in spamc.
+sieve_filter_exec_timeout = 540s
 
-  sieve_user_log = \
-    /var/local/mail/persistent/mail/%{domain}/%{username}/sieve.log
+sieve_user_log_path = \
+  /var/local/mail/persistent/mail/%{user | domain}/%{user | username}/sieve.log
 
-  sieve_before = file:{{ dovecot.top_config_dir }}/sieve-before
-  sieve = \
-    file:{{ common.local_etc }}/mail/%{domain}/%{username}/sieve
-    {{- ';' -}}
-    active=/var/cache/mail/%{domain}/%{username}/active.sieve
-    {{- ';' -}}
-    bindir=/var/cache/mail/%{domain}/%{username}/sieve
+sieve_script before {
+  sieve_script_type = before
+  sieve_script_path = {{ dovecot.top_config_dir }}/sieve-before
+}
+
+sieve_script personal {
+  sieve_script_type = personal
+  sieve_script_path = \
+    {{ common.local_etc }}/mail/%{user | domain}/%{user | username}/sieve
+  sieve_script_active_path = \
+    /var/cache/mail/%{user | domain}/%{user | username}/active.sieve
+  sieve_script_bin_path = \
+    /var/cache/mail/%{user | domain}/%{user | username}/sieve
 }
 
 namespace inbox {
-  inbox = yes
-  separator = /
+  namespace_inbox = yes
+  namespace_separator = /
   # https://datatracker.ietf.org/doc/html/rfc9051#section-7.3.1
   mailbox Archive {
-    special_use = \Archive
+    mailbox_special_use = \Archive
   }
   mailbox Drafts {
-    special_use = \Drafts
+    mailbox_special_use = \Drafts
   }
   mailbox Junk {
-    special_use = \Junk
+    mailbox_special_use = \Junk
   }
   mailbox Sent {
-    special_use = \Sent
+    mailbox_special_use = \Sent
   }
   mailbox Trash {
-    special_use = \Trash
+    mailbox_special_use = \Trash
   }
 }
 
-protocols = $protocols imap lmtp
+protocols {
+  imap = yes
+  lmtp = yes
+}
 
 ssl = required
 ssl_min_protocol = {{ crypto.openssl.general_protocols_min }}
 ssl_cipher_list = {{
     crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers) }}
-ssl_key = <{{ default_certificate.key }}
-ssl_cert = <{{ default_certificate.fullchain }}
+ssl_server_key_file = {{ default_certificate.key }}
+ssl_server_cert_file = {{ default_certificate.fullchain }}
 {%- for certificate_name, certificate in certificates.items() %}
 local_name {{ certificate_name }} {
-  ssl_key = <{{ certificate.key }}
-  ssl_cert = <{{ certificate.fullchain }}
+  ssl_server_key_file = {{ certificate.key }}
+  ssl_server_cert_file = {{ certificate.fullchain }}
 }
 {%- endfor %}
 
@@ -93,14 +104,14 @@ local_name {{ certificate_name }} {
 # letting all users use stats-writer.
 service stats {
   unix_listener stats-writer {
-    mode = 0666
+    unix_listener_mode = 0666
   }
 }
 
 service auth {
   unix_listener auth-userdb {
-    mode = 0660
-    group = vmail
+    unix_listener_mode = 0660
+    unix_listener_group = vmail
   }
 }
 
@@ -108,20 +119,22 @@ service auth {
 lda_mailbox_autosubscribe = yes
 
 protocol lmtp {
-  mail_plugins = $mail_plugins sieve
+  mail_plugins {
+    sieve = yes
+  }
 }
 
 service lmtp {
-  user = vmail
+  service_user = vmail
   unix_listener lmtp {
-    mode = 0660
-    group = {{ stunnel.group }}
+    unix_listener_mode = 0660
+    unix_listener_group = {{ stunnel.group }}
   }
 }
 
 service imap-login {
   inet_listener imaps {
-    port = 993
-    ssl = yes
+    inet_listener_port = 993
+    inet_listener_ssl = yes
   }
 }

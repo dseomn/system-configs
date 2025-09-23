@@ -212,9 +212,9 @@ active dkim keys should be rotated:
   - contents: |
       service auth {
         unix_listener {{ postfix_queue_dir }}/private/auth {
-          mode = 0660
-          user = {{ mail.postfix_user }}
-          group = {{ mail.postfix_group }}
+          unix_listener_mode = 0660
+          unix_listener_user = {{ mail.postfix_user }}
+          unix_listener_group = {{ mail.postfix_group }}
         }
       }
   - require:

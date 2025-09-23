@@ -14,6 +14,7 @@
 
 
 {% from 'common/map.jinja' import common %}
+{% from 'cron/map.jinja' import cron_job %}
 {% from 'crypto/map.jinja' import crypto %}
 {% from 'crypto/x509/map.jinja' import x509 %}
 {% from 'mail/dovecot/map.jinja' import dovecot %}
@@ -29,6 +30,7 @@
 include:
 - acme
 - common
+- cron
 - crypto.x509
 - mail.dovecot
 - network.firewall
@@ -392,13 +394,16 @@ spamd_running:
   - mode: 0755
   - require:
     - dovecot_running
-  cron.present:
-  - user: vmail
-  - identifier: 68d9cd66-2692-4359-ac75-6fd07030453e
-  - minute: random
-  - hour: random
-  - require:
-    - file: {{ common.local_lib }}/mail-storage-monitor-subscriptions
+{{ cron_job(
+    state_id='mail-storage-monitor-subscriptions cron',
+    user='root',
+    command=common.local_lib + '/mail-storage-monitor-subscriptions',
+    minute='?',
+    hour='?',
+    require=(
+        common.local_lib + '/mail-storage-monitor-subscriptions',
+    ),
+) }}
 
 
 {{ nftables.config_dir }}/50-mail-storage.conf:

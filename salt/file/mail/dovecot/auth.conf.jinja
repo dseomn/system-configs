@@ -1,0 +1,64 @@
+{#
+ # Copyright 2025 David Mandelberg
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+{% from 'accounts/client/map.jinja' import accounts_client %}
+{% from 'crypto/map.jinja' import crypto %}
+{% from 'mail/dovecot/map.jinja' import dovecot %}
+
+auth_mechanisms = plain oauthbearer xoauth2
+
+auth_username_chars = {{
+    '+-.'
+    '0123456789'
+    '@'
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    'abcdefghijklmnopqrstuvwxyz'
+}}
+
+service auth-worker {
+  # No need to be root to read the passwd file.
+  service_user = $SET:default_internal_user
+}
+
+passdb passwd-file {
+  passdb_mechanisms_filter = plain
+  passwd_file_path = {{ dovecot.config_dir }}/10-auth.passdb
+}
+
+oauth2 {
+  {% set oauth2_base_url = (
+      'https://' +
+      grains.id +
+      ':' +
+      salt['file.read'](
+          accounts_client.oauth2_client_secret_filename(grains.id)
+      ).strip() +
+      '@' +
+      pillar.accounts.client.oidc.provider
+  ) %}
+  oauth2_force_introspection = yes
+  oauth2_tokeninfo_url = {{ oauth2_base_url }}/oauth2/userinfo?access_token=
+  oauth2_introspection_url = {{ oauth2_base_url }}/oauth2/introspect
+  oauth2_introspection_mode = post
+  oauth2_scope = email-read-write
+  ssl_cipher_list = {{
+    crypto.openssl.ciphers_to_string(crypto.openssl.general_ciphers)
+  }}
+}
+
+userdb passwd-file {
+  passwd_file_path = {{ dovecot.config_dir }}/10-auth.userdb
+}
