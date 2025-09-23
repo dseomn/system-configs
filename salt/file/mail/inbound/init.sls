@@ -110,7 +110,7 @@ opendmarc_running:
     user=mail.postfix_user,
     group=mail_inbound.opendmarc_group,
     require=('mail_pkgs', 'mail_inbound_pkgs'),
-    watch_in=('postfix_running',),
+    watch_in=(postfix_instance + ' running',),
 ) }}
 
 {{ postfix_queue_dir }}/opendmarc:
@@ -166,7 +166,7 @@ opendmarc_running:
   - require:
     - {{ postfix_instance }}
   - watch_in:
-    - postfix_running
+    - {{ postfix_instance }} running
 {{ postfix_config_dir }}/master.cf mail.inbound lmtp:
   file.blockreplace:
   - name: {{ postfix_config_dir }}/master.cf
@@ -177,7 +177,7 @@ opendmarc_running:
   - require:
     - {{ postfix_instance }}
   - watch_in:
-    - postfix_running
+    - {{ postfix_instance }} running
 
 {{ mail.postfix_certificates(
     certificates=certificates, instance=postfix_instance) }}
@@ -225,7 +225,7 @@ opendmarc_running:
     - {{ system_certificate.fullchain }}
     - crypto_pkgs
   - watch_in:
-    - postfix_running
+    - {{ postfix_instance }} running
 
 
 {{ nftables.config_dir }}/50-mail-inbound.conf:

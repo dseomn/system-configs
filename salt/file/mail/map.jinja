@@ -138,6 +138,20 @@ smtpd_tls_received_header = yes
     - cmd: {{ instance }}
   - require_in:
     - file: {{ _postfix_config_dir() }}/main.cf
+
+{{ instance }} enabled:
+  service.enabled:
+  - name: {{ mail.postfix_service }}@{{ instance.removeprefix('postfix-') }}.service
+  - require:
+    - mail_pkgs
+    - {{ instance }}
+
+{{ instance }} running:
+  service.running:
+  - name: {{ mail.postfix_service }}@{{ instance.removeprefix('postfix-') }}.service
+  - require:
+    - mail_pkgs
+    - {{ instance }}
 {% endmacro %}
 
 

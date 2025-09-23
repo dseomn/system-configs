@@ -202,7 +202,7 @@ active dkim keys should be rotated:
   - require:
     - {{ postfix_instance }}
   - watch_in:
-    - postfix_running
+    - {{ postfix_instance }} running
 
 {{ mail.postfix_certificates(
     certificates=certificates, instance=postfix_instance) }}
@@ -302,7 +302,7 @@ active dkim keys should be rotated:
     - crypto_pkgs
     - {{ postfix_config_dir }}/smtp_sasl_password
   - watch_in:
-    - postfix_running
+    - {{ postfix_instance }} running
 
 
 {{ nftables.config_dir }}/50-mail-outbound.conf:
