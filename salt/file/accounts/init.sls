@@ -87,17 +87,6 @@ accounts_pkgs:
     - {{ accounts.llng_config_dir }}/auth.passwd
 
 
-# TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=995949): Remove this.
-# user/group/dir_mode are from LMCACHEDIR in
-# https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/blob/dea7b235b10f6ae73b827419720f8faaa13d8005/debian/rules#L67-87
-/var/cache/lemonldap-ng:
-  file.directory:
-  - user: www-data
-  - group: www-data
-  - dir_mode: 0750
-  - require:
-    - apache_httpd_pkgs
-
 {{ accounts.llng_config_dir }}/db-csv exists:
   file.directory:
   - name: {{ accounts.llng_config_dir }}/db-csv
@@ -182,7 +171,6 @@ accounts_pkgs:
   - template: jinja
   - require:
     - {{ accounts.llng_config_dir }}/lemonldap-ng.ini.orig
-    - /var/cache/lemonldap-ng
     - /etc/pam.d/lemonldap-ng
     - {{ accounts.llng_config_dir }}/db-csv is clean
     - {{ accounts.llng_var_lib_dir }}/oidcsessions
