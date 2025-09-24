@@ -48,7 +48,7 @@ def _portal_lines() -> Sequence[str]:
     # configuration type=Local. This tries to do something similar with Local
     # config.
     #
-    # TODO(https://gitlab.ow2.org/lemonldap-ng/lemonldap-ng/-/issues/810): Use
+    # TODO: https://github.com/pulsejet/nextcloud-oidc-login/issues/135 - Use
     # parameters from salt/file/crypto/map.jinja and change the signature
     # algorithms in the static part of the config file to match.
     private_key = subprocess.run(
