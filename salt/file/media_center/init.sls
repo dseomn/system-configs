@@ -14,6 +14,7 @@
 
 
 {% from 'common/map.jinja' import common %}
+{% from 'dconf/map.jinja' import dconf %}
 {% from 'gdm/map.jinja' import gdm %}
 {% from 'media_center/map.jinja' import media_center %}
 {% from 'network/firewall/map.jinja' import nftables %}
@@ -121,6 +122,116 @@ media-center autologin:
     - file: {{ gdm.config_dir }}/{{ gdm.custom_conf }}
 
 
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/desktop/interface/clock-format',
+    value="'24h'",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/desktop/notifications/application/org-gnome-software/enable',
+    value='false',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/desktop/screensaver/lock-enabled',
+    value='false',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/desktop/session/idle-delay',
+    value='uint32 0',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type',
+    value="'nothing'",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type',
+    value="'nothing'",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/shell/enabled-extensions',
+    value="['drive-menu@gnome-shell-extensions.gcampax.github.com']",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/shell/favorite-apps',
+    value='[' + media_center.favorite_apps | join(', ') + ']',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/artist-artwork',
+    value='false',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/auto-update',
+    value='false',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/network-access-acl',
+    value=0b00000000001000000000 | string,
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/notification-flag',
+    value=0b11 | string,
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/notifications',
+    value="'mpris'",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/replay-gain',
+    value="'album'",
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/replay-gain-db',
+    value='-12.0',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/show-tag-tracknumber',
+    value='true',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/shown-album-lists',
+    value='[-4, -13, -15, -99, -101, -103]',
+    require=('media-center user and group',),
+) }}
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/Lollypop/transitions',
+    value='false',
+    require=('media-center user and group',),
+) }}
+
+
 {% set background_image =
     '/var/local/media-center/.local/share/backgrounds/default.' +
     pillar.media_center.background.extension %}
@@ -131,6 +242,15 @@ media-center autologin:
   - user: media-center
   - group: media-center
   - makedirs: true
+{{ dconf.write(
+    user='media-center',
+    key='/org/gnome/desktop/background/picture-uri',
+    value="'file://" + background_image + "'",
+    require=(
+        'media-center user and group',
+        background_image,
+    ),
+) }}
 
 
 {% for name, target
@@ -378,57 +498,3 @@ mpdscribble_running:
       KeyboardFeatures: 'true'
       SimplyLoveColor: '12'
       VisualStyle: 'Arrows'
-
-
-/var/local/media-center/.local/bin/autostart:
-  file.managed:
-  - user: media-center
-  - group: media-center
-  - mode: 0755
-  - makedirs: true
-  - contents: |
-      #!/bin/bash -e
-      gsettings set org.gnome.desktop.background picture-uri \
-        "'file://{{ background_image }}'"
-      gsettings set org.gnome.desktop.interface clock-format "'24h'"
-      gsettings set \
-        org.gnome.desktop.notifications.application:/org/gnome/desktop/notifications/application/org-gnome-software/ \
-        enable \
-        false
-      gsettings set org.gnome.desktop.screensaver lock-enabled false
-      gsettings set org.gnome.desktop.session idle-delay 0
-      gsettings set org.gnome.settings-daemon.plugins.power \
-        sleep-inactive-ac-type "'nothing'"
-      gsettings set org.gnome.settings-daemon.plugins.power \
-        sleep-inactive-battery-type "'nothing'"
-      gsettings set org.gnome.shell enabled-extensions \
-        "['drive-menu@gnome-shell-extensions.gcampax.github.com']"
-      gsettings set org.gnome.shell favorite-apps \
-        "[{{ media_center.favorite_apps | join(', ') }}]"
-      gsettings set org.gnome.Lollypop artist-artwork false
-      gsettings set org.gnome.Lollypop auto-update false
-      gsettings set org.gnome.Lollypop network-access-acl \
-        {{ 0b00000000001000000000 }}
-      gsettings set org.gnome.Lollypop notification-flag {{ 0b11 }}
-      gsettings set org.gnome.Lollypop notifications "'mpris'"
-      gsettings set org.gnome.Lollypop replay-gain "'album'"
-      gsettings set org.gnome.Lollypop replay-gain-db -12.0
-      gsettings set org.gnome.Lollypop show-tag-tracknumber true
-      gsettings set org.gnome.Lollypop shown-album-lists \
-        "[-4, -13, -15, -99, -101, -103]"
-      gsettings set org.gnome.Lollypop transitions false
-  - require:
-    - media-center user and group
-    - media_center_pkgs
-/var/local/media-center/.config/autostart/autostart.desktop:
-  file.managed:
-  - user: media-center
-  - group: media-center
-  - makedirs: true
-  - contents: |
-      [Desktop Entry]
-      Type=Application
-      Name=autostart
-      Exec=/var/local/media-center/.local/bin/autostart
-  - require:
-    - /var/local/media-center/.local/bin/autostart
