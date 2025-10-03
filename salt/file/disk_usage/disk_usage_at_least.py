@@ -44,6 +44,8 @@ def _filesystem_usage(*, min_percent):
         (
             "df",
             "--exclude-type=efivarfs",
+            "--exclude-type=iso9660",
+            "--exclude-type=udf",
             "--human-readable",
         ),
         stdout=subprocess.PIPE,
