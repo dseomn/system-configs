@@ -1,0 +1,42 @@
+{#
+ # Copyright 2025 David Mandelberg
+ #
+ # Licensed under the Apache License, Version 2.0 (the "License");
+ # you may not use this file except in compliance with the License.
+ # You may obtain a copy of the License at
+ #
+ #     https://www.apache.org/licenses/LICENSE-2.0
+ #
+ # Unless required by applicable law or agreed to in writing, software
+ # distributed under the License is distributed on an "AS IS" BASIS,
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ #}
+
+
+{% macro _write(user, key, value) %}
+{% set dconf_cmd = (
+    'systemd-run --pipe --quiet --wait --collect --user --machine=' +
+    user +
+    '@ -- dconf'
+) %}
+dconf write {{ user }} {{ key }}:
+  cmd.run:
+  - name: |-
+      {{ dconf_cmd }} write "$DCONF_KEY" "$DCONF_VALUE"
+  - env:
+    - DCONF_KEY: {{ key | tojson }}
+    - DCONF_VALUE: {{ value | tojson }}
+  - unless:
+    - |-
+        [[ "$({{ dconf_cmd }} read "$DCONF_KEY")" = "$DCONF_VALUE" ]]
+  {% for state_key, state_value in kwargs.items() %}
+  - {{ state_key | tojson }}: {{ state_value | tojson }}
+  {% endfor %}
+{% endmacro %}
+
+
+{% set dconf = {
+    'write': _write,
+} %}

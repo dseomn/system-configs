@@ -48,6 +48,7 @@ salt-ssh:
   - salt://cron/map.jinja
   - salt://crypto/map.jinja
   - salt://crypto/x509/map.jinja
+  - salt://dconf/map.jinja
   - salt://ddns/map.jinja
   - salt://debian/map.jinja
   - salt://disk_usage/map.jinja
