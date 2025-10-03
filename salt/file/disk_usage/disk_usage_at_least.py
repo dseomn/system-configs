@@ -41,7 +41,10 @@ def _lvm_pool_usage(*, min_percent):
 
 def _filesystem_usage(*, min_percent):
     df = subprocess.run(
-        ("df", "-h"),
+        (
+            "df",
+            "--human-readable",
+        ),
         stdout=subprocess.PIPE,
         text=True,
         check=True,
