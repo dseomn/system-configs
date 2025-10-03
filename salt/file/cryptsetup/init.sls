@@ -18,7 +18,4 @@ cryptsetup_pkgs:
   - pkgs:
     - cryptsetup
     - cryptsetup-initramfs
-    # TODO: Debian >= 13 - Remove conditional.
-    {% if 'osmajorrelease' not in grains or grains.osmajorrelease >= 13 %}
     - systemd-cryptsetup
-    {% endif %}

@@ -15,14 +15,10 @@
  #}
 
 
-{#
- # TODO(https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1070329): Remove fuse3
- #}
 {% set backup_repo = {
     'Debian': {
         'pkgs': (
             'borgbackup',
-            'fuse3',
             'git',
             'pv',
         ),

@@ -56,8 +56,6 @@ apt_update:
   - onchanges_in:
     - apt_update
 
-# TODO: Debian >= 13 - Change keyring name for
-# https://salsa.debian.org/release-team/debian-archive-keyring/-/commit/17c653ad964a3e81519f83e1d3a0704be737e4f6
 /etc/apt/sources.list.d/20-debian.sources:
   file.managed:
   - contents: |
@@ -76,14 +74,14 @@ apt_update:
           debian.additional_distributions
       ) }}
       Components: {{ debian.components }}
-      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
 
       {% if debian.track != 'unstable' %}
       Types: deb deb-src
       URIs: {{ debian.mirror['debian-security'] }}
       Suites: {{ debian.distribution + '-security' }}
       Components: {{ debian.components }}
-      Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+      Signed-By: /usr/share/keyrings/debian-archive-keyring.pgp
       {% endif %}
   - require_in:
     - /etc/apt/sources.list.d is clean
