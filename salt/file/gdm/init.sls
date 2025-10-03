@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+{% from 'dconf/map.jinja' import dconf %}
 {% from 'gdm/map.jinja' import gdm %}
 
 
@@ -23,3 +24,35 @@ gdm:
   # could interrupt the current session.
   service.enabled:
   - name: {{ gdm.service }}
+
+
+# Leave the systemd user session running, so that the dconf.write() calls below
+# can use it.
+gdm linger:
+  cmd.run:
+  - name: loginctl enable-linger {{ gdm.user }}
+  - unless:
+    - |-
+        [[ "$(loginctl show-user --property=Linger {{ gdm.user }})" = Linger=yes ]]
+  - require:
+    - gdm
+
+
+{{ dconf.write(
+    user=gdm.user,
+    key='/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type',
+    value="'nothing'",
+    require=(
+        'gdm',
+        'gdm linger',
+    ),
+) }}
+{{ dconf.write(
+    user=gdm.user,
+    key='/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type',
+    value="'nothing'",
+    require=(
+        'gdm',
+        'gdm linger',
+    ),
+) }}
