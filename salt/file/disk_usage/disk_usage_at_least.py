@@ -43,6 +43,7 @@ def _filesystem_usage(*, min_percent):
     df = subprocess.run(
         (
             "df",
+            "--exclude-type=efivarfs",
             "--human-readable",
         ),
         stdout=subprocess.PIPE,
