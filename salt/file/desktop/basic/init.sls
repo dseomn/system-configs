@@ -16,6 +16,7 @@
 {% set basic_desktop = {
     'Debian': {
         'pkgs': [
+            'rhythmbox',
             'task-gnome-desktop',
         ],
     },
