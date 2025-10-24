@@ -38,6 +38,13 @@ unbound_running:
   - watch:
     - file: unbound_conf
 
+# TODO: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1106186 - Remove this.
+unbound-resolvconf.service:
+  service.dead:
+  - enable: false
+  - require:
+    - unbound_pkg
+
 
 # Main resolver for public names.
 dnss_pkg:
