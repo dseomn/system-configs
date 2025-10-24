@@ -108,6 +108,7 @@
     user=repo_username,
     command=' '.join((
         'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
+        'BORG_USE_CHUNKS_ARCHIVE=no',
         'borg',
         '--lock-wait',
         backup.borg_lock_wait_noninteractive | string,
@@ -386,6 +387,7 @@ backup_repo_pkgs:
     user=repo_username,
     command=' '.join((
         'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
+        'BORG_USE_CHUNKS_ARCHIVE=no',
         common.local_lib + '/borg-require-recent-archive',
         '--repository=' + repo_path,
         '--',

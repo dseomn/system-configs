@@ -118,6 +118,7 @@ manage_backup_source_sources_d:
       #!/bin/bash -e
       export BORG_REPO='{{ borg_repo }}'
       export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
+      export BORG_USE_CHUNKS_ARCHIVE=no
       exec borg --rsh='ssh -F {{ backup.config_dir }}/source/ssh/config' "$@"
   - require:
     - {{ backup.config_dir }}/source/ssh/config
