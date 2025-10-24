@@ -16,6 +16,7 @@
 {% from 'backup/map.jinja' import backup %}
 {% from 'backup/repo/map.jinja' import backup_repo %}
 {% from 'common/map.jinja' import common %}
+{% from 'cron/map.jinja' import cron_job %}
 {% from 'virtual_machine/guest/map.jinja' import require_running_on_vm_guest %}
 
 {% set source_host_name_by_repository = {} %}
@@ -23,15 +24,6 @@
   {% do source_host_name_by_repository.update(
       {source_host.repository: source_host_name}) %}
 {% endfor %}
-
-
-{% set cron_uuid = 'b02f0054-399c-4b80-9a9c-112d2739d5d1' %}
-{% set cron_jobs_by_user = {} %}
-{% macro cron_job_id(user, repo, job) -%}
-  {%- set job_id = '/'.join((cron_uuid, repo, job)) -%}
-  {%- do cron_jobs_by_user.setdefault(user, {}).update({job_id: None}) -%}
-  {{ job_id }}
-{%- endmacro %}
 
 
 {% macro pv(name, rate_limit) -%}
@@ -111,25 +103,27 @@
 
 {% macro check_repo(repo_path, type, repo_name, repo_username) %}
 {% if type == 'borg' %}
-check {{ repo_path }}:
-  cron.present:
-  - name: >-
-      BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
-      borg
-      --lock-wait {{ backup.borg_lock_wait_noninteractive }}
-      check
-      --verify-data
-      {{ repo_path }}
-  - identifier: {{
-        cron_job_id(user=repo_username, repo=repo_name, job='check') }}
-  - user: {{ repo_username }}
-  - minute: random
-  - hour: random
-  - dayweek: random
-  - require:
-    - {{ repo_username }} user and group
-    - backup_repo_pkgs
-    - {{ repo_path }} is initialized
+{{ cron_job(
+    state_id='check ' + repo_path,
+    user=repo_username,
+    command=' '.join((
+        'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
+        'borg',
+        '--lock-wait',
+        backup.borg_lock_wait_noninteractive | string,
+        'check',
+        '--verify-data',
+        repo_path,
+    )),
+    minute='?',
+    hour='?',
+    day_of_week='?',
+    require=(
+        repo_username + ' user and group',
+        'backup_repo_pkgs',
+        repo_path + ' is initialized',
+    ),
+) }}
 {% elif type == 'directory' %}
 check {{ repo_path }}:
   test.nop:
@@ -147,6 +141,7 @@ check {{ repo_path }}:
 include:
 - backup
 - common
+- cron
 - virtual_machine.guest
 
 
@@ -386,23 +381,24 @@ backup_repo_pkgs:
   - require:
     - {{ repo_user_home }}/.ssh
 
-monitor recency of {{ repo_path }}:
-  cron.present:
-  - name: >-
-      BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes
-      {{ common.local_lib }}/borg-require-recent-archive
-      --repository={{ repo_path }}
-      --
-      --lock-wait={{ backup.borg_lock_wait_noninteractive }}
-  - identifier: {{
-        cron_job_id(user=repo_username, repo=repo_name, job='recency') }}
-  - user: {{ repo_username }}
-  - minute: random
-  - hour: random
-  - require:
-    - {{ repo_username }} user and group
-    - {{ common.local_lib }}/borg-require-recent-archive
-    - {{ repo_path }} is initialized
+{{ cron_job(
+    state_id='monitor recency of ' + repo_path,
+    user=repo_username,
+    command=' '.join((
+        'BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes',
+        common.local_lib + '/borg-require-recent-archive',
+        '--repository=' + repo_path,
+        '--',
+        '--lock-wait=' + backup.borg_lock_wait_noninteractive | string,
+    )),
+    minute='?',
+    hour='?',
+    require=(
+        repo_username + ' user and group',
+        common.local_lib + '/borg-require-recent-archive',
+        repo_path + ' is initialized',
+    ),
+) }}
 
 {{ check_repo(
     repo_path=repo_path,
@@ -481,25 +477,8 @@ monitor recency of {{ repo_path }}:
 {% endif %}
 
 
-{% for user in salt['user.list_users']() if user.startswith('backup-') %}
-{% for cron_job in salt['cron.list_tab'](user).crons
-    if cron_job.identifier.startswith(cron_uuid + '/') and
-    cron_job.identifier not in cron_jobs_by_user.get(user, {}) %}
-{{ cron_job.identifier | tojson }}:
-  cron.absent:
-  - user: {{ user }}
-  - identifier: {{ cron_job.identifier | tojson }}
-{% endfor %}
-{% endfor %}
-
-
 {% for name in old_backup_users_and_groups %}
 {{ name }} user and group:
-  cmd.run:
-  - name: >-
-      crontab -u {{ name }} -l && crontab -u {{ name }} -r
-  - onlyif:
-    - crontab -u {{ name }} -l > /dev/null
   user.absent:
   - name: {{ name }}
   - require:
