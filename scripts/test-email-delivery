@@ -15,7 +15,7 @@
 # limitations under the License.
 
 echo "Subject: test $(hostname --fqdn)" | /usr/sbin/sendmail root
-salt-ssh '*' cmd.run \
+salt-ssh '*' cmd.shell \
   'echo "Subject: test $(hostname --fqdn)" | /usr/sbin/sendmail root'
 {
   echo "Check for emails from $(hostname --fqdn) and the ones listed above."
