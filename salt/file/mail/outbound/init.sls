@@ -29,6 +29,7 @@
 
 include:
 - acme
+- cron
 - crypto
 - crypto.secret_rotation
 - crypto.x509

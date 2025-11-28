@@ -16,6 +16,7 @@
 
 
 {% from 'acme/map.jinja' import acme %}
+{% from 'cron/map.jinja' import cron_job %}
 {% from 'crypto/map.jinja' import crypto %}
 
 
@@ -124,6 +125,11 @@ smtpd_tls_received_header = yes
 
 
 {% macro _postfix_instance(instance, require=()) %}
+{% set instance_service = '{}@{}.service'.format(
+    mail.postfix_service,
+    instance.removeprefix('postfix-'),
+) %}
+
 {{ instance }}:
   cmd.run:
   - name: postmulti -e init && postmulti -e create -I {{ instance }}
@@ -143,17 +149,32 @@ smtpd_tls_received_header = yes
 
 {{ instance }} enabled:
   service.enabled:
-  - name: {{ mail.postfix_service }}@{{ instance.removeprefix('postfix-') }}.service
+  - name: {{ instance_service }}
   - require:
     - mail_pkgs
     - {{ instance }}
 
 {{ instance }} running:
   service.running:
-  - name: {{ mail.postfix_service }}@{{ instance.removeprefix('postfix-') }}.service
+  - name: {{ instance_service }}
   - require:
     - mail_pkgs
     - {{ instance }}
+
+# TODO: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1120869 - Remove this.
+{{ cron_job(
+    state_id=instance + ' running cron',
+    user='root',
+    command='systemctl --quiet is-active {} || systemctl start {}'.format(
+        instance_service,
+        instance_service,
+    ),
+    minute='?',
+    require=(
+        'mail_pkgs',
+        instance,
+    ),
+) }}
 {% endmacro %}
 
 

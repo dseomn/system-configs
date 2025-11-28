@@ -34,6 +34,7 @@
 include:
 - acme
 - common
+- cron
 - crypto
 - crypto.x509
 - mail
