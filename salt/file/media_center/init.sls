@@ -351,6 +351,7 @@ media-center autologin:
     - /var/local/media-center/.mpd
   - contents: |
       db_file "~/.mpd/database"
+      music_directory "~/Music"
       state_file "~/.mpd/state"
       restore_paused "yes"
       follow_outside_symlinks "yes"
