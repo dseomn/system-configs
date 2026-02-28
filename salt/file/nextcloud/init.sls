@@ -115,9 +115,9 @@ nextcloud_installed:
 /var/local/nextcloud/webroot/config/local.config.php:
   file.managed:
   - source: salt://nextcloud/config.php.jinja
-  - user: root
+  - user: {{ apache_httpd.user }}
   - group: {{ apache_httpd.group }}
-  - mode: 0640
+  - mode: 0600
   - template: jinja
   - require:
     - nextcloud_installed
