@@ -16,8 +16,10 @@
 {% set basic_desktop = {
     'Debian': {
         'pkgs': [
+            'quodlibet',
             'rhythmbox',
             'task-gnome-desktop',
+            'vlc',
         ],
     },
 }[grains.os_family] %}
