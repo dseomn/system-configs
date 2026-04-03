@@ -63,15 +63,11 @@ def main() -> None:
         dir=args.output.parent,
         delete=False,
     ) as output_tempfile:
-        output_tempfile.write(
-            textwrap.dedent(
-                f"""\
-                <?php
-                $config['des_key'] = "{key_php_escaped}";
-                $config['cipher_method'] = '{args.cipher_method}';
-            """
-            )
-        )
+        output_tempfile.write(textwrap.dedent(f"""\
+            <?php
+            $config['des_key'] = "{key_php_escaped}";
+            $config['cipher_method'] = '{args.cipher_method}';
+        """))
     shutil.chown(output_tempfile.name, group=args.group)
     os.chmod(output_tempfile.name, 0o640)
     os.replace(output_tempfile.name, args.output)

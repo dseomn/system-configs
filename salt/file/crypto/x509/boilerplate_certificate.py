@@ -135,33 +135,29 @@ def main() -> None:
             # otherwise openssl gives the error below.
             #
             # X509 V3 routines:v2i_AUTHORITY_KEYID:unable to get issuer keyid:../crypto/x509v3/v3_akey.c:143
-            openssl_cnf.write(
-                textwrap.dedent(
-                    f"""
-                    [req]
-                    string_mask = utf8only
-                    prompt = no
-                    utf8 = yes
-                    distinguished_name = distinguished_name
+            openssl_cnf.write(textwrap.dedent(f"""
+                [req]
+                string_mask = utf8only
+                prompt = no
+                utf8 = yes
+                distinguished_name = distinguished_name
 
-                    [distinguished_name]
+                [distinguished_name]
 
-                    [x509_ca_extensions]
-                    subjectKeyIdentifier = hash
-                    authorityKeyIdentifier = keyid:always
-                    keyUsage = critical, keyCertSign
-                    basicConstraints = critical, CA:TRUE
+                [x509_ca_extensions]
+                subjectKeyIdentifier = hash
+                authorityKeyIdentifier = keyid:always
+                keyUsage = critical, keyCertSign
+                basicConstraints = critical, CA:TRUE
 
-                    [x509_ee_extensions]
-                    subjectKeyIdentifier = hash
-                    authorityKeyIdentifier = keyid:always
-                    keyUsage = critical, digitalSignature
-                    subjectAltName = DNS:{args.name}
-                    basicConstraints = critical, CA:FALSE
-                    extendedKeyUsage = serverAuth, clientAuth
-                """
-                )
-            )
+                [x509_ee_extensions]
+                subjectKeyIdentifier = hash
+                authorityKeyIdentifier = keyid:always
+                keyUsage = critical, digitalSignature
+                subjectAltName = DNS:{args.name}
+                basicConstraints = critical, CA:FALSE
+                extendedKeyUsage = serverAuth, clientAuth
+            """))
 
         ca_private_key = subprocess.run(
             ("openssl", "genpkey", *genpkey_args),

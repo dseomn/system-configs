@@ -32,6 +32,7 @@ possible, so --max-passwords-per-user is designed so that (in theory) it should
 take the same amount of time to check a password regardless of how many
 passwords a user has configured.
 """
+
 # Protocol: https://docs.ejabberd.im/developer/guide/#external
 #
 # When working on this script, keep these things in mind:

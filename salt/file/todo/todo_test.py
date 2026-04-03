@@ -456,8 +456,7 @@ class TodoTest(parameterized.TestCase):
             start="20000101T000000",
             last_sent=None,
             expected_subject="apple",
-            expected_extra_info=textwrap.dedent(
-                """\
+            expected_extra_info=textwrap.dedent("""\
                 Occurrences included in this email:
                 2000-01-01 00:00:00-05:00
 
@@ -466,16 +465,14 @@ class TodoTest(parameterized.TestCase):
                 2000-01-03 00:00:00-05:00
                 2000-01-04 00:00:00-05:00
                 ...
-            """
-            ),
+            """),
         ),
         dict(
             testcase_name="one_after_last_sent",
             start="19990101T000000",
             last_sent="19991231T120000Z",
             expected_subject="apple",
-            expected_extra_info=textwrap.dedent(
-                """\
+            expected_extra_info=textwrap.dedent("""\
                 Occurrences included in this email:
                 2000-01-01 00:00:00-05:00
 
@@ -484,16 +481,14 @@ class TodoTest(parameterized.TestCase):
                 2000-01-03 00:00:00-05:00
                 2000-01-04 00:00:00-05:00
                 ...
-            """
-            ),
+            """),
         ),
         dict(
             testcase_name="more_than_max",
             start="19990101T000000",
             last_sent=None,
             expected_subject="apple (x3+)",
-            expected_extra_info=textwrap.dedent(
-                """\
+            expected_extra_info=textwrap.dedent("""\
                 Occurrences included in this email:
                 1999-01-01 00:00:00-05:00
                 1999-01-02 00:00:00-05:00
@@ -505,16 +500,14 @@ class TodoTest(parameterized.TestCase):
                 2000-01-03 00:00:00-05:00
                 2000-01-04 00:00:00-05:00
                 ...
-            """
-            ),
+            """),
         ),
         dict(
             testcase_name="max",
             start="19991230T000000",
             last_sent=None,
             expected_subject="apple (x3)",
-            expected_extra_info=textwrap.dedent(
-                """\
+            expected_extra_info=textwrap.dedent("""\
                 Occurrences included in this email:
                 1999-12-30 00:00:00-05:00
                 1999-12-31 00:00:00-05:00
@@ -525,8 +518,7 @@ class TodoTest(parameterized.TestCase):
                 2000-01-03 00:00:00-05:00
                 2000-01-04 00:00:00-05:00
                 ...
-            """
-            ),
+            """),
         ),
     )
     @freezegun.freeze_time("2000-01-01 12:00:00")
